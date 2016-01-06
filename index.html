@@ -2,6 +2,8 @@
 <html>
 <head>
 	<title>Crowdsourced Annotations</title>
+	<script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+	<script type="text/javascript" src="annotations.js"></script>
 </head>
 <body style="text-align: center">
 	<div id="instructions">
@@ -20,7 +22,7 @@
 	</div>
 	<div id="annotations">
 		<div>
-			<textarea style="width: 300px; height: 200px"></textarea>
+			<textarea id="annotext" style="width: 300px; height: 120px"></textarea>
 		</div>
 		<div>
 			<button style="width:60px; height: 30px">Submit</button>
