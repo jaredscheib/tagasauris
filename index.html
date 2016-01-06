@@ -2,12 +2,13 @@
 <html>
 <head>
 	<title>Crowdsourced Annotations</title>
-	<script src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
+	<link rel="stylesheet" type="text/css" href="style.css"></script>
+	<script type="text/javascript" src="https://cdn.firebase.com/js/client/2.2.1/firebase.js"></script>
 	<script type="text/javascript" src="annotations.js"></script>
 </head>
-<body style="text-align: center">
-	<div id="instructions">
-		<p>Please watch the video below.<br>
+<body>
+	<div class="text">
+		<p id="instructions">Please watch the video below.<br>
 		Write what you observe in the text box.<br>
 		Then submit your annotations.</p>
 	</div>
@@ -22,10 +23,10 @@
 	</div>
 	<div id="annotations">
 		<div>
-			<textarea id="annotext" style="width: 300px; height: 120px"></textarea>
+			<textarea id="annotext"></textarea>
 		</div>
 		<div>
-			<button style="width:60px; height: 30px">Submit</button>
+			<button id="submit">Submit</button>
 		</div>
 	</div>
 </body>
