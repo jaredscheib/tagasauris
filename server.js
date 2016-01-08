@@ -4,7 +4,7 @@ var secrets = require('./secrets.js');
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets.URL,
+    ExternalURL: secrets.URL_task2,
     FrameHeight: '650'
   }
 };
@@ -28,7 +28,7 @@ function mturkRequest(id, secret, sandbox, params) {
 };
 
 _.run(function () {
-  var x = mturkRequest(secrets.ID, secrets.KEY, false, {
+  var x = mturkRequest(secrets.ID, secrets.KEY, true, {
             Operation : 'CreateHIT',
             Title : 'Simple video annotation task',
             Description : 'Describe everything you see in the 30 second video',
