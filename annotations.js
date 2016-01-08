@@ -12,6 +12,8 @@ window.onload = function () {
     annotext.value = '';
     db.push(annotations);
     console.log('POST to Firebase:', annotations);
+
+    mturkSubmit();
   });
 
   mturkCheckPreview();
@@ -20,7 +22,6 @@ window.onload = function () {
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
   console.log('Posted to Firebase:', addedAnnotation);
-  mturkSubmit();
 });
 
 function mturkSubmit() {
