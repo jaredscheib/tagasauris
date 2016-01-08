@@ -28,3 +28,6 @@ node_modules
 
 # Work Log
 work_log.txt
+
+# Secrets
+secrets.js
