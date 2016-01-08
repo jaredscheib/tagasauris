@@ -34,7 +34,7 @@ _.run(function () {
             Description : 'Write everything you see in the 30 second video',
             'Reward.1.Amount' : 0.10,
             'Reward.1.CurrencyCode' : 'USD',
-            MaxAssignments : 1,
+            MaxAssignments : 25,
             AssignmentDurationInSeconds : 60 * 60,
             LifetimeInSeconds : 60 * 60 * 24,
             AutoApprovalDelayInSeconds : 60 * 60,
