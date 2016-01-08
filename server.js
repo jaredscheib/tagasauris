@@ -1,8 +1,6 @@
 var _ = require('./utils.js');
 var secrets = require('./secrets.js');
 
-console.log(secrets.ID, secrets.KEY);
-
 var arg = {
   hit: {},
   ExternalQuestion: {
@@ -32,9 +30,9 @@ function mturkRequest(id, secret, sandbox, params) {
 _.run(function () {
   var x = mturkRequest(secrets.ID, secrets.KEY, true, {
             Operation : 'CreateHIT',
-            Title : 'CHANGE_ME',
-            Description : 'CHANGE_ME',
-            'Reward.1.Amount' : 0.01,
+            Title : 'Simple video annotation task',
+            Description : 'Write everything you see in the 30 second video',
+            'Reward.1.Amount' : 0.10,
             'Reward.1.CurrencyCode' : 'USD',
             MaxAssignments : 1,
             AssignmentDurationInSeconds : 60 * 60,
