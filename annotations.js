@@ -13,7 +13,7 @@ window.onload = function () {
     db.push(annotations, function () {
       mturkCheckPreview();
     });
-    console.log('POST to Firebase:', annotations);
+    // console.log('POST to Firebase:', annotations);
 
     mturkSubmit();
   });
@@ -22,7 +22,7 @@ window.onload = function () {
 
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
-  console.log('Posted to Firebase:', addedAnnotation);
+  // console.log('Posted to Firebase:', addedAnnotation);
 });
 
 function mturkSubmit() {
