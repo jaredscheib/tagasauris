@@ -33,9 +33,9 @@ window.onload = function () {
       alert('Please describe the video before submitting.');
     }
 
-    mturkCheckPreview();
   });
 
+  mturkCheckPreview();
 };
 
 var setVideo = function (data) {
