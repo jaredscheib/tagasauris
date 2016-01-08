@@ -1,5 +1,6 @@
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var vidToDisplay;
+var annotations_task = 'annotations_task1';
 
 db.on('value', function (snapshot) {
   data = snapshot.val();
@@ -23,8 +24,8 @@ window.onload = function () {
     var annotations = annotext.value;
     if (annotations.length > 0) {
       annotext.value = '';
-      var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/annotations_task1/');
-      var workerId = _.getUrlParams().workerId;
+      var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/' + annotations_task + '/');
+      var workerId = _.getUrlParams().workerId || 'undefined';
       postRef.push({'workerId': workerId, 'annotation': annotations}, function () {
         mturkSubmit();
       });
@@ -32,7 +33,6 @@ window.onload = function () {
     } else {
       alert('Please describe the video before submitting.');
     }
-
   });
 
   mturkCheckPreview();
@@ -43,7 +43,9 @@ var setVideo = function (data) {
   vidToDisplay = vidIDs[0];
   console.log(data, vidIDs);
   _.each(vidIDs, function (id) {
-    if (Object.keys(data[id]).length < Object.keys(data[vidToDisplay]).length) vidToDisplay = id;
+    if (data[id][annotations_task]) {
+      if (Object.keys(data[id][annotations_task]).length < Object.keys(data[vidToDisplay][annotations_task]).length) vidToDisplay = id;
+    }
   });
   document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="' + data[vidToDisplay].embedURL + '" frameborder="0" allowfullscreen></iframe>';
 };
