@@ -43,9 +43,8 @@ var setVideo = function (data) {
   vidToDisplay = vidIDs[0];
   console.log(data, vidIDs);
   _.each(vidIDs, function (id) {
-    if (data[id][annotations_task]) {
-      if (Object.keys(data[id][annotations_task]).length < Object.keys(data[vidToDisplay][annotations_task]).length) vidToDisplay = id;
-    }
+    if (!data[id][annotations_task]) data[id][annotations_task] = {};
+    if (Object.keys(data[id][annotations_task]).length < Object.keys(data[vidToDisplay][annotations_task]).length) vidToDisplay = id;
   });
   document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="' + data[vidToDisplay].embedURL + '" frameborder="0" allowfullscreen></iframe>';
 };
