@@ -26,11 +26,11 @@ window.onload = function () {
                               'Select each concept that applies among the checkboxes below.<br>' +
                               'Then click submit.';
     response_area.innerHTML = '<div id="annochecks">' +
-                              '<input type="checkbox" name="checkboxes[]" value="driving">driving</input><br>' +
-                              '<input type="checkbox" name="checkboxes[]" value="carExterior">car exterior</input><br>' +
-                              '<input type="checkbox" name="checkboxes[]" value="carInterior">car interior</input><br>' +
-                              '<input type="checkbox" name="checkboxes[]" value="road">road</input><br>' +
-                              '<input type="checkbox" name="checkboxes[]" value="people">people</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="driving">driving</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="carExterior">car exterior</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="carInterior">car interior</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="road">road</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="people">people</input><br>' +
                               '</div>';
 
   } else { // textarea response
@@ -60,13 +60,12 @@ window.onload = function () {
         console.log(checkbox);
         if (checkbox.checked) annotations.push(checkbox.value);
       });
-      console.log('checkboxes array', annotations);
-      console.log('checkboxes string', annotations.join(','));
+      var annotations = annotations.join(',');
     } else { // textarea
       annotations = annotext.value;
+      // annotext.value = '';
     }
     if (annotations.length > 0) {
-      annotext.value = '';
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/' + params.task + '/');
       var workerId = params.workerId || 'undefined';
       postRef.push({'workerId': workerId, 'annotation': annotations}, function () {
