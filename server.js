@@ -4,7 +4,7 @@ var secrets = require('./secrets.js');
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets.URL_task3,
+    ExternalURL: secrets.URL_task1,
     FrameHeight: '650'
   }
 };
@@ -34,7 +34,7 @@ _.run(function () {
             Description : 'Describe everything you see in the 30 second video',
             'Reward.1.Amount' : 0.10,
             'Reward.1.CurrencyCode' : 'USD',
-            MaxAssignments : 25,
+            MaxAssignments : 9,
             AssignmentDurationInSeconds : 3 * 60,
             LifetimeInSeconds : 60 * 60 * 24,
             AutoApprovalDelayInSeconds : 60 * 60,
