@@ -25,7 +25,7 @@ var renderView = function (data) {
       _.each(video['annotations_task' + i], function (anno) {
         var li = document.createElement('li');
         li.className = 'annotation';
-        li.innerHTML = 'TASK' + i + '::  workerId: ' + anno.workerId + ', annotation: ' + anno.annotation;
+        li.innerHTML = 'TASK' + i + ' |workerId: ' + anno.workerId + '|  annotation: ' + anno.annotation;
         ul.appendChild(li); 
       });
       divAno.appendChild(ul);
