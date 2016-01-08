@@ -28,10 +28,10 @@ function mturkRequest(id, secret, sandbox, params) {
 };
 
 _.run(function () {
-  var x = mturkRequest(secrets.ID, secrets.KEY, true, {
+  var x = mturkRequest(secrets.ID, secrets.KEY, false, {
             Operation : 'CreateHIT',
             Title : 'Simple video annotation task',
-            Description : 'Write everything you see in the 30 second video',
+            Description : 'Describe everything you see in the 30 second video',
             'Reward.1.Amount' : 0.10,
             'Reward.1.CurrencyCode' : 'USD',
             MaxAssignments : 25,
