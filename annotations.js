@@ -1,4 +1,16 @@
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
+var vidToDisplay;
+
+db.on('value', function (snapshot) {
+  data = snapshot.val();
+
+  setVideo(data);
+});
+
+db.on('child_added', function (snapshot){
+  var addedAnnotation = snapshot.val();
+  console.log('Posted to Firebase:', addedAnnotation);
+});
 
 window.onload = function () {
   var annotext = document.getElementById('annotext');
@@ -9,21 +21,32 @@ window.onload = function () {
     event.preventDefault();
 
     var annotations = annotext.value;
-    annotext.value = '';
-    db.push(annotations, function () {
-      mturkCheckPreview();
-    });
-    // console.log('POST to Firebase:', annotations);
+    if (annotations.length > 0) {
+      annotext.value = '';
+      var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/annotations_task1/');
+      var workerId = _.getUrlParams().workerId;
+      postRef.push({'workerId': workerId, 'annotation': annotations}, function () {
+        mturkSubmit();
+      });
+      console.log('POST to Firebase:', workerId, annotations);
+    } else {
+      alert('Please describe the video before submitting.');
+    }
 
-    mturkSubmit();
+    mturkCheckPreview();
   });
 
 };
 
-db.on('child_added', function (snapshot){
-  var addedAnnotation = snapshot.val();
-  // console.log('Posted to Firebase:', addedAnnotation);
-});
+var setVideo = function (data) {
+  var vidIDs = Object.keys(data);
+  vidToDisplay = vidIDs[0];
+  console.log(data, vidIDs);
+  _.each(vidIDs, function (id) {
+    if (Object.keys(data[id]).length < Object.keys(data[vidToDisplay]).length) vidToDisplay = id;
+  });
+  document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="' + data[vidToDisplay].embedURL + '" frameborder="0" allowfullscreen></iframe>';
+};
 
 function mturkSubmit() {
     var params = _.getUrlParams()
