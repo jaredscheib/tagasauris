@@ -10,13 +10,14 @@ window.onload = function () {
 
     var annotations = annotext.value;
     annotext.value = '';
-    db.push(annotations);
+    db.push(annotations, function () {
+      mturkCheckPreview();
+    });
     console.log('POST to Firebase:', annotations);
 
     mturkSubmit();
   });
 
-  mturkCheckPreview();
 };
 
 db.on('child_added', function (snapshot){
