@@ -2,7 +2,7 @@ var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var vidToDisplay;
 
-db.on('value', function (snapshot) {
+db.once('value', function (snapshot) {
   data = snapshot.val();
 
   setVideo(data);
