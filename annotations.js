@@ -15,27 +15,56 @@ db.on('child_added', function (snapshot){
 
 window.onload = function () {
   var instructions = document.getElementById('instructions');
-  var annotext = document.getElementById('annotext');
+  var response_area = document.getElementById('response_area');
+  var annotations;
   var submit = document.getElementById('submit');
-  
   var taskNum = Number(params.task.slice(-1));
-  if (taskNum === 1) {
-    instructions.innerHTML = 'Please watch the entire video.<br>Describe everything you see in the text box below.<br>Then click submit.';
+
+  if (taskNum === 3) { // checkboxes response
     
-  } else if (taskNum === 2) {
-    instructions.innerHTML = 'Please watch the entire video.<br>Describe everything you see related to cars in the text box below.<br>Then click submit.';
+    instructions.innerHTML =  'Please watch the entire video.<br>' +
+                              'Select each concept that applies among the checkboxes below.<br>' +
+                              'Then click submit.';
+    response_area.innerHTML = '<div id="annochecks">' +
+                              '<input type="checkbox" name="checkboxes[]" value="driving">driving</input><br>' +
+                              '<input type="checkbox" name="checkboxes[]" value="carExterior">car exterior</input><br>' +
+                              '<input type="checkbox" name="checkboxes[]" value="carInterior">car interior</input><br>' +
+                              '<input type="checkbox" name="checkboxes[]" value="road">road</input><br>' +
+                              '<input type="checkbox" name="checkboxes[]" value="people">people</input><br>' +
+                              '</div>';
 
-  } else if (taskNum === 3) {
-    instructions.innerHTML = 'Please watch the entire video.<br>Mark each concept that applies in the checkboxes below.<br>Then click submit.';
+  } else { // textarea response
 
+    if (taskNum === 1) {
+      instructions.innerHTML =  'Please watch the entire video.<br>' +
+                                'Describe everything you see in the text box below.<br>' +
+                                'Then click submit.';
+    } else if (taskNum === 2) {
+      instructions.innerHTML =  'Please watch the entire video.<br>' +
+                                'Describe everything you see related to cars in the text box below.<br>' +
+                                'Then click submit.';
+    }
+
+    response_area.innerHTML = '<textarea id="annotext" placeholder="Your annotations here"></textarea>';
+    var annotext = document.getElementById('annotext');
+    annotext.focus();
   }
-
-  annotext.focus();
 
   submit.addEventListener('click', function (event) {
     event.preventDefault();
 
-    var annotations = annotext.value;
+    if (taskNum === 3) { // checkboxes
+      annotations = [];
+      var checkboxes = document.getElementsByName('checkboxes');
+      _.each(checkboxes, function (checkbox) {
+        console.log(checkbox);
+        if (checkbox.checked) annotations.push(checkbox.value);
+      });
+      console.log('checkboxes array', annotations);
+      console.log('checkboxes string', annotations.join(','));
+    } else { // textarea
+      annotations = annotext.value;
+    }
     if (annotations.length > 0) {
       annotext.value = '';
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/' + params.task + '/');

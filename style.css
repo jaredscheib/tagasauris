@@ -6,10 +6,16 @@ body {
 	font-size: 16px;
 }
 
+#response_area {
+	margin: 15px
+}
+
 #annotext {
 	width: 300px;
 	height: 120px;
-	margin: 15px
+}
+
+#annochecks {
 }
 
 #submit {
