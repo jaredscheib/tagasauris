@@ -30,3 +30,4 @@ node_modules
 work_log.txt
 secrets.js
 notes.js
+/results
