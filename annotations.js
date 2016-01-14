@@ -36,6 +36,7 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
   // event.target.playVideo();
+  console.log('onPlayerReady()');
 };
 
 function onPlayerStateChange(event) {
@@ -109,7 +110,7 @@ window.onload = function () {
         event.preventDefault();
         annotations[getNow()] = {text: annotext.value, timestamp: player.getCurrentTime()};
         annotext.value = '';
-        // console.log(annotations);
+        console.log(annotations);
       }
     });
   }
