@@ -2,24 +2,58 @@ var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
+var annotations;
+var vidEvents = {};
 const todayDataDate = '20160114';
-
-db.once('value', function (snapshot) {
-  data = snapshot.val();
-
-  if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
-  setVideo(data.videos, data.data[todayDataDate]);
-});
 
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
   console.log('Posted to Firebase:', addedAnnotation);
 });
 
+
+// load and set callback for YouTube API
+var player;
+
+function onYouTubeIframeAPIReady() {
+  db.once('value', function (snapshot) {
+    data = snapshot.val();
+
+    if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
+
+    player = new YT.Player('player', {
+      height: '315',
+      width: '420',
+      videoId: getVideoId(data.videos, data.data[todayDataDate]),
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
+      }
+    });
+  });
+};
+
+function onPlayerReady(event) {
+  // event.target.playVideo();
+};
+
+function onPlayerStateChange(event) {
+  var eventNames = {
+    '-1': 'unstarted',
+    '0': 'ended',
+    '1': 'playing',
+    '2': 'paused',
+    '3': 'buffering',
+    '5': 'video cued'
+  };
+  vidEvents[new Date().getTime()] = eventNames[String(event.data)];
+};
+
+
+// set HTML and create event listeners on window load
 window.onload = function () {
   var instructions = document.getElementById('instructions');
   var response_area = document.getElementById('response_area');
-  var annotations;
   var submit = document.getElementById('submit');
 
   if (taskNum === 3) { // checkboxes response
@@ -50,7 +84,12 @@ window.onload = function () {
     response_area.innerHTML = '<textarea id="annotext" placeholder="Your annotations here"></textarea>';
     var annotext = document.getElementById('annotext');
     annotext.focus();
+
+    annotext.addEventListener('', function (event) {
+      // player.getCurrentTime():Number
+    });
   }
+
 
   submit.addEventListener('click', function (event) {
     event.preventDefault();
@@ -73,8 +112,9 @@ window.onload = function () {
         videoId: vidToDisplay,
         workerId: params.workerId,
         task: taskNum,
-        annotation: annotations,
-        time_submitted: new Date().getTime()
+        annotations: annotations,
+        time_submitted: new Date().getTime(),
+        video_events: vidEvents
       };
       postRef.push(postData, function () {
         mturkSubmit();
@@ -88,10 +128,11 @@ window.onload = function () {
   mturkCheckPreview();
 };
 
-var setVideo = function (videos, data) {
+var getVideoId = function (videos, data) {
   if (Object.keys(data).length === 0) {
     vidToDisplay = Object.keys(videos)[0];
-    return setVidHTML(vidToDisplay);
+    return vidToDisplay;
+    // return setVidHTML(vidToDisplay);
   } else {
     var vidsAll = _.deepClone(videos);
     var vidsRemaining = [];
@@ -107,7 +148,8 @@ var setVideo = function (videos, data) {
     
     if (vidsRemaining.length > 0) {
       vidToDisplay = vidsRemaining.pop();
-      return setVidHTML(vidToDisplay);
+      return vidToDisplay;
+      // return setVidHTML(vidToDisplay);
     } else {
       _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
       $('body').click(function () {
@@ -117,10 +159,10 @@ var setVideo = function (videos, data) {
     }
   }
 
-  function setVidHTML (id) {
-    console.log('setting vid', id);
-    document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
-  };
+  // function setVidHTML (id) {
+  //   console.log('setting vid', id);
+  //   document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
+  // };
 };
 
 function mturkSubmit() {
