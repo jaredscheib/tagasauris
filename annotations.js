@@ -1,11 +1,13 @@
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var vidToDisplay;
+const todayDataDate = '20160114';
 
 db.once('value', function (snapshot) {
   data = snapshot.val();
 
-  setVideo(data);
+  if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
+  setVideo(data.videos, data.data[todayDataDate]);
 });
 
 db.on('child_added', function (snapshot){
@@ -66,12 +68,18 @@ window.onload = function () {
       // annotext.value = '';
     }
     if (annotations.length > 0) {
-      var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/' + vidToDisplay + '/' + params.task + '/');
-      var workerId = params.workerId || 'undefined';
-      postRef.push({'workerId': workerId, 'annotation': annotations}, function () {
+      var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
+      var postData = {
+        videoId: vidToDisplay,
+        workerId: params.workerId,
+        task: taskNum,
+        annotation: annotations,
+        time_submitted: new Date().getTime()
+      };
+      postRef.push(postData, function () {
         mturkSubmit();
+        console.log('POST to Firebase:', postData);
       });
-      console.log('POST to Firebase:', workerId, annotations);
     } else {
       alert('Please describe the video before submitting.');
     }
@@ -80,29 +88,52 @@ window.onload = function () {
   mturkCheckPreview();
 };
 
-var setVideo = function (data) {
-  var vidIDs = Object.keys(data);
-  vidToDisplay = vidIDs[0];
-  console.log(data, vidIDs);
-  _.each(vidIDs, function (id) {
-    if (!data[id][params.task]) data[id][params.task] = {};
-    if (Object.keys(data[id][params.task]).length < Object.keys(data[vidToDisplay][params.task]).length) vidToDisplay = id;
-  });
-  document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="' + data[vidToDisplay].embedURL + '" frameborder="0" allowfullscreen></iframe>';
+var setVideo = function (videos, data) {
+  if (Object.keys(data).length === 0) {
+    vidToDisplay = Object.keys(videos)[0];
+    return setVidHTML(vidToDisplay);
+  } else {
+    var vidsAll = _.deepClone(videos);
+
+    _.each(data[params.workerId], function (entry) {
+      if (taskNum === entry.task) vidsAll[entry.videoId] = false;
+    });
+
+    _.each(vidsAll, function (val, key) {
+      if (val === true) vidsRemaining.push(key);
+    });
+
+    
+    if (vidsRemaining.length > 0) {
+      vidToDisplay = vidsRemaining.pop();
+      return setVidHTML(vidToDisplay);
+    } else {
+      _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
+      $('body').click(function () {
+          alert('You have annotated all possible videos. Please return this HIT. Thank you.')
+      })
+      return true;
+    }
+  }
+
+  function setVidHTML (id) {
+    console.log('setting vid', id);
+    document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
+  };
 };
 
 function mturkSubmit() {
-    var f = $('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" method="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>')
-    $('body').append(f)
-    f.submit()
+  var f = $('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" method="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
+  $('body').append(f);
+  f.submit();
 };
 
 function mturkCheckPreview() {
-    if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-        _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false)
-        $('body').click(function () {
-            alert('This is a preview. Please accept the HIT to work on it.')
-        })
-        return true
-    }
+  if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+    _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false);
+    $('body').click(function () {
+        alert('This is a preview. Please accept the HIT to work on it.');
+    });
+    return true;
+  }
 };
