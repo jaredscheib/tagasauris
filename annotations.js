@@ -3,6 +3,7 @@ var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
 var annotations = {};
+var annotext;
 var vidEvents = {};
 const todayDataDate = '20160114';
 
@@ -48,6 +49,7 @@ function onPlayerStateChange(event) {
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
   console.log(vidEvents);
+  annotext.focus();
 };
 
 
@@ -99,7 +101,7 @@ window.onload = function () {
     }
 
     response_area.innerHTML = '<textarea id="annotext" placeholder="Type concept here"></textarea>';
-    var annotext = document.getElementById('annotext');
+    annotext = document.getElementById('annotext');
     annotext.focus();
 
     annotext.addEventListener('keydown', function (event) {
