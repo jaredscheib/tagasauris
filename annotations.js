@@ -47,6 +47,7 @@ function onPlayerStateChange(event) {
     '5': 'video cued'
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
+  console.log(vidEvents);
 };
 
 
@@ -81,7 +82,7 @@ window.onload = function () {
       event.preventDefault();
       annotations[getNow()] = {text: event.target.value, timestamp: player.getCurrentTime()};
       setTimeout(function() { event.target.checked = false; }, 100);
-      // console.log(annotations);
+      console.log(annotations);
     });
   } else { // textarea response
 
