@@ -1,10 +1,16 @@
 var _ = require('./utils.js');
 var secrets = require('./secrets.js');
 
+var args = process.argv.slice(2);
+var taskNum = Number(args[0]);
+var sandbox = args[1] === 'true' ? true : false;
+var timesToRun = Number(args[2]) || 1;
+console.log(taskNum, sandbox, timesToRun);
+
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets.URL_task1,
+    ExternalURL: secrets.URL_task3,
     FrameHeight: '650'
   }
 };
@@ -28,17 +34,19 @@ function mturkRequest(id, secret, sandbox, params) {
 };
 
 _.run(function () {
-  var x = mturkRequest(secrets.ID, secrets.KEY, true, {
-            Operation : 'CreateHIT',
-            Title : 'Simple video annotation task',
-            Description : 'Describe everything you see in the 30 second video',
-            'Reward.1.Amount' : 0.10,
-            'Reward.1.CurrencyCode' : 'USD',
-            MaxAssignments : 5,
-            AssignmentDurationInSeconds : 10 * 60,
-            LifetimeInSeconds : 60 * 60 * 24,
-            AutoApprovalDelayInSeconds : 60 * 60,
-            Question: arg.hit.question
-        });
-  console.log(x);
+  for (var i = 0; i < timesToRun; i++) {
+    var x = mturkRequest(secrets.ID, secrets.KEY, sandbox, {
+              Operation : 'CreateHIT',
+              Title : 'Simple video annotation task',
+              Description : 'Describe everything you see in the 30 second video',
+              'Reward.1.Amount' : 0.10,
+              'Reward.1.CurrencyCode' : 'USD',
+              MaxAssignments : 5,
+              AssignmentDurationInSeconds : 10 * 60,
+              LifetimeInSeconds : 60 * 60 * 24,
+              AutoApprovalDelayInSeconds : 60 * 60,
+              Question: arg.hit.question
+          });
+    console.log(x);
+  }
 });
