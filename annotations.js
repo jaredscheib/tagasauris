@@ -59,8 +59,9 @@ window.onload = function () {
   if (taskNum === 3) { // checkboxes response
     
     instructions.innerHTML =  'Please watch the entire video.<br>' +
-                              'Select each concept that applies among the checkboxes below.<br>' +
-                              'Then click submit.';
+                              'At the moment you see anything, click that concept from among the checkboxes below.<br>' +
+                              'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
+                              'When you have entered every concept and finished the video, click submit.';
     response_area.innerHTML = '<div id="annochecks">' +
                               '<input type="checkbox" name="checkboxes" value="driving">driving</input><br>' +
                               '<input type="checkbox" name="checkboxes" value="carExterior">car exterior</input><br>' +
@@ -73,12 +74,16 @@ window.onload = function () {
 
     if (taskNum === 1) {
       instructions.innerHTML =  'Please watch the entire video.<br>' +
-                                'Describe everything you see in the text box below.<br>' +
-                                'Then click submit.';
+                                'At the moment you see anything, type what you see<br>' +
+                                'into the text area below and press enter.<br>' +
+                                'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
+                                'When you have entered every concept and finished the video, click submit.';
     } else if (taskNum === 2) {
       instructions.innerHTML =  'Please watch the entire video.<br>' +
-                                'Describe everything you see related to cars in the text box below.<br>' +
-                                'Then click submit.';
+                                'At the moment you see anything related to cars,<br>' +
+                                'type what you see into the text area below and press enter.<br>' +
+                                'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
+                                'When you have entered every concept and finished the video, click submit.';
     }
 
     response_area.innerHTML = '<textarea id="annotext" placeholder="Type concept here"></textarea>';
