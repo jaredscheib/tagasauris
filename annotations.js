@@ -94,7 +94,8 @@ var setVideo = function (videos, data) {
     return setVidHTML(vidToDisplay);
   } else {
     var vidsAll = _.deepClone(videos);
-
+    var vidsRemaining = [];
+    
     _.each(data[params.workerId], function (entry) {
       if (taskNum === entry.task) vidsAll[entry.videoId] = false;
     });
