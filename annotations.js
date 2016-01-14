@@ -5,6 +5,7 @@ var vidToDisplay;
 var annotations = {};
 var annotext;
 var vidEvents = {};
+var vidCompleted = false;
 const todayDataDate = '20160114';
 
 db.on('child_added', function (snapshot){
@@ -58,6 +59,7 @@ function onPlayerStateChange(event) {
     '5': 'video cued'
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
+  if (event.data === 0) vidCompleted = true;
   annotext.focus();
 };
 
@@ -126,6 +128,10 @@ window.onload = function () {
 
   submit.addEventListener('click', function (event) {
     event.preventDefault();
+
+    if (!vidCompleted) {
+      return alert('Please finish watching the video.');
+    }
 
     console.log('submit', annotations);
 
