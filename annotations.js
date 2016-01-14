@@ -49,7 +49,7 @@ function onPlayerStateChange(event) {
     '5': 'video cued'
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
-  console.log(vidEvents);
+  console.log('onPlayerStateChange()', vidEvents);
   annotext.focus();
 };
 
@@ -118,6 +118,8 @@ window.onload = function () {
 
   submit.addEventListener('click', function (event) {
     event.preventDefault();
+
+    console.log('submit', annotations);
 
     if (taskNum === 3) { // checkboxes
       annotations = [];
