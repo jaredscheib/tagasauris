@@ -95,7 +95,7 @@ var setVideo = function (videos, data) {
   } else {
     var vidsAll = _.deepClone(videos);
     var vidsRemaining = [];
-    
+
     _.each(data[params.workerId], function (entry) {
       if (taskNum === entry.task) vidsAll[entry.videoId] = false;
     });
@@ -111,7 +111,7 @@ var setVideo = function (videos, data) {
     } else {
       _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
       $('body').click(function () {
-          alert('You have annotated all possible videos. Please return this HIT. Thank you.')
+          alert('You have annotated all videos. Please return this HIT.')
       })
       return true;
     }
