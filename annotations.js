@@ -101,12 +101,12 @@ window.onload = function () {
 
     if (taskNum === 1) {
       instructions.innerHTML =  'Please watch the entire video.<br>' +
-                                'When you see anything, type that keyword into the text area below and press enter.<br>' +
+                                'When you see anything, type the keyword(s) into the text area below and press enter.<br>' +
                                 'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
                                 'When you have entered every concept and finished the video, click submit.';
     } else if (taskNum === 2) {
       instructions.innerHTML =  'Please watch the entire video.<br>' +
-                                'When you see anything related to cars, type that keyword into the text area below and press enter.<br>' +
+                                'When you see anything related to cars, type the keyword(s) into the text area below and press enter.<br>' +
                                 'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
                                 'When you have entered every concept and finished the video, click submit.';
     }
