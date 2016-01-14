@@ -2,7 +2,7 @@ var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
-var annotations;
+var annotations = {};
 var vidEvents = {};
 const todayDataDate = '20160114';
 
@@ -46,7 +46,7 @@ function onPlayerStateChange(event) {
     '3': 'buffering',
     '5': 'video cued'
   };
-  vidEvents[new Date().getTime()] = eventNames[String(event.data)];
+  vidEvents[getNow()] = eventNames[String(event.data)];
 };
 
 
@@ -81,12 +81,17 @@ window.onload = function () {
                                 'Then click submit.';
     }
 
-    response_area.innerHTML = '<textarea id="annotext" placeholder="Your annotations here"></textarea>';
+    response_area.innerHTML = '<textarea id="annotext" placeholder="Type concept here"></textarea>';
     var annotext = document.getElementById('annotext');
     annotext.focus();
 
-    annotext.addEventListener('', function (event) {
-      // player.getCurrentTime():Number
+    annotext.addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) {
+        event.preventDefault();
+        annotations[getNow()] = {text: annotext.value, timestamp: player.getCurrentTime()};
+        annotext.value = '';
+        // console.log(annotations);
+      }
     });
   }
 
@@ -106,14 +111,14 @@ window.onload = function () {
       annotations = annotext.value;
       // annotext.value = '';
     }
-    if (annotations.length > 0) {
+    if (Object.keys(annotations).length > 0) {
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
       var postData = {
         videoId: vidToDisplay,
         workerId: params.workerId,
         task: taskNum,
         annotations: annotations,
-        time_submitted: new Date().getTime(),
+        time_submitted: getNow(),
         video_events: vidEvents
       };
       postRef.push(postData, function () {
@@ -179,4 +184,8 @@ function mturkCheckPreview() {
     });
     return true;
   }
+};
+
+function getNow() {
+  return new Date().getTime();
 };
