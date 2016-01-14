@@ -68,8 +68,21 @@ window.onload = function () {
                               '<input type="checkbox" name="checkboxes" value="carInterior">car interior</input><br>' +
                               '<input type="checkbox" name="checkboxes" value="road">road</input><br>' +
                               '<input type="checkbox" name="checkboxes" value="people">people</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="truck">truck</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="BMW">BMW</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="motorcycle">motorcycle</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="diesel">diesel</input><br>' +
+                              '<input type="checkbox" name="checkboxes" value="drifting">drifting</input><br>' +
                               '</div>';
 
+    var checkboxes = document.getElementById('annochecks');
+
+    checkboxes.addEventListener('change', function (event) {
+      event.preventDefault();
+      annotations[getNow()] = {text: event.target.value, timestamp: player.getCurrentTime()};
+      setTimeout(function() { event.target.checked = false; }, 100);
+      // console.log(annotations);
+    });
   } else { // textarea response
 
     if (taskNum === 1) {
@@ -106,7 +119,6 @@ window.onload = function () {
 
     if (taskNum === 3) { // checkboxes
       annotations = [];
-      var checkboxes = document.getElementsByName('checkboxes');
       _.each(checkboxes, function (checkbox) {
         console.log(checkbox);
         if (checkbox.checked) annotations.push(checkbox.value);
