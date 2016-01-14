@@ -25,7 +25,6 @@ function onYouTubeIframeAPIReady() {
     player = new YT.Player('player', {
       height: '315',
       width: '420',
-      videoId: getVideoId(data.videos, data.data[todayDataDate]),
       events: {
         'onReady': onPlayerReady,
         'onStateChange': onPlayerStateChange
@@ -36,6 +35,20 @@ function onYouTubeIframeAPIReady() {
 
 function onPlayerReady(event) {
   // event.target.playVideo();
+  vidToDisplay = getVideoId(data.videos, data.data[todayDataDate]);
+  var startSeconds = 0;
+  var startSecondsIndex = vidToDisplay.indexOf('?t=');
+  console.log(vidToDisplay, startSeconds, startSecondsIndex);
+  if (startSecondsIndex !== -1) {
+    startSeconds = Number(vidToDisplay.slice(startSecondsIndex + 3));
+    vidToDisplay = vidToDisplay.slice(0, startSecondsIndex);
+  }
+  console.log(vidToDisplay, startSeconds, startSecondsIndex);
+
+  player.loadVideoById({
+    videoId: vidToDisplay,
+    startSeconds: startSeconds
+  });
   console.log('onPlayerReady()');
 };
 
@@ -145,8 +158,7 @@ window.onload = function () {
 
 var getVideoId = function (videos, data) {
   if (Object.keys(data).length === 0) {
-    vidToDisplay = Object.keys(videos)[0];
-    return vidToDisplay;
+    return Object.keys(videos)[0];
     // return setVidHTML(vidToDisplay);
   } else {
     var vidsAll = _.deepClone(videos);
@@ -162,8 +174,7 @@ var getVideoId = function (videos, data) {
 
     
     if (vidsRemaining.length > 0) {
-      vidToDisplay = vidsRemaining.pop();
-      return vidToDisplay;
+      return vidsRemaining.pop();
       // return setVidHTML(vidToDisplay);
     } else {
       _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
