@@ -1,5 +1,6 @@
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
+var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
 const todayDataDate = '20160114';
 
@@ -20,7 +21,6 @@ window.onload = function () {
   var response_area = document.getElementById('response_area');
   var annotations;
   var submit = document.getElementById('submit');
-  var taskNum = Number(params.task.slice(-1));
 
   if (taskNum === 3) { // checkboxes response
     
