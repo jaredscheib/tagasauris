@@ -36,20 +36,18 @@ function onYouTubeIframeAPIReady() {
 function onPlayerReady(event) {
   // event.target.playVideo();
   vidToDisplay = getVideoId(data.videos, data.data[todayDataDate]);
+  var sliceVid = vidToDisplay;
   var startSeconds = 0;
   var startSecondsIndex = vidToDisplay.indexOf('?t=');
-  console.log(vidToDisplay, startSeconds, startSecondsIndex);
   if (startSecondsIndex !== -1) {
     startSeconds = Number(vidToDisplay.slice(startSecondsIndex + 3));
-    vidToDisplay = vidToDisplay.slice(0, startSecondsIndex);
+    sliceVid = vidToDisplay.slice(0, startSecondsIndex);
   }
-  console.log(vidToDisplay, startSeconds, startSecondsIndex);
 
   player.loadVideoById({
-    videoId: vidToDisplay,
+    videoId: sliceVid,
     startSeconds: startSeconds
   });
-  console.log('onPlayerReady()');
 };
 
 function onPlayerStateChange(event) {
@@ -62,7 +60,6 @@ function onPlayerStateChange(event) {
     '5': 'video cued'
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
-  console.log('onPlayerStateChange()', vidEvents);
   annotext.focus();
 };
 
@@ -98,7 +95,7 @@ window.onload = function () {
       event.preventDefault();
       annotations[getNow()] = {text: event.target.value, timestamp: player.getCurrentTime()};
       setTimeout(function() { event.target.checked = false; }, 100);
-      console.log(annotations);
+      // console.log(annotations);
     });
   } else { // textarea response
 
@@ -123,7 +120,7 @@ window.onload = function () {
         event.preventDefault();
         annotations[getNow()] = {text: annotext.value, timestamp: player.getCurrentTime()};
         annotext.value = '';
-        console.log(annotations);
+        // console.log(annotations);
       }
     });
   }
