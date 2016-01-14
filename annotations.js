@@ -121,17 +121,6 @@ window.onload = function () {
 
     console.log('submit', annotations);
 
-    if (taskNum === 3) { // checkboxes
-      annotations = [];
-      _.each(checkboxes, function (checkbox) {
-        console.log(checkbox);
-        if (checkbox.checked) annotations.push(checkbox.value);
-      });
-      var annotations = annotations.join(',');
-    } else { // textarea
-      annotations = annotext.value;
-      // annotext.value = '';
-    }
     if (Object.keys(annotations).length > 0) {
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
       var postData = {
