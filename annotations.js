@@ -6,7 +6,7 @@ var annotations = {};
 var annotext;
 var vidEvents = {};
 var vidCompleted = false;
-const todayDataDate = '20160114';
+const todayDataDate = '20160121';
 
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
@@ -59,7 +59,10 @@ function onPlayerStateChange(event) {
     '5': 'video cued'
   };
   vidEvents[getNow()] = eventNames[String(event.data)];
-  if (event.data === 0) vidCompleted = true;
+  if (event.data === 0) {
+    document.getElementById('submit').disabled = false;
+    vidCompleted = true;
+  }
   annotext.focus();
 };
 
@@ -68,11 +71,12 @@ function onPlayerStateChange(event) {
 window.onload = function () {
   var instructions = document.getElementById('instructions');
   var response_area = document.getElementById('response_area');
+  var enterKeyword;
   var submit = document.getElementById('submit');
 
   if (taskNum === 3) { // checkboxes response
     
-    instructions.innerHTML =  'Please watch the entire video.<br>' +
+    instructions.innerHTML =  'Please watch the entire video. Pause and replay as necessary.<br>' +
                               'At the moment you see anything, click that concept from among the checkboxes below.<br>' +
                               'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
                               'When you have entered every concept and finished the video, click submit.';
@@ -101,19 +105,20 @@ window.onload = function () {
 
     if (taskNum === 1) {
       instructions.innerHTML =  "Press play to watch the video.<br>" +
-                                "Enter keywords that describe anything you see in the video.<br>" +
-                                "Pause and replay the video as necessary.<br>" +
-                                "When you have entered keywords for the entire video, hit Submit.";
+                                "Enter one keyword or phrase at a time to describe what you see in the video.<br>" +
+                                "Pause and replay the video as necessary to enter all keywords.<br>" +
+                                "When you have entered keywords for the entire video, click Submit HIT.";
     } else if (taskNum === 2) {
       instructions.innerHTML =  "Press play to watch the video related to <b>cars</b>.<br>" +
-                                "Enter keywords that describe anything you see related to <b>cars</b> in the video.<br>" +
-                                "Pause and replay the video as necessary.<br>" +
-                                "When you have entered keywords for the entire video, hit Submit.";
+                                "Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.<br>" +
+                                "Pause and replay the video as necessary to enter all keywords.<br>" +
+                                "When you have entered keywords for the entire video, click Submit HIT.";
     }
 
-    response_area.innerHTML = '<textarea id="annotext" placeholder="Type concept here"></textarea>';
+    response_area.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enterKeyword" disabled>Enter</button>';
     annotext = document.getElementById('annotext');
     annotext.focus();
+    enterKeyword = document.getElementById('enterKeyword');
 
     annotext.addEventListener('keydown', function (event) {
       if (event.keyCode === 13) {
@@ -121,6 +126,14 @@ window.onload = function () {
         annotations[getNow()] = {text: annotext.value, timestamp: player.getCurrentTime()};
         annotext.value = '';
         // console.log(annotations);
+      }
+    });
+
+    annotext.addEventListener('keyup', function (event) {
+      if (annotext.value === '') {
+        enterKeyword.setAttribute('disabled', 'disabled');
+      } else {
+        enterKeyword.removeAttribute('disabled');
       }
     });
   }
