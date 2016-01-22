@@ -10,7 +10,7 @@ console.log(taskNum, sandbox, timesToRun);
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets.URL_task3,
+    ExternalURL: secrets['URL_task' + String(taskNum)],
     FrameHeight: '650'
   }
 };
