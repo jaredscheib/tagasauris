@@ -1,3 +1,7 @@
+var $j = jQuery.noConflict();
+
+(function app () {
+
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
@@ -12,10 +16,10 @@ var imgToDisplayLead = 0;
 var imgPerGrid = 4;
 const todayDataDate = '20160114';
 
-db.on('child_added', function (snapshot){
-  var addedAnnotation = snapshot.val();
-  console.log('Posted to Firebase:', addedAnnotation);
-});
+// db.on('child_added', function (snapshot){
+//   var addedAnnotation = snapshot.val();
+//   console.log('Posted to Firebase:', addedAnnotation);
+// });
 
 if (taskNum < 4) {
   // load and set callback for YouTube API
@@ -154,12 +158,13 @@ window.onload = function () {
   // img+annotorious tasks
   } else {
     if (taskNum === 5) {
-      instructions.innerHTML =  '<li>Click and drag on each image to draw a box around each concept you see.</li>' +
+      instructions.innerHTML =  '<li>Draw a box around each concept you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
-                                '<li>The same concept may appear across multiple images.</li>' +
-                                '<li>When you have annotated each image, click next to keep annotating more images.</li>' +
+                                '<li>Note: the same concept may appear across multiple images.</li>' +
+                                '<li>When you have annotated each image in a set, click Next to annotate the next set.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT.</li>';
     
+      // create image grid
       var imgGrid = document.createElement('div');
       imgGrid.id = 'img_grid';
 
@@ -176,16 +181,20 @@ window.onload = function () {
           limit = j + imgPerGrid / 2;
         }
 
-        console.log('j, limit', j, limit);
+        // console.log('j, limit', j, limit);
         for (j; j < limit; j++) {
           var imgNum = String(j);
           if (imgNum.length < 2) imgNum = '0' + imgNum;
-          console.log('imgNum', imgNum);
+          // console.log('imgNum', imgNum);
           var newImg = document.createElement('img');
           newImg.id = 'img' + imgNum;
-          newImg.className = 'gallery_img';
+          newImg.className = 'anno_img';
           newImg.src = 'assets/img/01-' + imgNum + '.jpeg';
           imgRow.appendChild(newImg);
+          // make annotatable on img load event fully so annotorious loads properly
+          $j(newImg).load(function () {
+            anno.makeAnnotatable(this);
+          });
         }
 
         imgGrid.appendChild(imgRow);
@@ -199,7 +208,8 @@ window.onload = function () {
   submit.addEventListener('click', function (event) {
     event.preventDefault();
 
-    if (!vidCompleted) {
+
+    if (taskNum < 4 && !vidCompleted) {
       return alert('Please finish watching the video.');
     }
 
@@ -247,7 +257,9 @@ function getVideoId (assetsCounts, data) {
       if (val !== false) assetsCountsRemaining.push([key, val]);
     });
 
-    console.log('hello', assetsCounts, assetsCountsClone, assetsCountsRemaining);
+    console.log('assetsCounts', assetsCounts);
+    console.log('assetsCountsClone', assetsCountsClone);
+    console.log('assetsCountsRemaining', assetsCountsRemaining);
 
     if (assetsCountsRemaining.length > 0) {
       // return vid with least views
@@ -255,8 +267,8 @@ function getVideoId (assetsCounts, data) {
       return assetsCountsRemaining.pop()[0];
       // return setVidHTML(vidToDisplay);
     } else {
-      _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
-      $('body').click(function () {
+      _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
+      $j('body').click(function () {
           alert('You have annotated all videos. Please return this HIT.')
       })
       return true;
@@ -265,15 +277,15 @@ function getVideoId (assetsCounts, data) {
 };
 
 function mturkSubmit() {
-  var f = $('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" method="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
-  $('body').append(f);
+  var f = $j('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" method="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
+  $j('body').append(f);
   f.submit();
 };
 
 function mturkCheckPreview() {
   if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-    _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false);
-    $('body').click(function () {
+    _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false);
+    $j('body').click(function () {
         alert('This is a preview. Please accept the HIT to work on it.');
     });
     return true;
@@ -283,3 +295,5 @@ function mturkCheckPreview() {
 function getNow() {
   return new Date().getTime();
 };
+
+}());

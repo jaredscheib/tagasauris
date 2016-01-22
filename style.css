@@ -1,6 +1,31 @@
+html {
+	height: 100%;
+	box-sizing: border-box;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+/*table {
+	border-collapse: collapse;
+}
+
+th, td {
+	padding: 0px;
+}*/
+
 body {
+	height: 100%;
+	margin: 0px;
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
+}
+
+div {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
 }
 
 #instructions_area {
@@ -20,15 +45,17 @@ body {
 }
 
 .img_row {
+	margin: 0px;
 	display: inline-block;
 	width: 100%;
 	zoom: 1;
 	display*: inline;
 }
 
-.gallery_img {
-	float: left;
-	width: 50%; /* make variable for dynamic grid sizes; 50% for 4 for now */
+.anno_img {
+	margin: 5px;
+	/*float: left;*/
+	/*width: 50%;  make variable for dynamic grid sizes; 50% for 4 for now */
 }
 
 #response_area {
