@@ -6,7 +6,9 @@ var annotations = {};
 var annotext;
 var vidEvents = {};
 var vidCompleted = false;
-const todayDataDate = '20160114';
+var data;
+var assetsCounts;
+const todayDataDate = '20160122';
 
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
@@ -20,10 +22,11 @@ var player;
 function onYouTubeIframeAPIReady() {
   db.once('value', function (snapshot) {
     data = snapshot.val();
+    assetsCounts = data.assets[todayDataDate];
 
     if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
 
-    vidToDisplay = getVideoId(data.videos, data.data[todayDataDate]);
+    vidToDisplay = getVideoId(assetsCounts, data.data[todayDataDate]);
     var sliceVid = vidToDisplay;
     var startSeconds = 0;
     var startSecondsIndex = vidToDisplay.indexOf('?t=');
@@ -159,6 +162,8 @@ window.onload = function () {
         video_events: vidEvents
       };
       postRef.push(postData, function () {
+        assetsCounts[vidToDisplay]++;
+        db.assets[todayDataDate].set(assetsCounts);
         mturkSubmit();
         console.log('POST to Firebase:', postData);
       });
@@ -170,32 +175,28 @@ window.onload = function () {
   mturkCheckPreview();
 };
 
-var getVideoId = function (videos, data) {
+var getVideoId = function (assetsCounts, data) {
   if (Object.keys(data).length === 0) {
-    return Object.keys(videos)[0];
+    return Object.keys(assetsCounts)[0];
     // return setVidHTML(vidToDisplay);
   } else {
-    var vidsAll = _.deepClone(videos);
-    var vidsTallies = {};
-    var vidsRemaining = [];
+    var assetsCountsClone = _.deepClone(assetsCounts);
+    var assetsCountsRemaining = [];
 
     _.each(data[params.workerId], function (entry) {
       if (taskNum === entry.task) {
-        vidsAll[entry.videoId] = false;
+        assetsCountsClone[entry.videoId] = false;
       }
     });
 
-    _.each(vidsAll, function (val, key) {
-      if (val === true) vidsRemaining.push(key);
+    _.each(assetsCountsClone, function (val, key) {
+      if (val !== false) assetsCountsRemaining.push([key, val]);
     });
 
-    console.log('hello', videos, data);
-    // reorder vidsRemaining by least number of HITs completed with that vid
-    // accomplish this by updating a tally of each videoId under that todayDataDate and sort against that, rather than using Greg's method each time
-    
-    
-    if (vidsRemaining.length > 0) {
-      return vidsRemaining.pop();
+    if (assetsCountsRemaining.length > 0) {
+      // return vid with least views
+      assetsCountsRemaining.sort(function (a, b) { return a[1] < b[1]; });
+      return assetsCountsRemaining.pop()[1];
       // return setVidHTML(vidToDisplay);
     } else {
       _.dialog($('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
