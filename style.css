@@ -12,6 +12,25 @@ body {
 	display: inline-block;
 }
 
+#img_grid {
+	display: inline-block;
+	width: 60%;
+	zoom: 1;
+	display*: inline;
+}
+
+.img_row {
+	display: inline-block;
+	width: 100%;
+	zoom: 1;
+	display*: inline;
+}
+
+.gallery_img {
+	float: left;
+	width: 50%; /* make variable for dynamic grid sizes; 50% for 4 for now */
+}
+
 #response_area {
 	margin: 15px
 }
