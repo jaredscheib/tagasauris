@@ -6,7 +6,7 @@ var annotations = {};
 var annotext;
 var vidEvents = {};
 var vidCompleted = false;
-const todayDataDate = '20160121';
+const todayDataDate = '20160114';
 
 db.on('child_added', function (snapshot){
   var addedAnnotation = snapshot.val();
@@ -104,15 +104,15 @@ window.onload = function () {
   } else { // textarea response
 
     if (taskNum === 1) {
-      instructions.innerHTML =  "Press play to watch the video.<br>" +
-                                "Enter one keyword or phrase at a time to describe what you see in the video.<br>" +
-                                "Pause and replay the video as necessary to enter all keywords.<br>" +
-                                "When you have entered keywords for the entire video, click Submit HIT.";
+      instructions.innerHTML =  '<li>Press play to watch the video.</li>' +
+                                '<li>Enter one keyword or phrase at a time to describe what you see in the video.</li>' +
+                                '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
+                                '<li>When you have entered keywords for the entire video, click Submit HIT.</li>';
     } else if (taskNum === 2) {
-      instructions.innerHTML =  "Press play to watch the video related to <b>cars</b>.<br>" +
-                                "Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.<br>" +
-                                "Pause and replay the video as necessary to enter all keywords.<br>" +
-                                "When you have entered keywords for the entire video, click Submit HIT.";
+      instructions.innerHTML =  '<li>Press play to watch the video related to <b>cars</b>.</li>' +
+                                '<li>Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.</li>' +
+                                '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
+                                '<li>When you have entered keywords for the entire video, click Submit HIT.</li>';
     }
 
     response_area.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enterKeyword" disabled>Enter</button>';
@@ -176,16 +176,23 @@ var getVideoId = function (videos, data) {
     // return setVidHTML(vidToDisplay);
   } else {
     var vidsAll = _.deepClone(videos);
+    var vidsTallies = {};
     var vidsRemaining = [];
 
     _.each(data[params.workerId], function (entry) {
-      if (taskNum === entry.task) vidsAll[entry.videoId] = false;
+      if (taskNum === entry.task) {
+        vidsAll[entry.videoId] = false;
+      }
     });
 
     _.each(vidsAll, function (val, key) {
       if (val === true) vidsRemaining.push(key);
     });
 
+    console.log('hello', videos, data);
+    // reorder vidsRemaining by least number of HITs completed with that vid
+    // accomplish this by updating a tally of each videoId under that todayDataDate and sort against that, rather than using Greg's method each time
+    
     
     if (vidsRemaining.length > 0) {
       return vidsRemaining.pop();
@@ -198,11 +205,6 @@ var getVideoId = function (videos, data) {
       return true;
     }
   }
-
-  // function setVidHTML (id) {
-  //   console.log('setting vid', id);
-  //   document.getElementById('video').innerHTML = '<iframe width="420" height="315" src="https://www.youtube.com/embed/' + id + '" frameborder="0" allowfullscreen></iframe>';
-  // };
 };
 
 function mturkSubmit() {
