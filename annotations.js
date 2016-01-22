@@ -15,59 +15,60 @@ db.on('child_added', function (snapshot){
   console.log('Posted to Firebase:', addedAnnotation);
 });
 
+if (taskNum < 4) {
+  // load and set callback for YouTube API
+  var player;
 
-// load and set callback for YouTube API
-var player;
+  function onYouTubeIframeAPIReady() {
+    db.once('value', function (snapshot) {
+      data = snapshot.val();
+      assetsCounts = data.assets[todayDataDate];
 
-function onYouTubeIframeAPIReady() {
-  db.once('value', function (snapshot) {
-    data = snapshot.val();
-    assetsCounts = data.assets[todayDataDate];
+      if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
 
-    if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
-
-    vidToDisplay = getVideoId(assetsCounts, data.data[todayDataDate]);
-    var sliceVid = vidToDisplay;
-    var startSeconds = 0;
-    var startSecondsIndex = vidToDisplay.indexOf('?t=');
-    if (startSecondsIndex !== -1) {
-      startSeconds = Number(vidToDisplay.slice(startSecondsIndex + 3));
-      sliceVid = vidToDisplay.slice(0, startSecondsIndex);
-    }
-
-    player = new YT.Player('player', {
-      height: '315',
-      width: '420',
-      videoId: sliceVid,
-      playerVars: {start: startSeconds},
-      events: {
-        'onReady': onPlayerReady,
-        'onStateChange': onPlayerStateChange
+      vidToDisplay = getVideoId(assetsCounts, data.data[todayDataDate]);
+      var sliceVid = vidToDisplay;
+      var startSeconds = 0;
+      var startSecondsIndex = vidToDisplay.indexOf('?t=');
+      if (startSecondsIndex !== -1) {
+        startSeconds = Number(vidToDisplay.slice(startSecondsIndex + 3));
+        sliceVid = vidToDisplay.slice(0, startSecondsIndex);
       }
+
+      player = new YT.Player('player', {
+        height: '315',
+        width: '420',
+        videoId: sliceVid,
+        playerVars: {start: startSeconds},
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
     });
-  });
-};
-
-function onPlayerReady(event) {
-  // event.target.playVideo();
-};
-
-function onPlayerStateChange(event) {
-  var eventNames = {
-    '-1': 'unstarted',
-    '0': 'ended',
-    '1': 'playing',
-    '2': 'paused',
-    '3': 'buffering',
-    '5': 'video cued'
   };
-  vidEvents[getNow()] = eventNames[String(event.data)];
-  if (event.data === 0) {
-    document.getElementById('submit').disabled = false;
-    vidCompleted = true;
-  }
-  annotext.focus();
-};
+
+  function onPlayerReady(event) {
+    // event.target.playVideo();
+  };
+
+  function onPlayerStateChange(event) {
+    var eventNames = {
+      '-1': 'unstarted',
+      '0': 'ended',
+      '1': 'playing',
+      '2': 'paused',
+      '3': 'buffering',
+      '5': 'video cued'
+    };
+    vidEvents[getNow()] = eventNames[String(event.data)];
+    if (event.data === 0) {
+      document.getElementById('submit').disabled = false;
+      vidCompleted = true;
+    }
+    annotext.focus();
+  };
+}
 
 
 // set HTML and create event listeners on window load
