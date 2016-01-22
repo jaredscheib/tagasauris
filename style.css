@@ -1,9 +1,15 @@
 body {
 	text-align: center;
+	font-family: 'Open Sans', sans-serif;
+}
+
+#instructions_area {
 }
 
 #instructions {
 	font-size: 16px;
+	text-align: left;
+	display: inline-block;
 }
 
 #response_area {
