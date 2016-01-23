@@ -34,7 +34,7 @@ var submitBtn;
 // });
 
 if (assetType === 'img') {
-  loadScript('http://annotorious.github.com/latest/annotorious.min.js');
+  loadScript('https://annotorious.github.com/latest/annotorious.min.js');
 }
 
 db.once('value', function (snapshot) {
