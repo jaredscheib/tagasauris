@@ -6,6 +6,7 @@ var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
+var allAnnos = {};
 var annotations = {};
 var annotext;
 var vidEvents = {};
@@ -13,6 +14,7 @@ var vidCompleted = false;
 var data;
 var assetsCounts;
 var imgToDisplayLead = 0;
+var imgTotal = 30
 var imgPerGrid = 4;
 const todayDataDate = '20160114';
 
@@ -70,7 +72,7 @@ if (taskNum < 4) {
     };
     vidEvents[getNow()] = eventNames[String(event.data)];
     if (event.data === 0) {
-      document.getElementById('submit').disabled = false;
+      document.getElementById('submitBtn').disabled = false;
       vidCompleted = true;
     }
     annotext.focus();
@@ -81,13 +83,17 @@ if (taskNum < 4) {
 // set HTML and create event listeners on window load
 window.onload = function () {
   var instructions = document.getElementById('instructions');
+  var prevBtns = document.getElementsByClassName('prevBtn');
+  var nextBtns = document.getElementsByClassName('nextBtn');
   var media_area = document.getElementById('media_area');
   var response_area = document.getElementById('response_area');
   var enterKeyword;
-  var submit = document.getElementById('submit');
+  var submitBtn = document.getElementById('submitBtn');
 
   // non img+annotorious tasks
   if (taskNum < 4) {
+    $j('.prevBtn').each(function (i, el) { $j(el).hide(); });
+    $j('.nextBtn').each(function (i, el) { $j(el).hide(); });
     var playerDiv = document.createElement('div');
     playerDiv.id = 'player';
     media_area.appendChild(playerDiv);
@@ -161,51 +167,139 @@ window.onload = function () {
       instructions.innerHTML =  '<li>Draw a box around each concept you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
                                 '<li>Note: the same concept may appear across multiple images.</li>' +
-                                '<li>When you have annotated each image in a set, click Next to annotate the next set.</li>' +
+                                '<li>When you have annotated each image in a set, click Next Set to annotate remaining images.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT.</li>';
     
-      // create image grid
-      var imgGrid = document.createElement('div');
-      imgGrid.id = 'img_grid';
-
-      for (var i = 0; i < 2; i++) {
-        var imgRow = document.createElement('div');
-        imgRow.className = 'img_row';
-
-        var j, limit;
-        if (i === 0) {
-          j = imgToDisplayLead;
-          limit = j + imgPerGrid / 2;
-        } else {
-          j = imgToDisplayLead + imgPerGrid / 2;
-          limit = j + imgPerGrid / 2;
-        }
-
-        // console.log('j, limit', j, limit);
-        for (j; j < limit; j++) {
-          var imgNum = String(j);
-          if (imgNum.length < 2) imgNum = '0' + imgNum;
-          // console.log('imgNum', imgNum);
-          var newImg = document.createElement('img');
-          newImg.id = 'img' + imgNum;
-          newImg.className = 'anno_img';
-          newImg.src = 'assets/img/01-' + imgNum + '.jpeg';
-          imgRow.appendChild(newImg);
-          // make annotatable on img load event fully so annotorious loads properly
-          $j(newImg).load(function () {
-            anno.makeAnnotatable(this);
+      // set up prev and next buttons for carousel
+      $j('.prevBtn')
+        .prop('disabled', false)
+        .on('click', function (e) {
+          e.preventDefault();
+          var imgSet = $j('.anno_img');
+          var allAnnotated = true;
+          imgSet.each(function (i, el) {
+            var imgAnno = anno.getAnnotations(el.src);
+            if (imgAnno.length === 0) allAnnotated = false;
           });
+          if (allAnnotated) {
+            imgToDisplayLead -= imgPerGrid;
+            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - imgPerGrid;
+            drawImgGrid();
+          } else {
+            alert('Please annotate each image in the set.');
+          }
+        });
+
+      $j('.nextBtn')
+        .prop('disabled', false)
+        .on('click', function (e) {
+          e.preventDefault();
+          var imgSet = $j('.anno_img');
+          var allAnnotated = true;
+          imgSet.each(function (i, el) {
+            var imgAnno = anno.getAnnotations(el.src);
+            if (imgAnno.length === 0) allAnnotated = false;
+          });
+          if (allAnnotated) {
+            imgToDisplayLead += imgPerGrid;
+            if (imgToDisplayLead > imgTotal) imgToDisplayLead = 0;
+            drawImgGrid();
+          } else {
+            alert('Please annotate each image in the set.');
+          }
+        });
+
+      drawImgGrid();
+
+      // create image grid
+      function drawImgGrid () {
+        $j(media_area).children().remove();
+        var imgGrid = document.createElement('div');
+        imgGrid.id = 'img_grid';
+
+        for (var i = 0; i < 2; i++) {
+          anno.reset(); // necessary for addAnnotation functionality below
+          var imgRow = document.createElement('div');
+          imgRow.className = 'img_row';
+
+          var j, limit;
+          if (i === 0) {
+            j = imgToDisplayLead;
+            limit = j + imgPerGrid / 2;
+          } else {
+            j = imgToDisplayLead + imgPerGrid / 2;
+            limit = j + imgPerGrid / 2;
+          }
+
+          // console.log('j, limit', j, limit);
+          for (j; j < limit; j++) {
+            var imgNum = String(j);
+            if (imgNum.length < 2) imgNum = '0' + imgNum;
+            // console.log('imgNum', imgNum);
+            var newImg = document.createElement('img');
+            newImg.id = 'img' + imgNum;
+            newImg.className = 'anno_img';
+            newImg.src = 'assets/img/01-' + imgNum + '.jpeg';
+            imgRow.appendChild(newImg);
+            $j(newImg).load(function () { // on img load event so annotorious loads properly
+              anno.makeAnnotatable(this);
+              var imgNum = this.id.slice(3);
+              if (allAnnos[imgNum]) {
+                // console.log('allAnnos[imgNum]', allAnnos[imgNum]);
+                _.each(allAnnos[imgNum], function (tempAnno) {
+                  // delete tempAnno.context;
+                  // tempAnno.src = tempAnno.src.slice(tempAnno.src.indexOf('assets/'));
+                  // tempAnno.editable = false; // make annotation read-only
+                  anno.addAnnotation(tempAnno);
+                });
+              }
+            });
+          }
+
+          imgGrid.appendChild(imgRow);
         }
 
-        imgGrid.appendChild(imgRow);
-      }
-
-      media_area.appendChild(imgGrid);
+        media_area.appendChild(imgGrid);
+      };
     }
+
+    // annotorious event handlers
+    anno.addHandler('onAnnotationCreated', function (annotation) {
+      var imgNum = getImgNum(annotation);
+      // persist annotations to later remove and restore on Next/Prev
+      if (!allAnnos[imgNum]) allAnnos[imgNum] = [];
+      allAnnos[imgNum].push(annotation);
+    });
+
+    anno.addHandler('onAnnotationRemoved', function (annotation) {
+      var imgNum = getImgNum(annotation);
+
+      _.each(allAnnos[imgNum], function (tempAnno, i) {
+        if (_.deepEquals(annotation, tempAnno)) {
+          allAnnos[imgNum].splice(i, 1);
+        }
+      });
+
+      console.log('allAnnos', allAnnos);
+    });
+
+    anno.addHandler('onAnnotationUpdated', function (annotation) {
+      var imgNum = getImgNum(annotation);
+
+      _.each(allAnnos[imgNum], function (tempAnno, i) {
+        if (_.deepEquals(annotation, tempAnno)) {
+          allAnnos[imgNum][i] = annotation;
+        }
+      });
+    });
+
+    function getImgNum (annotation) {
+      return annotation.src.slice(annotation.src.indexOf('/img/') + 8, annotation.src.indexOf('.jp'));
+    };
   }
 
 
-  submit.addEventListener('click', function (event) {
+  submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
 
@@ -213,7 +307,7 @@ window.onload = function () {
       return alert('Please finish watching the video.');
     }
 
-    console.log('submit', annotations);
+    console.log('submit event', annotations);
 
     if (Object.keys(annotations).length > 0) {
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
