@@ -322,7 +322,8 @@ window.onload = function () {
 
       postRef.push(postData, function () {
         assetsCounts[assetId]++;
-        db.assets[todayDataDate][assetType].set(assetsCounts);
+        var assetsRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/assets/' + todayDataDate + '/' + assetType + '/');
+        assetsRef.set(assetsCounts);
         mturkSubmit();
         console.log('POST to Firebase:', postData);
       });
@@ -399,6 +400,7 @@ function drawImgGrid () {
     for (j; j < limit; j++) {
       var imgNum = String(j);
       if (imgNum.length < 2) imgNum = '0' + imgNum;
+      imgNum += '00'; // until non-integer frames added
       // console.log('imgNum', imgNum);
       var newImg = document.createElement('img');
       newImg.id = 'img' + imgNum;
