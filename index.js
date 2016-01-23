@@ -12,8 +12,8 @@ var vidEvents = {};
 var vidCompleted = false;
 var data;
 var assetsCounts;
-const todayDataDate = '20160114';
-const assetType = 'vid'; // alternately, 'vid'
+const todayDataDate = '20160123';
+const assetType = 'img'; // alternately, 'vid'
 var assetId;
 var firstImgToDisplay = 0;
 var imgTotal = 30
@@ -192,7 +192,7 @@ window.onload = function () {
     }
   // img+annotorious tasks
   } else {
-    if (assetType === 'vid') {
+    if (assetType === 'img') {
       instructions.innerHTML =  '<li>Draw a box around each concept you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
                                 '<li>Note: the same concept may appear across multiple images.</li>' +
