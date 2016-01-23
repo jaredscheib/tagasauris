@@ -1,58 +1,88 @@
 var $j = jQuery.noConflict();
 
+// wrap in IIFE to not expose global variables
 (function app () {
 
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
-var vidToDisplay;
 var annotations = {};
 var annotext;
 var vidEvents = {};
 var vidCompleted = false;
 var data;
 var assetsCounts;
-var imgToDisplayLead = 0;
+const todayDataDate = '20160114';
+const assetType = 'vid'; // alternately, 'vid'
+var assetId;
+var firstImgToDisplay = 0;
 var imgTotal = 30
 var imgPerGrid = 4;
-const todayDataDate = '20160122';
+
+// page elements
+var instructions;
+var prevBtns;
+var nextBtns;
+var media_area;
+var response_area;
+var enterKeyword;
+var submitBtn;
 
 // db.on('child_added', function (snapshot){
 //   var addedAnnotation = snapshot.val();
-//   console.log('Posted to Firebase:', addedAnnotation);
+//   console.log('Confirmed post to Firebase:', addedAnnotation);
 // });
 
-if (taskNum < 4) {
-  // load and set callback for YouTube API
+if (assetType === 'img') {
+  loadScript('http://annotorious.github.com/latest/annotorious.min.js');
+}
+
+db.once('value', function (snapshot) {
+  console.log('db.once event');
+  data = snapshot.val();
+  assetsCounts = data.assets[todayDataDate];
+  if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
+
+  if (todayDataDate === '20160114') {
+    assetId = getAssetId(assetsCounts, data.data[todayDataDate]);
+  } else if (todayDataDate === '20160123') {
+    assetId = getAssetId(assetsCounts[assetType], data.data[todayDataDate]);
+    // assetId = '01';
+
+    drawImgGrid();
+    setImgCounter();
+  }
+
+  if (assetType === 'vid') {
+    loadScript('https://www.youtube.com/iframe_api');
+  }
+});
+
+
+// load and set callback for YouTube API
+if (assetType === 'vid') {
   var player;
 
-  function onYouTubeIframeAPIReady() {
-    db.once('value', function (snapshot) {
-      data = snapshot.val();
-      assetsCounts = data.assets[todayDataDate];
+  // must be in global namespace to be triggered upon script load
+  window.onYouTubeIframeAPIReady = function () {
+    console.log('YT READY');
+    var sliceVid = assetId;
+    var startSeconds = 0;
+    var startSecondsIndex = assetId.indexOf('?t=');
+    if (startSecondsIndex !== -1) {
+      startSeconds = Number(assetId.slice(startSecondsIndex + 3));
+      sliceVid = assetId.slice(0, startSecondsIndex);
+    }
 
-      if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
-
-      vidToDisplay = getVideoId(assetsCounts, data.data[todayDataDate]);
-      console.log('vidToDisplay', vidToDisplay);
-      var sliceVid = vidToDisplay;
-      var startSeconds = 0;
-      var startSecondsIndex = vidToDisplay.indexOf('?t=');
-      if (startSecondsIndex !== -1) {
-        startSeconds = Number(vidToDisplay.slice(startSecondsIndex + 3));
-        sliceVid = vidToDisplay.slice(0, startSecondsIndex);
+    player = new YT.Player('player', {
+      height: '315',
+      width: '420',
+      videoId: sliceVid,
+      playerVars: {start: startSeconds},
+      events: {
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
       }
-
-      player = new YT.Player('player', {
-        height: '315',
-        width: '420',
-        videoId: sliceVid,
-        playerVars: {start: startSeconds},
-        events: {
-          'onReady': onPlayerReady,
-          'onStateChange': onPlayerStateChange
-        }
-      });
     });
   };
 
@@ -81,16 +111,16 @@ if (taskNum < 4) {
 
 // set HTML and create event listeners on window load
 window.onload = function () {
-  var instructions = document.getElementById('instructions');
-  var prevBtns = document.getElementsByClassName('prevBtn');
-  var nextBtns = document.getElementsByClassName('nextBtn');
-  var media_area = document.getElementById('media_area');
-  var response_area = document.getElementById('response_area');
-  var enterKeyword;
-  var submitBtn = document.getElementById('submitBtn');
+  instructions = document.getElementById('instructions');
+  prevBtns = document.getElementsByClassName('prevBtn');
+  nextBtns = document.getElementsByClassName('nextBtn');
+  media_area = document.getElementById('media_area');
+  response_area = document.getElementById('response_area');
+  enterKeyword;
+  submitBtn = document.getElementById('submitBtn');
 
   // non img+annotorious tasks
-  if (taskNum < 4) {
+  if (taskNum <= 3) {
     $j('.prevBtn').each(function (i, el) { $j(el).hide(); });
     $j('.nextBtn').each(function (i, el) { $j(el).hide(); });
     var playerDiv = document.createElement('div');
@@ -162,7 +192,7 @@ window.onload = function () {
     }
   // img+annotorious tasks
   } else {
-    if (taskNum === 5) {
+    if (assetType === 'vid') {
       instructions.innerHTML =  '<li>Draw a box around each concept you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
                                 '<li>Note: the same concept may appear across multiple images.</li>' +
@@ -171,101 +201,44 @@ window.onload = function () {
       response_area.remove()
       // set up prev and next buttons for carousel
       $j('.prevBtn')
-        .prop('disabled', false)
-        .on('click', function (e) {
-          e.preventDefault();
-          var imgSet = $j('.anno_img');
-          var allAnnotated = true;
-          imgSet.each(function (i, el) {
-            var imgAnno = anno.getAnnotations(el.src);
-            if (imgAnno.length === 0) allAnnotated = false;
-          });
-          if (allAnnotated) {
-            imgToDisplayLead -= imgPerGrid;
-
-            // prevent error on missing expected tail images
-            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - (imgTotal % imgPerGrid);
-            drawImgGrid();
-          } else {
-            alert('Please annotate each image in the set.');
-          }
+      .prop('disabled', false)
+      .on('click', function (e) {
+        e.preventDefault();
+        var imgSet = $j('.anno_img');
+        var allAnnotated = true;
+        imgSet.each(function (i, el) {
+          var imgAnno = anno.getAnnotations(el.src);
+          if (imgAnno.length === 0) allAnnotated = false;
         });
+        if (allAnnotated) {
+          firstImgToDisplay -= imgPerGrid;
+
+          // prevent error on missing expected tail images
+          if (firstImgToDisplay < 0) firstImgToDisplay = imgTotal - (imgTotal % imgPerGrid);
+          drawImgGrid();
+        } else {
+          alert('Please annotate each image in the set.');
+        }
+      });
 
       $j('.nextBtn')
-        .prop('disabled', false)
-        .on('click', function (e) {
-          e.preventDefault();
-          var imgSet = $j('.anno_img');
-          var allAnnotated = true;
-          imgSet.each(function (i, el) {
-            var imgAnno = anno.getAnnotations(el.src);
-            if (imgAnno.length === 0) allAnnotated = false;
-          });
-          if (allAnnotated) {
-            imgToDisplayLead += imgPerGrid;
-            if (imgToDisplayLead > imgTotal) imgToDisplayLead = 0;
-            drawImgGrid();
-          } else {
-            alert('Please annotate each image in the set.');
-          }
+      .prop('disabled', false)
+      .on('click', function (e) {
+        e.preventDefault();
+        var imgSet = $j('.anno_img');
+        var allAnnotated = true;
+        imgSet.each(function (i, el) {
+          var imgAnno = anno.getAnnotations(el.src);
+          if (imgAnno.length === 0) allAnnotated = false;
         });
-
-      drawImgGrid();
-      setImgCounter();
-
-      // create image grid
-      function drawImgGrid () {
-        // console.log(imgToDisplayLead);
-        $j(media_area).children().remove();
-        var imgGrid = document.createElement('div');
-        imgGrid.id = 'img_grid';
-
-        for (var i = 0; i < 2; i++) {
-          anno.reset(); // necessary for addAnnotation functionality below
-          var imgRow = document.createElement('div');
-          imgRow.className = 'img_row';
-
-          var j, limit;
-          if (i === 0) {
-            j = imgToDisplayLead;
-            limit = j + imgPerGrid / 2;
-          } else {
-            j = imgToDisplayLead + imgPerGrid / 2;
-            limit = j + imgPerGrid / 2;
-          }
-
-          // console.log('j, limit', j, limit);
-          for (j; j < limit; j++) {
-            var imgNum = String(j);
-            if (imgNum.length < 2) imgNum = '0' + imgNum;
-            // console.log('imgNum', imgNum);
-            var newImg = document.createElement('img');
-            newImg.id = 'img' + imgNum;
-            newImg.className = 'anno_img';
-            newImg.src = 'assets/img/01-' + imgNum + '.jpeg';
-            imgRow.appendChild(newImg);
-            $j(newImg).load(function () { // on img load event so annotorious loads properly
-              anno.makeAnnotatable(this);
-              var imgNum = this.id.slice(3);
-              if (annotations[imgNum]) {
-                // console.log('annotations[imgNum]', annotations[imgNum]);
-                _.each(annotations[imgNum], function (tempAnno) {
-                  // delete tempAnno.context;
-                  // tempAnno.src = tempAnno.src.slice(tempAnno.src.indexOf('assets/'));
-                  // tempAnno.editable = false; // make annotation read-only
-                  anno.addAnnotation(tempAnno);
-                });
-              }
-            }).error(function (err) {
-              $j(this).parent().remove();
-            }).bind(newImg);
-          }
-
-          imgGrid.appendChild(imgRow);
+        if (allAnnotated) {
+          firstImgToDisplay += imgPerGrid;
+          if (firstImgToDisplay > imgTotal) firstImgToDisplay = 0;
+          drawImgGrid();
+        } else {
+          alert('Please annotate each image in the set.');
         }
-
-        media_area.appendChild(imgGrid);
-      };
+      });
     }
 
 
@@ -324,35 +297,6 @@ window.onload = function () {
       });
     });
 
-    function getImgNum (annotation) {
-      return annotation.src.slice(annotation.src.indexOf('/img/') + 8, annotation.src.indexOf('.jp'));
-    };
-
-    function imgRemaining () {
-      var remaining = imgTotal;
-
-      _.each(annotations, function (tempAnno) {
-        if (tempAnno.length > 0) {
-          remaining--;
-        }
-      });
-
-      if (submitBtn.disabled === true) {
-        if (remaining === 0) {
-          submitBtn.disabled = false;
-        }
-      } else {
-        if (remaining > 0) {
-          submitBtn.disabled = true;
-        }
-      }
-
-      return remaining;
-    };
-
-    function setImgCounter (remaining) {
-      document.getElementById('imgRemaining').innerHTML = imgRemaining();
-    };
   }
 
 
@@ -366,17 +310,19 @@ window.onload = function () {
     console.log('submit event', annotations);
 
     if (Object.keys(annotations).length > 0) {
+      params.workerId = params.workerId || 'test';
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
-      var postData = {
-        videoId: vidToDisplay,
-        workerId: params.workerId,
-        task: taskNum,
-        annotations: annotations,
-        time_submitted: getNow(),
-        video_events: vidEvents
-      };
+        var postData = {
+          assetId: assetId,
+          workerId: params.workerId,
+          task: taskNum,
+          annotations: annotations,
+          time_submitted: getNow()
+        };
+      if (taskNum <= 3) postData.video_events = vidEvents
+
       postRef.push(postData, function () {
-        assetsCounts[vidToDisplay]++;
+        assetsCounts[assetId]++;
         db.assets[todayDataDate].set(assetsCounts);
         mturkSubmit();
         console.log('POST to Firebase:', postData);
@@ -389,17 +335,17 @@ window.onload = function () {
   mturkCheckPreview();
 };
 
-function getVideoId (assetsCounts, data) {
+function getAssetId (assetsCounts, data) {
   if (Object.keys(data).length === 0) {
     return Object.keys(assetsCounts)[0];
-    // return setVidHTML(vidToDisplay);
+    // return setVidHTML(assetId);
   } else {
     var assetsCountsClone = _.deepClone(assetsCounts);
     var assetsCountsRemaining = [];
 
     _.each(data[params.workerId], function (entry) {
       if (taskNum === entry.task) {
-        assetsCountsClone[entry.videoId] = false;
+        assetsCountsClone[entry.assetId] = false;
       }
     });
 
@@ -415,7 +361,7 @@ function getVideoId (assetsCounts, data) {
       // return vid with least views
       assetsCountsRemaining.sort(function (a, b) { return a[1] < b[1]; });
       return assetsCountsRemaining.pop()[0];
-      // return setVidHTML(vidToDisplay);
+      // return setVidHTML(assetId);
     } else {
       _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false)
       $j('body').click(function () {
@@ -424,6 +370,90 @@ function getVideoId (assetsCounts, data) {
       return true;
     }
   }
+};
+
+// create image grid
+function drawImgGrid () {
+  // console.log(firstImgToDisplay);
+  $j(media_area).children().remove();
+  var imgGrid = document.createElement('div');
+  imgGrid.id = 'img_grid';
+
+  for (var i = 0; i < 2; i++) {
+    anno.reset(); // necessary for addAnnotation functionality below
+    var imgRow = document.createElement('div');
+    imgRow.className = 'img_row';
+
+    var j, limit;
+    if (i === 0) {
+      j = firstImgToDisplay;
+      limit = j + imgPerGrid / 2;
+    } else {
+      j = firstImgToDisplay + imgPerGrid / 2;
+      limit = j + imgPerGrid / 2;
+    }
+
+    // console.log('j, limit', j, limit);
+    for (j; j < limit; j++) {
+      var imgNum = String(j);
+      if (imgNum.length < 2) imgNum = '0' + imgNum;
+      // console.log('imgNum', imgNum);
+      var newImg = document.createElement('img');
+      newImg.id = 'img' + imgNum;
+      newImg.className = 'anno_img';
+      newImg.src = 'assets/img/' + assetId + '-' + imgNum + '.jpeg';
+      imgRow.appendChild(newImg);
+      $j(newImg).load(function () { // on img load event so annotorious loads properly
+        anno.makeAnnotatable(this);
+        var imgNum = this.id.slice(3);
+        if (annotations[imgNum]) {
+          // console.log('annotations[imgNum]', annotations[imgNum]);
+          _.each(annotations[imgNum], function (tempAnno) {
+            // delete tempAnno.context;
+            // tempAnno.src = tempAnno.src.slice(tempAnno.src.indexOf('assets/'));
+            // tempAnno.editable = false; // make annotation read-only
+            anno.addAnnotation(tempAnno);
+          });
+        }
+      }).error(function (err) {
+        $j(this).parent().remove();
+      }).bind(newImg);
+    }
+
+    imgGrid.appendChild(imgRow);
+  }
+
+  media_area.appendChild(imgGrid);
+};
+
+function getImgNum (annotation) {
+  return annotation.src.slice(annotation.src.indexOf('/img/') + 8, annotation.src.indexOf('.jp'));
+};
+
+function imgRemaining () {
+  var remaining = imgTotal;
+
+  _.each(annotations, function (tempAnno) {
+    if (tempAnno.length > 0) {
+      remaining--;
+    }
+  });
+
+  if (submitBtn.disabled === true) {
+    if (remaining === 0) {
+      submitBtn.disabled = false;
+    }
+  } else {
+    if (remaining > 0) {
+      submitBtn.disabled = true;
+    }
+  }
+
+  return remaining;
+};
+
+function setImgCounter (remaining) {
+  document.getElementById('imgRemaining').innerHTML = imgRemaining();
 };
 
 function mturkSubmit() {
@@ -445,5 +475,11 @@ function mturkCheckPreview() {
 function getNow() {
   return new Date().getTime();
 };
+
+function loadScript (src) {
+  var script = document.createElement('script');
+  script.src = src;
+  $j('script').parent().append(script);
+}
 
 }());
