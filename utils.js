@@ -9,6 +9,8 @@
 // every
 // some
 
+var $j = jQuery.noConflict();
+
 if (typeof(module) == "undefined") var module = {}
 var gl519 = module.exports = (function () {
 var _ = {}
@@ -710,7 +712,7 @@ _.splitHorz = function (aSize, bSize, a, b, fill) {
     if (fill === undefined) fill = true
     aSize = splitSizeHelper('width', aSize)
     bSize = splitSizeHelper('width', bSize)
-    var t = $('<table ' + (fill ? 'style="width:100%;height:100%"' : '') + '><tr valign="top"><td class="a" ' + aSize + '></td><td class="b" ' + bSize + '></td></tr></table>')
+    var t = $j('<table ' + (fill ? 'style="width:100%;height:100%"' : '') + '><tr valign="top"><td class="a" ' + aSize + '></td><td class="b" ' + bSize + '></td></tr></table>')
     // don't do this:
     // t.find('.a').append(a)
     // t.find('.b').append(b)
@@ -725,7 +727,7 @@ _.splitVert = function (aSize, bSize, a, b, fill) {
     if (fill === undefined) fill = true
     aSize = splitSizeHelper('height', aSize)
     bSize = splitSizeHelper('height', bSize)
-    var t = $('<table ' + (fill ? 'style="width:100%;height:100%"' : '') + '><tr valign="top"><td class="a" ' + aSize + '></td></tr><tr valign="top"><td class="b" ' + bSize + '></td></tr></table>')
+    var t = $j('<table ' + (fill ? 'style="width:100%;height:100%"' : '') + '><tr valign="top"><td class="a" ' + aSize + '></td></tr><tr valign="top"><td class="b" ' + bSize + '></td></tr></table>')
     // don't do this:
     // t.find('.a').append(a)
     // t.find('.b').append(b)
@@ -737,15 +739,15 @@ _.splitVert = function (aSize, bSize, a, b, fill) {
 }
 
 _.dialog = function (content) {
-    var win = $(window)
+    var win = $j(window)
     var w = win.width()
     var h = win.height()
     
     var b
-    $('body').append(b = $('<div style="position:fixed;left:0px;top:0px; z-index:10000;background:black;opacity:0.5"/>').width(w).height(h))
+    $j('body').append(b = $j('<div style="position:fixed;left:0px;top:0px; z-index:10000;background:black;opacity:0.5"/>').width(w).height(h))
     
-    var d = $('<div style="position:fixed;z-index:20000;background:white"/>').append(content)
-    $('body').append(d)
+    var d = $j('<div style="position:fixed;z-index:20000;background:white"/>').append(content)
+    $j('body').append(d)
     setTimeout(function () {
         var w = window.innerWidth
         var h = window.innerHeight
