@@ -47,7 +47,6 @@ db.once('value', function (snapshot) {
     assetId = getAssetId(assetsCounts, data.data[todayDataDate]);
   } else if (todayDataDate === '20160123') {
     assetId = getAssetId(assetsCounts[assetType], data.data[todayDataDate]);
-    // assetId = '01';
 
     drawImgGrid();
     setImgCounter();
@@ -282,7 +281,7 @@ window.onload = function () {
     $j(media_area).on('focus', '.annotorious-editor-text', function (e) {
       $j(e.target).on('keyup', function (e) {
         // var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
-        console.log('keyup', e);
+        // console.log('keyup', e);
         if (e.keyCode === 13) {
           // val below is a hack rather than modifying annotorious source code via goog.events, which replaces the default 'click' event on the <a> of saveBtn
           var val = $j(e.target).val().split('\n').join('');
@@ -323,7 +322,7 @@ window.onload = function () {
 
       postRef.push(postData, function () {
         assetsCounts[assetId]++;
-        db.assets[todayDataDate].set(assetsCounts);
+        db.assets[todayDataDate][assetType].set(assetsCounts);
         mturkSubmit();
         console.log('POST to Firebase:', postData);
       });
@@ -336,6 +335,9 @@ window.onload = function () {
 };
 
 function getAssetId (assetsCounts, data) {
+  console.log(assetsCounts);
+  console.log(data);
+
   if (Object.keys(data).length === 0) {
     return Object.keys(assetsCounts)[0];
     // return setVidHTML(assetId);
