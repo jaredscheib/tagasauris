@@ -6,7 +6,6 @@ var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
 var taskNum = Number(params.task.slice(-1));
 var vidToDisplay;
-var allAnnos = {};
 var annotations = {};
 var annotext;
 var vidEvents = {};
@@ -169,7 +168,7 @@ window.onload = function () {
                                 '<li>Note: the same concept may appear across multiple images.</li>' +
                                 '<li>When you have annotated each image in a set, click Next Set to annotate remaining images.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT.</li>';
-    
+      response_area.remove()
       // set up prev and next buttons for carousel
       $j('.prevBtn')
         .prop('disabled', false)
@@ -216,7 +215,7 @@ window.onload = function () {
 
       // create image grid
       function drawImgGrid () {
-        console.log(imgToDisplayLead);
+        // console.log(imgToDisplayLead);
         $j(media_area).children().remove();
         var imgGrid = document.createElement('div');
         imgGrid.id = 'img_grid';
@@ -248,9 +247,9 @@ window.onload = function () {
             $j(newImg).load(function () { // on img load event so annotorious loads properly
               anno.makeAnnotatable(this);
               var imgNum = this.id.slice(3);
-              if (allAnnos[imgNum]) {
-                // console.log('allAnnos[imgNum]', allAnnos[imgNum]);
-                _.each(allAnnos[imgNum], function (tempAnno) {
+              if (annotations[imgNum]) {
+                // console.log('annotations[imgNum]', annotations[imgNum]);
+                _.each(annotations[imgNum], function (tempAnno) {
                   // delete tempAnno.context;
                   // tempAnno.src = tempAnno.src.slice(tempAnno.src.indexOf('assets/'));
                   // tempAnno.editable = false; // make annotation read-only
@@ -269,6 +268,7 @@ window.onload = function () {
       };
     }
 
+
     // annotorious event handlers
     anno.addHandler('onAnnotationCreated', function (annotation) {
       var imgNum = getImgNum(annotation);
@@ -278,17 +278,17 @@ window.onload = function () {
         return alert('Text must be a valid keyword.')
       }
       // persist annotations to later remove and restore on Next/Prev
-      if (!allAnnos[imgNum]) allAnnos[imgNum] = [];
-      allAnnos[imgNum].push(annotation);
+      if (!annotations[imgNum]) annotations[imgNum] = [];
+      annotations[imgNum].push(annotation);
       setImgCounter();
     });
 
     anno.addHandler('onAnnotationRemoved', function (annotation) {
       var imgNum = getImgNum(annotation);
 
-      _.each(allAnnos[imgNum], function (tempAnno, i) {
+      _.each(annotations[imgNum], function (tempAnno, i) {
         if (_.deepEquals(annotation, tempAnno)) {
-          allAnnos[imgNum].splice(i, 1);
+          annotations[imgNum].splice(i, 1);
         }
       });
       setImgCounter();
@@ -297,12 +297,31 @@ window.onload = function () {
     anno.addHandler('onAnnotationUpdated', function (annotation) {
       var imgNum = getImgNum(annotation);
 
-      _.each(allAnnos[imgNum], function (tempAnno, i) {
+      _.each(annotations[imgNum], function (tempAnno, i) {
         if (_.deepEquals(annotation, tempAnno)) {
-          allAnnos[imgNum][i] = annotation;
+          annotations[imgNum][i] = annotation;
         }
       });
       setImgCounter();
+    });
+
+    // make 'Enter' trigger Save button to prevent multi-line annotations
+    $j(media_area).on('focus', '.annotorious-editor-text', function (e) {
+      $j(e.target).on('keyup', function (e) {
+        // var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
+        console.log('keyup', e);
+        if (e.keyCode === 13) {
+          // val below is a hack rather than modifying annotorious source code via goog.events, which replaces the default 'click' event on the <a> of saveBtn
+          var val = $j(e.target).val().split('\n').join('');
+          $j(e.target).val(val);
+          // console.log('hit enter in box; saveBtn:', saveBtn);
+          // debugger;
+          // console.log(goog);
+          // to implement 'Enter' triggering Save, would need to modify annotorious.js, a la https://groups.google.com/forum/#!topic/annotorious/dq1-Qtif3b4
+          // goog.events.dispatchEvent(saveBtn, goog.events.EventType.CLICK);
+          // $j(saveBtn).simulate('click');
+        }
+      });
     });
 
     function getImgNum (annotation) {
@@ -312,11 +331,21 @@ window.onload = function () {
     function imgRemaining () {
       var remaining = imgTotal;
 
-      _.each(allAnnos, function (tempAnno) {
+      _.each(annotations, function (tempAnno) {
         if (tempAnno.length > 0) {
           remaining--;
         }
       });
+
+      if (submitBtn.disabled === true) {
+        if (remaining === 0) {
+          submitBtn.disabled = false;
+        }
+      } else {
+        if (remaining > 0) {
+          submitBtn.disabled = true;
+        }
+      }
 
       return remaining;
     };
