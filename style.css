@@ -68,7 +68,7 @@ div {
 .anno_img {
 	margin: 5px;
 	/*float: left;*/
-	/*width: 50%;  make variable for dynamic grid sizes; 50% for 4 for now */
+	width: 320px;  make variable for dynamic grid sizes; 50% for 4 for now 
 }
 
 #response_area {
