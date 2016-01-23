@@ -444,7 +444,7 @@ function drawImgGrid () {
           });
         }
       }).error(function (err) {
-        $j(this).parent().remove();
+        $j(this).remove();
       }).bind(newImg);
     }
 
