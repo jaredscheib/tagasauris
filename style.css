@@ -72,7 +72,7 @@ div {
 }
 
 #response_area {
-	margin: 15px
+	margin: 15px 15px 0px 15px;
 }
 
 #annotext {
@@ -94,8 +94,13 @@ div {
 #annochecks {
 }
 
-#submit {
+#img_count {
+	margin: -20px;
+}
+
+#submitBtn {
 	width:100px;
 	height: 30px;
 	font-size: 16px;
+	margin: 10px;
 }
