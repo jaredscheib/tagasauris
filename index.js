@@ -33,10 +33,10 @@ var submitBtn;
 //   console.log('Confirmed post to Firebase:', addedAnnotation);
 // });
 
-if (assetType === 'img') {
-  loadScript('https://annotorious.github.com/latest/annotorious.css');
-  loadScript('https://annotorious.github.com/latest/annotorious.min.js');
-}
+// if (assetType === 'img') {
+//   loadScript('https://annotorious.github.com/latest/annotorious.css');
+//   loadScript('https://annotorious.github.com/latest/annotorious.min.js');
+// }
 
 db.once('value', function (snapshot) {
   console.log('db.once event');
