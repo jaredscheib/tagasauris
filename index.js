@@ -33,13 +33,15 @@ var submitBtn;
 //   console.log('Confirmed post to Firebase:', addedAnnotation);
 // });
 
-// if (assetType === 'img') {
-//   loadScript('https://annotorious.github.com/latest/annotorious.css');
-//   loadScript('https://annotorious.github.com/latest/annotorious.min.js');
-// }
+if (assetType === 'img') {
+  // loadScript('https://annotorious.github.com/latest/annotorious.css'); // GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
+  // loadScript('https://annotorious.github.com/latest/annotorious.min.js');
+  loadScript('lib/annotorious.css');
+  loadScript('lib/annotorious.min.js');
+}
 
 db.once('value', function (snapshot) {
-  console.log('db.once event');
+  // console.log('db.once event');
   data = snapshot.val();
   assetsCounts = data.assets[todayDataDate];
   if (data.data[todayDataDate] === undefined) data.data[todayDataDate] = {};
@@ -48,7 +50,7 @@ db.once('value', function (snapshot) {
     assetId = getAssetId(assetsCounts, data.data[todayDataDate]);
   } else if (todayDataDate === '20160123') {
     assetId = getAssetId(assetsCounts[assetType], data.data[todayDataDate]);
-    console.log('assetId', assetId);
+    // console.log('assetId', assetId);
 
     // hard code imgTotal for now
     if (assetId === '01') {
@@ -79,7 +81,7 @@ if (assetType === 'vid') {
 
   // must be in global namespace to be triggered upon script load
   window.onYouTubeIframeAPIReady = function () {
-    console.log('YT READY');
+    // console.log('YT READY');
     var sliceVid = assetId;
     var startSeconds = 0;
     var startSecondsIndex = assetId.indexOf('?t=');
@@ -321,7 +323,7 @@ window.onload = function () {
       return alert('Please finish watching the video.');
     }
 
-    console.log('submit event', annotations);
+    // console.log('submit event', annotations);
 
     if (Object.keys(annotations).length > 0) {
       params.workerId = params.workerId || 'test';
@@ -360,8 +362,8 @@ window.onload = function () {
 };
 
 function getAssetId (assetsCounts, data) {
-  console.log('assetsCounts', assetsCounts);
-  console.log('data', data);
+  // console.log('assetsCounts', assetsCounts);
+  // console.log('data', data);
 
   if (Object.keys(data).length === 0) {
     return Object.keys(assetsCounts)[0];
@@ -380,9 +382,9 @@ function getAssetId (assetsCounts, data) {
       if (val !== false) assetsCountsRemaining.push([key, val]);
     });
 
-    console.log('assetsCounts', assetsCounts);
-    console.log('assetsCountsClone', assetsCountsClone);
-    console.log('assetsCountsRemaining', assetsCountsRemaining);
+    // console.log('assetsCounts', assetsCounts);
+    // console.log('assetsCountsClone', assetsCountsClone);
+    // console.log('assetsCountsRemaining', assetsCountsRemaining);
 
     if (assetsCountsRemaining.length > 0) {
       // return vid with least views
@@ -517,7 +519,7 @@ function loadScript (url) {
     script.setAttribute('type', 'text/css');
     script.setAttribute('href', url);
   }
-  console.log('script dynamically added', script);
+  // console.log('script dynamically added', script);
   $j('script').parent().append(script);
 }
 
