@@ -29,6 +29,11 @@ div {
 }
 
 #instructions_area {
+	/*border: 1px solid black;*/
+	padding: 0px;
+	margin: 10px auto;
+	width: 55%;
+	display: block;
 }
 
 #instructions {
@@ -37,13 +42,17 @@ div {
 	display: inline-block;
 }
 
+#task_area {
+	width: 100%;
+}
+
 .prevBtn, .nextBtn {
 	font-size: 14px;
 }
 
 #img_grid {
 	display: inline-block;
-	width: 60%;
+	width: 80%;
 	zoom: 1;
 	display*: inline;
 }

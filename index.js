@@ -16,7 +16,7 @@ var assetsCounts;
 var imgToDisplayLead = 0;
 var imgTotal = 30
 var imgPerGrid = 4;
-const todayDataDate = '20160114';
+const todayDataDate = '20160122';
 
 // db.on('child_added', function (snapshot){
 //   var addedAnnotation = snapshot.val();
@@ -183,7 +183,10 @@ window.onload = function () {
           });
           if (allAnnotated) {
             imgToDisplayLead -= imgPerGrid;
-            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - imgPerGrid;
+
+            // fix wraparound count & rows
+
+            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - imgPerGrid - imgToDisplayLead;
             drawImgGrid();
           } else {
             alert('Please annotate each image in the set.');
@@ -210,9 +213,11 @@ window.onload = function () {
         });
 
       drawImgGrid();
+      setImgCounter();
 
       // create image grid
       function drawImgGrid () {
+        console.log(imgToDisplayLead);
         $j(media_area).children().remove();
         var imgGrid = document.createElement('div');
         imgGrid.id = 'img_grid';
@@ -266,9 +271,15 @@ window.onload = function () {
     // annotorious event handlers
     anno.addHandler('onAnnotationCreated', function (annotation) {
       var imgNum = getImgNum(annotation);
+
+      if (annotation.text.length < 2) {
+        anno.removeAnnotation(annotation);
+        return alert('Text must be a valid keyword.')
+      }
       // persist annotations to later remove and restore on Next/Prev
       if (!allAnnos[imgNum]) allAnnos[imgNum] = [];
       allAnnos[imgNum].push(annotation);
+      setImgCounter();
     });
 
     anno.addHandler('onAnnotationRemoved', function (annotation) {
@@ -279,8 +290,7 @@ window.onload = function () {
           allAnnos[imgNum].splice(i, 1);
         }
       });
-
-      console.log('allAnnos', allAnnos);
+      setImgCounter();
     });
 
     anno.addHandler('onAnnotationUpdated', function (annotation) {
@@ -291,10 +301,27 @@ window.onload = function () {
           allAnnos[imgNum][i] = annotation;
         }
       });
+      setImgCounter();
     });
 
     function getImgNum (annotation) {
       return annotation.src.slice(annotation.src.indexOf('/img/') + 8, annotation.src.indexOf('.jp'));
+    };
+
+    function imgRemaining () {
+      var remaining = imgTotal;
+
+      _.each(allAnnos, function (tempAnno) {
+        if (tempAnno.length > 0) {
+          remaining--;
+        }
+      });
+
+      return remaining;
+    };
+
+    function setImgCounter (remaining) {
+      document.getElementById('imgRemaining').innerHTML = imgRemaining();
     };
   }
 
