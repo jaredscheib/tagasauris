@@ -127,6 +127,8 @@ if (assetType === 'vid') {
 
 // set HTML and create event listeners on window load
 window.onload = function () {
+  mturkCheckPreview();
+
   instructions = document.getElementById('instructions');
   prevBtns = document.getElementsByClassName('prevBtn');
   nextBtns = document.getElementsByClassName('nextBtn');
@@ -357,8 +359,6 @@ window.onload = function () {
       alert('Please annotate the media before submitting.');
     }
   });
-
-  mturkCheckPreview();
 };
 
 function getAssetId (assetsCounts, data) {
@@ -493,6 +493,7 @@ function mturkSubmit() {
 };
 
 function mturkCheckPreview() {
+  console.log('checkpreview');
   if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
     _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false);
     $j('body').click(function () {
