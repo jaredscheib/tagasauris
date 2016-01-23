@@ -37,6 +37,10 @@ div {
 	display: inline-block;
 }
 
+.prevBtn, .nextBtn {
+	font-size: 14px;
+}
+
 #img_grid {
 	display: inline-block;
 	width: 60%;
