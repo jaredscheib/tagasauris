@@ -42,7 +42,7 @@ _.run(function () {
               'Reward.1.Amount' : 0.10,
               'Reward.1.CurrencyCode' : 'USD',
               MaxAssignments : 5,
-              AssignmentDurationInSeconds : 10 * 60,
+              AssignmentDurationInSeconds : 15 * 60,
               LifetimeInSeconds : 60 * 60 * 24,
               AutoApprovalDelayInSeconds : 60 * 60,
               Question: arg.hit.question
