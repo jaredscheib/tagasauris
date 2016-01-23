@@ -9,8 +9,6 @@
 // every
 // some
 
-var $j = jQuery.noConflict();
-
 if (typeof(module) == "undefined") var module = {}
 var gl519 = module.exports = (function () {
 var _ = {}
