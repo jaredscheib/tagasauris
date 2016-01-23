@@ -184,9 +184,8 @@ window.onload = function () {
           if (allAnnotated) {
             imgToDisplayLead -= imgPerGrid;
 
-            // fix wraparound count & rows
-
-            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - imgPerGrid - imgToDisplayLead;
+            // prevent error on missing expected tail images
+            if (imgToDisplayLead < 0) imgToDisplayLead = imgTotal - (imgTotal % imgPerGrid);
             drawImgGrid();
           } else {
             alert('Please annotate each image in the set.');
@@ -258,7 +257,9 @@ window.onload = function () {
                   anno.addAnnotation(tempAnno);
                 });
               }
-            });
+            }).error(function (err) {
+              $j(this).parent().remove();
+            }).bind(newImg);
           }
 
           imgGrid.appendChild(imgRow);
@@ -328,7 +329,6 @@ window.onload = function () {
 
   submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
-
 
     if (taskNum < 4 && !vidCompleted) {
       return alert('Please finish watching the video.');
