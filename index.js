@@ -34,6 +34,7 @@ var submitBtn;
 // });
 
 if (assetType === 'img') {
+  loadScript('https://annotorious.github.com/latest/annotorious.css');
   loadScript('https://annotorious.github.com/latest/annotorious.min.js');
 }
 
@@ -480,9 +481,19 @@ function getNow() {
   return new Date().getTime();
 };
 
-function loadScript (src) {
-  var script = document.createElement('script');
-  script.src = src;
+function loadScript (url) {
+  var fileType = url.split('.').reverse()[0];
+  var script;
+  if (fileType === 'js') {
+    script = document.createElement('script');
+    script.setAttribute('src', url);
+    script.setAttribute('type', 'text/javascript');
+  } else if (fileType === 'css') {
+    script = document.createElement('link');
+    script.setAttribute('rel', 'stylesheet');
+    script.setAttribute('type', 'text/css');
+    script.setAttribute('href', url);
+  }
   $j('script').parent().append(script);
 }
 
