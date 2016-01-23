@@ -48,6 +48,7 @@ div {
 
 .prevBtn, .nextBtn {
 	font-size: 14px;
+	margin: 2px;
 }
 
 #img_grid {
@@ -95,7 +96,7 @@ div {
 }
 
 #img_count {
-	margin: -20px;
+	margin: 5px;
 }
 
 #submitBtn {
