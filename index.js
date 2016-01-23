@@ -16,7 +16,7 @@ const todayDataDate = '20160123';
 const assetType = 'img'; // alternately, 'vid'
 var assetId;
 var firstImgToDisplay = 0;
-var imgTotal = 30
+var imgTotal;
 var imgPerGrid = 4;
 
 // page elements
@@ -48,6 +48,20 @@ db.once('value', function (snapshot) {
     assetId = getAssetId(assetsCounts, data.data[todayDataDate]);
   } else if (todayDataDate === '20160123') {
     assetId = getAssetId(assetsCounts[assetType], data.data[todayDataDate]);
+    console.log('assetId', assetId);
+
+    // hard code imgTotal for now
+    if (assetId === '01') {
+      imgTotal = 30;
+    } else if (assetId === '02') {
+      imgTotal = 30;
+    } else if (assetId === '03') {
+      imgTotal = 37;
+    } else if (assetId === '04') {
+      imgTotal = 38;
+    } else if (assetId === '05') {
+      imgTotal = 33;
+    }
 
     drawImgGrid();
     setImgCounter();
@@ -322,11 +336,20 @@ window.onload = function () {
       if (taskNum <= 3) postData.video_events = vidEvents
 
       postRef.push(postData, function () {
-        assetsCounts[assetId]++;
+        // console.log('assetsCounts before [assetId]++', assetsCounts);
+        assetsCounts[assetType][assetId]++;
+        // console.log('assetsCounts after [assetId]++', assetsCounts);
         var assetsRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/assets/' + todayDataDate + '/' + assetType + '/');
-        assetsRef.set(assetsCounts);
-        mturkSubmit();
-        console.log('POST to Firebase:', postData);
+        // console.log('assetsRef', assetsRef);
+        assetsRef.child(assetId).set(assetsCounts[assetType][assetId], function (err) {
+          if (err) {
+            console.log('POST of', assetsCounts[assetType][assetId], 'to', assetsRef.child(assetId), 'failed');
+          } else { 
+            console.log('POST of', assetsCounts[assetType][assetId], 'to', assetsRef.child(assetId), 'succeeded');
+            mturkSubmit();
+          }
+        });
+        // console.log('POST to Firebase:', postData);
       });
     } else {
       alert('Please annotate the media before submitting.');
@@ -337,8 +360,8 @@ window.onload = function () {
 };
 
 function getAssetId (assetsCounts, data) {
-  console.log(assetsCounts);
-  console.log(data);
+  console.log('assetsCounts', assetsCounts);
+  console.log('data', data);
 
   if (Object.keys(data).length === 0) {
     return Object.keys(assetsCounts)[0];
@@ -406,7 +429,7 @@ function drawImgGrid () {
       var newImg = document.createElement('img');
       newImg.id = 'img' + imgNum;
       newImg.className = 'anno_img';
-      newImg.src = 'assets/img/' + assetId + '-' + imgNum + '.jpeg';
+      newImg.src = 'assets/img/' + assetId + '-' + imgNum + '.jpg';
       imgRow.appendChild(newImg);
       $j(newImg).load(function () { // on img load event so annotorious loads properly
         anno.makeAnnotatable(this);
