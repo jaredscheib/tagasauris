@@ -270,22 +270,22 @@ window.onload = function () {
         return invalidateAnnotation(createdAnno);
       }
       // persist annotations to later remove and restore on Next/Prev
-      updatedPersistedAnnotations(createdAnno);
-      console.log('create annotation event');
+      updatePersistedAnnotations(createdAnno);
+      // console.log('create annotation event');
     });
 
     anno.addHandler('onAnnotationRemoved', function (removedAnno) {
-      updatedPersistedAnnotations(removedAnno);
-      console.log('remove annotation event');
+      updatePersistedAnnotations(removedAnno);
+      // console.log('remove annotation event');
     });
 
     anno.addHandler('onAnnotationUpdated', function (updatedAnno) {
       if (updatedAnno.text.length < 2) {
-        console.log('remove blank/invalid anno from update');
+        // console.log('remove blank/invalid anno from update');
         invalidateAnnotation(updatedAnno);
       }
-      updatedPersistedAnnotations(updatedAnno);
-      console.log('update annotation event');
+      updatePersistedAnnotations(updatedAnno);
+      // console.log('update annotation event');
     });
 
     function invalidateAnnotation (invalidAnno) {
@@ -293,11 +293,11 @@ window.onload = function () {
       alert('Text must be a valid keyword. Deleting annotation...')
     };
 
-    function updatedPersistedAnnotations (annoToUpdate) {
+    function updatePersistedAnnotations (annoToUpdate) {
       var imgNum = getImgNum(annoToUpdate);
       annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
       setImgCounter();
-      console.log('annotations after update persisted', annotations);
+      // console.log('annotations after update persisted', annotations);
     };
 
     // make 'Enter' trigger Save button to prevent multi-line annotations
@@ -307,33 +307,22 @@ window.onload = function () {
 
       $j(e.target).on('keypress', function (e) {
         if (e.which === 13) {
-          // debugger;
+          e.stopImmediatePropagation(); // prevents jQuery from repeating click event, which produces error because can't find button anymore and messes up annotorious
           e.preventDefault();
 
-          saveBtn.focus(); // for unknown reason, .click() causes error and makes annotation = ''
+          $j(saveBtn).off();
 
-          // $j(saveBtn).off();
-
-          // if (saveBtn[0].click) {
-          //   saveBtn[0].click(); // annotorious.js uses goog.Events (from Google Closure library), rather than actual 'click' event, FYI, ex. goog.events.dispatchEvent(saveBtn, goog.events.EventType.CLICK);
-          // // for non-Chrome or Safari
-          // } else if (document.createEvent) {
-          //   var newEvent = document.createEvent('MouseEvents');
-          //   newEvent.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-          //   saveBtn[0].dispatchEvent(newEvent);
-          // }
+          if (saveBtn[0].click) {
+            saveBtn[0].click(); // annotorious.js uses goog.Events (from Google Closure library), rather than actual 'click' event, FYI, ex. goog.events.dispatchEvent(saveBtn, goog.events.EventType.CLICK);
+          // for non-Chrome or Safari
+          } else if (document.createEvent) {
+            var newEvent = document.createEvent('MouseEvents');
+            newEvent.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+            saveBtn[0].dispatchEvent(newEvent);
+          }
         }
       });
-
-      // saveBtn.click(function (e) {
-      //   console.log('saveBtn click event', e);
-      //   console.log('e.target', e.target);
-      //   e.preventDefault();
-      //   e.stopPropagation();
-      //   saveBtn.off('click');
-      // });
     });
-
   }
 
 
