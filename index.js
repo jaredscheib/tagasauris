@@ -5,6 +5,10 @@ var $j = jQuery.noConflict();
 
 var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 var params = _.getUrlParams();
+if (!params.length) {
+  params.workerId = 'test',
+  params.task = 'annotations_task5'
+}
 var taskNum = Number(params.task.slice(-1));
 var annotations = {};
 var annotext;
@@ -117,7 +121,7 @@ if (assetType === 'vid') {
     };
     vidEvents[getNow()] = eventNames[String(event.data)];
     if (event.data === 0) {
-      document.getElementById('submitBtn').disabled = false;
+      document.getElementById('submit_btn').disabled = false;
       vidCompleted = true;
     }
     annotext.focus();
@@ -128,17 +132,17 @@ if (assetType === 'vid') {
 // set HTML and create event listeners on window load
 window.onload = function () {
   instructions = document.getElementById('instructions');
-  prevBtns = document.getElementsByClassName('prevBtn');
-  nextBtns = document.getElementsByClassName('nextBtn');
+  prevBtns = document.getElementsByClassName('prev_btn');
+  nextBtns = document.getElementsByClassName('next_btn');
   media_area = document.getElementById('media_area');
   response_area = document.getElementById('response_area');
   enterKeyword;
-  submitBtn = document.getElementById('submitBtn');
+  submitBtn = document.getElementById('submit_btn');
 
   // non img+annotorious tasks
   if (taskNum <= 3) {
-    $j('.prevBtn').each(function (i, el) { $j(el).hide(); });
-    $j('.nextBtn').each(function (i, el) { $j(el).hide(); });
+    $j(prevBtns).each(function (i, el) { $j(el).hide(); });
+    $j(nextBtns).each(function (i, el) { $j(el).hide(); });
     var playerDiv = document.createElement('div');
     playerDiv.id = 'player';
     media_area.appendChild(playerDiv);
@@ -176,18 +180,18 @@ window.onload = function () {
         instructions.innerHTML =  '<li>Press play to watch the video.</li>' +
                                   '<li>Enter one keyword or phrase at a time to describe what you see in the video.</li>' +
                                   '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
-                                  '<li>When you have entered keywords for the entire video, click Submit HIT.</li>';
+                                  '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
       } else if (taskNum === 2) {
         instructions.innerHTML =  '<li>Press play to watch the video related to <b>cars</b>.</li>' +
                                   '<li>Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.</li>' +
                                   '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
-                                  '<li>When you have entered keywords for the entire video, click Submit HIT.</li>';
+                                  '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
       }
 
-      response_area.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enterKeyword" disabled>Enter</button>';
+      response_area.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword" disabled>Enter</button>';
       annotext = document.getElementById('annotext');
       annotext.focus();
-      enterKeyword = document.getElementById('enterKeyword');
+      enterKeyword = document.getElementById('enter_keyword');
 
       annotext.addEventListener('keydown', function (event) {
         if (event.keyCode === 13) {
@@ -213,10 +217,10 @@ window.onload = function () {
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
                                 '<li>Note: the same concept may appear across multiple images.</li>' +
                                 '<li>When you have annotated each image in a set, click Next Set to annotate remaining images.</li>' +
-                                '<li>When you have annotated every image, click Submit HIT.</li>';
+                                '<li>When you have annotated every image, click Submit HIT below.</li>';
       response_area.remove()
       // set up prev and next buttons for carousel
-      $j('.prevBtn')
+      $j(prevBtns)
       .prop('disabled', false)
       .on('click', function (e) {
         e.preventDefault();
@@ -237,7 +241,7 @@ window.onload = function () {
         }
       });
 
-      $j('.nextBtn')
+      $j(nextBtns)
       .prop('disabled', false)
       .on('click', function (e) {
         e.preventDefault();
@@ -326,7 +330,6 @@ window.onload = function () {
     // console.log('submit event', annotations);
 
     if (Object.keys(annotations).length > 0) {
-      params.workerId = params.workerId || 'test';
       var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + todayDataDate + '/' + params.workerId + '/');
         var postData = {
           assetId: assetId,
@@ -483,7 +486,10 @@ function imgRemaining () {
 };
 
 function setImgCounter (remaining) {
-  document.getElementById('imgRemaining').innerHTML = imgRemaining();
+  var imgCounters = document.getElementsByClassName('img_counter');
+  _.each(imgCounters, function (counter) {
+    counter.innerHTML = imgRemaining();
+  });
 };
 
 function mturkSubmit() {
