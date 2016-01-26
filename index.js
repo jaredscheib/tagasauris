@@ -11,6 +11,7 @@ if (!params.length) {
 }
 var taskNum = Number(params.task.slice(-1));
 var annotations = {};
+window.annotations = annotations;
 var annotext;
 var vidEvents = {};
 var vidCompleted = false;
@@ -264,58 +265,73 @@ window.onload = function () {
 
 
     // annotorious event handlers
-    anno.addHandler('onAnnotationCreated', function (annotation) {
-      var imgNum = getImgNum(annotation);
-
-      if (annotation.text.length < 2) {
-        anno.removeAnnotation(annotation);
-        return alert('Text must be a valid keyword.')
+    anno.addHandler('onAnnotationCreated', function (createdAnno) {
+      if (createdAnno.text.length < 2) {
+        return invalidateAnnotation(createdAnno);
       }
       // persist annotations to later remove and restore on Next/Prev
-      if (!annotations[imgNum]) annotations[imgNum] = [];
-      annotations[imgNum].push(annotation);
-      setImgCounter();
+      updatedPersistedAnnotations(createdAnno);
+      console.log('create annotation event');
     });
 
-    anno.addHandler('onAnnotationRemoved', function (annotation) {
-      var imgNum = getImgNum(annotation);
-
-      _.each(annotations[imgNum], function (tempAnno, i) {
-        if (_.deepEquals(annotation, tempAnno)) {
-          annotations[imgNum].splice(i, 1);
-        }
-      });
-      setImgCounter();
+    anno.addHandler('onAnnotationRemoved', function (removedAnno) {
+      updatedPersistedAnnotations(removedAnno);
+      console.log('remove annotation event');
     });
 
-    anno.addHandler('onAnnotationUpdated', function (annotation) {
-      var imgNum = getImgNum(annotation);
-
-      _.each(annotations[imgNum], function (tempAnno, i) {
-        if (_.deepEquals(annotation, tempAnno)) {
-          annotations[imgNum][i] = annotation;
-        }
-      });
-      setImgCounter();
+    anno.addHandler('onAnnotationUpdated', function (updatedAnno) {
+      if (updatedAnno.text.length < 2) {
+        console.log('remove blank/invalid anno from update');
+        invalidateAnnotation(updatedAnno);
+      }
+      updatedPersistedAnnotations(updatedAnno);
+      console.log('update annotation event');
     });
+
+    function invalidateAnnotation (invalidAnno) {
+      anno.removeAnnotation(invalidAnno);
+      alert('Text must be a valid keyword. Deleting annotation...')
+    };
+
+    function updatedPersistedAnnotations (annoToUpdate) {
+      var imgNum = getImgNum(annoToUpdate);
+      annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
+      setImgCounter();
+      console.log('annotations after update persisted', annotations);
+    };
 
     // make 'Enter' trigger Save button to prevent multi-line annotations
     $j(media_area).on('focus', '.annotorious-editor-text', function (e) {
-      $j(e.target).on('keyup', function (e) {
-        // var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
-        // console.log('keyup', e);
-        if (e.keyCode === 13) {
-          // val below is a hack rather than modifying annotorious source code via goog.events, which replaces the default 'click' event on the <a> of saveBtn
-          var val = $j(e.target).val().split('\n').join('');
-          $j(e.target).val(val);
-          // console.log('hit enter in box; saveBtn:', saveBtn);
+
+      var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
+
+      $j(e.target).on('keypress', function (e) {
+        if (e.which === 13) {
           // debugger;
-          // console.log(goog);
-          // to implement 'Enter' triggering Save, would need to modify annotorious.js, a la https://groups.google.com/forum/#!topic/annotorious/dq1-Qtif3b4
-          // goog.events.dispatchEvent(saveBtn, goog.events.EventType.CLICK);
-          // $j(saveBtn).simulate('click');
+          e.preventDefault();
+
+          saveBtn.focus(); // for unknown reason, .click() causes error and makes annotation = ''
+
+          // $j(saveBtn).off();
+
+          // if (saveBtn[0].click) {
+          //   saveBtn[0].click(); // annotorious.js uses goog.Events (from Google Closure library), rather than actual 'click' event, FYI, ex. goog.events.dispatchEvent(saveBtn, goog.events.EventType.CLICK);
+          // // for non-Chrome or Safari
+          // } else if (document.createEvent) {
+          //   var newEvent = document.createEvent('MouseEvents');
+          //   newEvent.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+          //   saveBtn[0].dispatchEvent(newEvent);
+          // }
         }
       });
+
+      // saveBtn.click(function (e) {
+      //   console.log('saveBtn click event', e);
+      //   console.log('e.target', e.target);
+      //   e.preventDefault();
+      //   e.stopPropagation();
+      //   saveBtn.off('click');
+      // });
     });
 
   }
