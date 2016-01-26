@@ -213,11 +213,12 @@ window.onload = function () {
   // img+annotorious tasks
   } else {
     if (assetType === 'img') {
-      instructions.innerHTML =  '<li>Draw a box around each concept you see in each image.</li>' +
+      instructions.innerHTML =  '<li>Draw a box around each concept or object you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
-                                '<li>Note: the same concept may appear across multiple images.</li>' +
+                                '<li>Note 1: You may enter multiple concepts for the same box, separated by commas (",").</li>' +
+                                '<li>Note 2: You may enter the same concept for multiple images.</li>' +
                                 '<li>When you have annotated each image in a set, click Next Set to annotate remaining images.</li>' +
-                                '<li>When you have annotated every image, click Submit HIT below.</li>';
+                                '<li>When you have annotated every image, click Submit HIT at the bottom of the page.</li>';
       response_area.remove()
       // set up prev and next buttons for carousel
       $j(prevBtns)
