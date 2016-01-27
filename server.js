@@ -10,7 +10,7 @@ console.log(taskNum, sandbox, timesToRun);
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets['URL_task' + String(taskNum)],
+    ExternalURL: secrets['URL_TASK' + String(taskNum)] + '&=TODAY_DATA_DATE' + secrets['TODAY_DATA_DATE'],
     FrameHeight: '650'
   }
 };
@@ -41,7 +41,7 @@ _.run(function () {
               Description : 'Describe everything you see in the 30 second video',
               'Reward.1.Amount' : 0.10,
               'Reward.1.CurrencyCode' : 'USD',
-              MaxAssignments : 5,
+              MaxAssignments : 10,
               AssignmentDurationInSeconds : 15 * 60,
               LifetimeInSeconds : 60 * 60 * 24,
               AutoApprovalDelayInSeconds : 60 * 60,
