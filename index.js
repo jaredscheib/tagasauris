@@ -6,7 +6,6 @@ var $j = jQuery.noConflict();
 (function app() {
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
   var params = _.getUrlParams();
-  var taskNum;
   var annotations = {};
   var annotext;
   var player;
@@ -14,8 +13,6 @@ var $j = jQuery.noConflict();
   var vidCompleted = false;
   var data;
   var assetsCounts;
-  var TODAY_DATA_DATE = '20160123';
-  var ASSET_TYPE = 'img'; // alternately, 'vid'
   var assetId;
   var firstImgToDisplay = 0;
   var imgTotal;
@@ -37,14 +34,15 @@ var $j = jQuery.noConflict();
   var enterKeyword;
   var submitBtn;
 
-  if (!params.length) {
-    params.workerId = 'test';
-    params.task = 'annotations_task5';
-  }
+  console.log('params', params);
 
-  taskNum = Number(params.task.slice(-1));
+  // if (!params.length) params = {
+  //   workerId: 'test',
+  //   task: 'annotations_task5',
+  //   ASSET_TYPE: 'img' // alternately, 'vid'
+  // };
 
-  if (ASSET_TYPE === 'img') {
+  if (params.ASSET_TYPE === 'img') {
     // loadScript('https://annotorious.github.com/latest/annotorious.css'); // GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
     // loadScript('https://annotorious.github.com/latest/annotorious.min.js');
     loadScript('lib/annotorious.css');
@@ -54,13 +52,13 @@ var $j = jQuery.noConflict();
   db.once('value', function (snapshot) {
     // console.log('db.once event');
     data = snapshot.val();
-    assetsCounts = data.assets[TODAY_DATA_DATE];
-    if (data.data[TODAY_DATA_DATE] === undefined) data.data[TODAY_DATA_DATE] = {};
+    assetsCounts = data.assets[params.TODAY_DATA_DATE];
+    if (data.data[params.TODAY_DATA_DATE] === undefined) data.data[params.TODAY_DATA_DATE] = {};
 
-    if (TODAY_DATA_DATE === '20160114') {
-      assetId = getAssetId(assetsCounts, data.data[TODAY_DATA_DATE]);
-    } else if (TODAY_DATA_DATE === '20160123') {
-      assetId = getAssetId(assetsCounts[ASSET_TYPE], data.data[TODAY_DATA_DATE]);
+    if (params.TODAY_DATA_DATE === '20160114') {
+      assetId = getAssetId(assetsCounts, data.data[params.TODAY_DATA_DATE]);
+    } else if (params.TODAY_DATA_DATE === '20160123') {
+      assetId = getAssetId(assetsCounts[params.ASSET_TYPE], data.data[params.TODAY_DATA_DATE]);
       // console.log('assetId', assetId);
 
       imgTotal = assetToImgTotal[assetId];
@@ -69,14 +67,14 @@ var $j = jQuery.noConflict();
       setImgCounter();
     }
 
-    if (ASSET_TYPE === 'vid') {
+    if (params.ASSET_TYPE === 'vid') {
       loadScript('https://www.youtube.com/iframe_api');
     }
   });
 
 
   // load and set callback for YouTube API
-  if (ASSET_TYPE === 'vid') {
+  if (params.ASSET_TYPE === 'vid') {
     // must be in global namespace to be triggered upon script load
     window.onYouTubeIframeAPIReady = function () {
       // console.log('YT READY');
@@ -131,14 +129,14 @@ var $j = jQuery.noConflict();
     submitBtn = document.getElementById('submit_btn');
 
     // non img+annotorious tasks
-    if (taskNum <= 3) {
+    if (params.TASK_NUM <= 3) {
       $j(prevBtns).each(function (i, el) { $j(el).hide(); });
       $j(nextBtns).each(function (i, el) { $j(el).hide(); });
       var playerDiv = document.createElement('div');
       playerDiv.id = 'player';
       mediaArea.appendChild(playerDiv);
 
-      if (taskNum === 3) { // checkboxes response
+      if (params.TASK_NUM === 3) { // checkboxes response
         
         instructions.innerHTML = 'Please watch the entire video. Pause and replay as necessary.<br>' +
                                   'At the moment you see anything, click that concept from among the checkboxes below.<br>' +
@@ -167,12 +165,12 @@ var $j = jQuery.noConflict();
         });
       } else { // textarea response
 
-        if (taskNum === 1) {
+        if (params.TASK_NUM === 1) {
           instructions.innerHTML = '<li>Press play to watch the video.</li>' +
                                     '<li>Enter one keyword or phrase at a time to describe what you see in the video.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
-        } else if (taskNum === 2) {
+        } else if (params.TASK_NUM === 2) {
           instructions.innerHTML = '<li>Press play to watch the video related to <b>cars</b>.</li>' +
                                     '<li>Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
@@ -203,7 +201,7 @@ var $j = jQuery.noConflict();
       }
     // img+annotorious tasks
     } else {
-      if (ASSET_TYPE === 'img') {
+      if (params.ASSET_TYPE === 'img') {
         instructions.innerHTML = '<li>Use your mouse to draw a box around each concept or object you see in each image.</li>' +
                                   '<li>Enter a keyword or phrase to describe the concept. Separate multiple with commas.</li>' +
                                   '<li>Note: The same concept may appear across multiple images.</li>' +
@@ -329,30 +327,30 @@ var $j = jQuery.noConflict();
     submitBtn.addEventListener('click', function (event) {
       event.preventDefault();
 
-      if (taskNum < 4 && !vidCompleted) {
+      if (params.TASK_NUM < 4 && !vidCompleted) {
         return alert('Please finish watching the video.');
       }
 
       if (Object.keys(annotations).length > 0) {
-        var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + TODAY_DATA_DATE + '/' + params.workerId + '/');
+        var postRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/data/' + params.TODAY_DATA_DATE + '/' + params.workerId + '/');
         var postData = {
           assetId: assetId,
           workerId: params.workerId,
-          task: taskNum,
+          task: params.TASK_NUM,
           annotations: annotations,
           time_submitted: getNow()
         };
 
-        if (taskNum <= 3) postData.video_events = vidEvents;
+        if (params.TASK_NUM <= 3) postData.video_events = vidEvents;
 
         postRef.push(postData, function () {
-          var assetsRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/assets/' + TODAY_DATA_DATE + '/' + ASSET_TYPE + '/');
-          assetsCounts[ASSET_TYPE][assetId]++;
-          assetsRef.child(assetId).set(assetsCounts[ASSET_TYPE][assetId], function (err) {
+          var assetsRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/assets/' + params.TODAY_DATA_DATE + '/' + params.ASSET_TYPE + '/');
+          assetsCounts[params.ASSET_TYPE][assetId]++;
+          assetsRef.child(assetId).set(assetsCounts[params.ASSET_TYPE][assetId], function (err) {
             if (err) {
-              // console.log('POST of', assetsCounts[ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'failed');
+              // console.log('POST of', assetsCounts[params.ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'failed');
             } else {
-              // console.log('POST of', assetsCounts[ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'succeeded');
+              // console.log('POST of', assetsCounts[params.ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'succeeded');
               mturkSubmit();
             }
           });
@@ -374,7 +372,7 @@ var $j = jQuery.noConflict();
       var assetsCountsRemaining = [];
 
       _.each(d[params.workerId], function (entry) {
-        if (taskNum === entry.task) {
+        if (params.TASK_NUM === entry.task) {
           assetsCountsClone[entry.assetId] = false;
         }
       });
