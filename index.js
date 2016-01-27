@@ -3,13 +3,13 @@
 var $j = jQuery.noConflict();
 
 // wrap in IIFE to not expose global variables
-(function app () {
-
+(function app() {
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
   var params = _.getUrlParams();
   var taskNum;
   var annotations = {};
   var annotext;
+  var player;
   var vidEvents = {};
   var vidCompleted = false;
   var data;
@@ -20,13 +20,20 @@ var $j = jQuery.noConflict();
   var firstImgToDisplay = 0;
   var imgTotal;
   var imgPerGrid = 4;
-
+  // hard code imgTotal for now
+  var assetToImgTotal = {
+    '01': 30,
+    '02': 30,
+    '03': 37,
+    '04': 38,
+    '05': 33,
+  };
   // page elements
   var instructions;
   var prevBtns;
   var nextBtns;
-  var media_area;
-  var response_area;
+  var mediaArea;
+  var responseArea;
   var enterKeyword;
   var submitBtn;
 
@@ -56,15 +63,6 @@ var $j = jQuery.noConflict();
       assetId = getAssetId(assetsCounts[ASSET_TYPE], data.data[TODAY_DATA_DATE]);
       // console.log('assetId', assetId);
 
-      // hard code imgTotal for now
-      var assetToImgTotal = {
-        '01': 30,
-        '02': 30,
-        '03': 37,
-        '04': 38,
-        '05': 33
-      };
-
       imgTotal = assetToImgTotal[assetId];
 
       drawImgGrid();
@@ -79,8 +77,6 @@ var $j = jQuery.noConflict();
 
   // load and set callback for YouTube API
   if (ASSET_TYPE === 'vid') {
-    var player;
-
     // must be in global namespace to be triggered upon script load
     window.onYouTubeIframeAPIReady = function () {
       // console.log('YT READY');
@@ -96,10 +92,12 @@ var $j = jQuery.noConflict();
         height: '315',
         width: '420',
         videoId: sliceVid,
-        playerVars: {start: startSeconds},
+        playerVars: {
+          start: startSeconds,
+        },
         events: {
-          'onStateChange': onPlayerStateChange
-        }
+          onStateChange: onPlayerStateChange,
+        },
       });
     };
 
@@ -110,7 +108,7 @@ var $j = jQuery.noConflict();
         '1': 'playing',
         '2': 'paused',
         '3': 'buffering',
-        '5': 'video cued'
+        '5': 'video cued',
       };
       vidEvents[getNow()] = eventNames[String(event.data)];
       if (event.data === 0) {
@@ -127,8 +125,8 @@ var $j = jQuery.noConflict();
     instructions = document.getElementById('instructions');
     prevBtns = document.getElementsByClassName('prev_btn');
     nextBtns = document.getElementsByClassName('next_btn');
-    media_area = document.getElementById('media_area');
-    response_area = document.getElementById('response_area');
+    mediaArea = document.getElementById('media_area');
+    responseArea = document.getElementById('response_area');
     enterKeyword;
     submitBtn = document.getElementById('submit_btn');
 
@@ -138,15 +136,15 @@ var $j = jQuery.noConflict();
       $j(nextBtns).each(function (i, el) { $j(el).hide(); });
       var playerDiv = document.createElement('div');
       playerDiv.id = 'player';
-      media_area.appendChild(playerDiv);
+      mediaArea.appendChild(playerDiv);
 
       if (taskNum === 3) { // checkboxes response
         
-        instructions.innerHTML =  'Please watch the entire video. Pause and replay as necessary.<br>' +
+        instructions.innerHTML = 'Please watch the entire video. Pause and replay as necessary.<br>' +
                                   'At the moment you see anything, click that concept from among the checkboxes below.<br>' +
                                   'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
                                   'When you have entered every concept and finished the video, click submit.';
-        response_area.innerHTML = '<div id="annochecks">' +
+        responseArea.innerHTML = '<div id="annochecks">' +
                                   '<input type="checkbox" name="checkboxes" value="driving">driving</input><br>' +
                                   '<input type="checkbox" name="checkboxes" value="carExterior">car exterior</input><br>' +
                                   '<input type="checkbox" name="checkboxes" value="carInterior">car interior</input><br>' +
@@ -170,18 +168,18 @@ var $j = jQuery.noConflict();
       } else { // textarea response
 
         if (taskNum === 1) {
-          instructions.innerHTML =  '<li>Press play to watch the video.</li>' +
+          instructions.innerHTML = '<li>Press play to watch the video.</li>' +
                                     '<li>Enter one keyword or phrase at a time to describe what you see in the video.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         } else if (taskNum === 2) {
-          instructions.innerHTML =  '<li>Press play to watch the video related to <b>cars</b>.</li>' +
+          instructions.innerHTML = '<li>Press play to watch the video related to <b>cars</b>.</li>' +
                                     '<li>Enter one keyword or phrase at a time to describe what you see related to <b>cars</b> in the video.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         }
 
-        response_area.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword" disabled>Enter</button>';
+        responseArea.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword" disabled>Enter</button>';
         annotext = document.getElementById('annotext');
         annotext.focus();
         enterKeyword = document.getElementById('enter_keyword');
@@ -206,13 +204,13 @@ var $j = jQuery.noConflict();
     // img+annotorious tasks
     } else {
       if (ASSET_TYPE === 'img') {
-        instructions.innerHTML =  '<li>Draw a box around each concept or object you see in each image.</li>' +
+        instructions.innerHTML = '<li>Draw a box around each concept or object you see in each image.</li>' +
                                   '<li>Enter a keyword or phrase in the text box that appears under each drawn box.</li>' +
                                   '<li>Note 1: You may enter multiple concepts for the same box, separated by commas (",").</li>' +
                                   '<li>Note 2: You may enter the same concept for multiple images.</li>' +
                                   '<li>When you have annotated each image in a set, click Next Set to annotate remaining images.</li>' +
                                   '<li>When you have annotated every image, click Submit HIT at the bottom of the page.</li>';
-        response_area.remove();
+        responseArea.remove();
         // set up prev and next buttons for carousel
         $j(prevBtns)
         .prop('disabled', false)
@@ -293,7 +291,7 @@ var $j = jQuery.noConflict();
       }
 
       // make 'Enter' trigger Save button to prevent multi-line annotations
-      $j(media_area).on('focus', '.annotorious-editor-text', function (e) {
+      $j(mediaArea).on('focus', '.annotorious-editor-text', function (e) {
         $j(e.target).on('keypress', function (e) {
           if (e.which === 13) {
             var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
@@ -303,7 +301,7 @@ var $j = jQuery.noConflict();
 
       });
 
-      $j(media_area).on('mousedown', '.annotorious-annotationlayer', function (e) {
+      $j(mediaArea).on('mousedown', '.annotorious-annotationlayer', function (e) {
         // console.log('annotationlayer mousedown');
 
         var currSaveBtn = $j(e.currentTarget).find('.annotorious-editor-button-save');
@@ -350,12 +348,12 @@ var $j = jQuery.noConflict();
         if (taskNum <= 3) postData.video_events = vidEvents;
 
         postRef.push(postData, function () {
-          assetsCounts[ASSET_TYPE][assetId]++;
           var assetsRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/assets/' + TODAY_DATA_DATE + '/' + ASSET_TYPE + '/');
+          assetsCounts[ASSET_TYPE][assetId]++;
           assetsRef.child(assetId).set(assetsCounts[ASSET_TYPE][assetId], function (err) {
             if (err) {
               // console.log('POST of', assetsCounts[ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'failed');
-            } else { 
+            } else {
               // console.log('POST of', assetsCounts[ASSET_TYPE][assetId], 'to', assetsRef.child(assetId), 'succeeded');
               mturkSubmit();
             }
@@ -369,15 +367,15 @@ var $j = jQuery.noConflict();
     mturkCheckPreview();
   };
 
-  function getAssetId (assetsCounts, data) {
-    if (Object.keys(data).length === 0) {
-      return Object.keys(assetsCounts)[0];
+  function getAssetId(ac, d) {
+    if (Object.keys(d).length === 0) {
+      return Object.keys(ac)[0];
       // return setVidHTML(assetId);
     } else {
-      var assetsCountsClone = _.deepClone(assetsCounts);
+      var assetsCountsClone = _.deepClone(ac);
       var assetsCountsRemaining = [];
 
-      _.each(data[params.workerId], function (entry) {
+      _.each(d[params.workerId], function (entry) {
         if (taskNum === entry.task) {
           assetsCountsClone[entry.assetId] = false;
         }
@@ -387,7 +385,7 @@ var $j = jQuery.noConflict();
         if (val !== false) assetsCountsRemaining.push([key, val]);
       });
 
-      // console.log('assetsCounts', assetsCounts);
+      // console.log('ac', ac);
       // console.log('assetsCountsClone', assetsCountsClone);
       // console.log('assetsCountsRemaining', assetsCountsRemaining);
 
@@ -409,7 +407,7 @@ var $j = jQuery.noConflict();
   // create image grid
   function drawImgGrid () {
     // console.log(firstImgToDisplay);
-    $j(media_area).children().remove();
+    $j(mediaArea).children().remove();
     var imgGrid = document.createElement('div');
     imgGrid.id = 'img_grid';
 
@@ -458,7 +456,7 @@ var $j = jQuery.noConflict();
       imgGrid.appendChild(imgRow);
     }
 
-    media_area.appendChild(imgGrid);
+    mediaArea.appendChild(imgGrid);
   }
 
   function getImgNum (annotation) {
@@ -487,7 +485,7 @@ var $j = jQuery.noConflict();
     return remaining;
   }
 
-  function setImgCounter () {
+  function setImgCounter() {
     var imgCounters = document.getElementsByClassName('img_counter');
     _.each(imgCounters, function (counter) {
       counter.innerHTML = imgRemaining();
@@ -501,7 +499,7 @@ var $j = jQuery.noConflict();
   }
 
   function mturkCheckPreview() {
-    if (params.assignmentId == 'ASSIGNMENT_ID_NOT_AVAILABLE') {
+    if (params.assignmentId === 'ASSIGNMENT_ID_NOT_AVAILABLE') {
       _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('preview'), false);
       $j('body').click(function () {
         alert('This is a preview. Please accept the HIT to work on it.');
@@ -514,7 +512,7 @@ var $j = jQuery.noConflict();
     return new Date().getTime();
   }
 
-  function loadScript (url) {
+  function loadScript(url) {
     var fileType = url.split('.').reverse()[0];
     var script;
     if (fileType === 'js') {
@@ -530,5 +528,4 @@ var $j = jQuery.noConflict();
     // console.log('script dynamically added', script);
     $j('script').parent().append(script);
   }
-
 }());
