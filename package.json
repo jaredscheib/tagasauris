@@ -3,5 +3,9 @@
     "fibers": "^1.0.8",
     "firebase": "^2.3.2",
     "json2csv": "^3.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^1.10.3",
+    "eslint-config-airbnb": "^4.0.0"
   }
 }
