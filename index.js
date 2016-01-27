@@ -7,7 +7,7 @@ var $j = jQuery.noConflict();
 
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
   var params = _.getUrlParams();
-  var taskNum = Number(params.task.slice(-1));
+  var taskNum;
   var annotations = {};
   var annotext;
   var vidEvents = {};
@@ -35,6 +35,8 @@ var $j = jQuery.noConflict();
     params.task = 'annotations_task5';
   }
 
+  taskNum = Number(params.task.slice(-1));
+
   if (ASSET_TYPE === 'img') {
     // loadScript('https://annotorious.github.com/latest/annotorious.css'); // GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
     // loadScript('https://annotorious.github.com/latest/annotorious.min.js');
@@ -55,17 +57,15 @@ var $j = jQuery.noConflict();
       // console.log('assetId', assetId);
 
       // hard code imgTotal for now
-      if (assetId === '01') {
-        imgTotal = 30;
-      } else if (assetId === '02') {
-        imgTotal = 30;
-      } else if (assetId === '03') {
-        imgTotal = 37;
-      } else if (assetId === '04') {
-        imgTotal = 38;
-      } else if (assetId === '05') {
-        imgTotal = 33;
-      }
+      var assetToImgTotal = {
+        '01': 30,
+        '02': 30,
+        '03': 37,
+        '04': 38,
+        '05': 33
+      };
+
+      imgTotal = assetToImgTotal[assetId];
 
       drawImgGrid();
       setImgCounter();
