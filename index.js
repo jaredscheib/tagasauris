@@ -288,37 +288,43 @@ var $j = jQuery.noConflict();
         // console.log('annotations after update persisted', annotations);
       }
 
-      // make 'Enter' trigger Save button to prevent multi-line annotations
+      // make 'Enter' simulate clicking 'Save'
       $j(mediaArea).on('focus', '.annotorious-editor-text', function (e) {
         $j(e.target).on('keypress', function (e) {
           if (e.which === 13) {
             var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
-            clickButtonOnce(e, saveBtn);
+            e.stopImmediatePropagation(); // prevents repeat click event resulting in annotorious error after Save button has disappeared
+            e.preventDefault();
+            clickButtonOnce(saveBtn);
           }
         });
-
       });
 
+      // create new bounding box after and 'Enter' on current open one if exists
       $j(mediaArea).on('mousedown', '.annotorious-annotationlayer', function (e) {
-        // console.log('annotationlayer mousedown');
+        e.stopImmediatePropagation(); // prevents repeat click event resulting in annotorious error after Save button has disappeared
+        e.preventDefault();
 
         var currSaveBtn = $j(e.currentTarget).find('.annotorious-editor-button-save');
         if (currSaveBtn.is(':visible')) {
-          clickButtonOnce(e, currSaveBtn);
+          clickButtonOnce(currSaveBtn);
+   
+          var clickEvent = document.createEvent ('MouseEvents');
+          clickEvent.initMouseEvent('mousedown', true, true, window, 0, 0, 0, e.clientX, e.clientY, false, false, false, false, 0, null);
+
+          var annotoriousLayer = $j(e.currentTarget).parent().find('.annotorious-item-focus')[0];
+          annotoriousLayer.dispatchEvent (clickEvent);
         }
       });
 
-      function clickButtonOnce (e, jQbuttonObj) {
-        e.stopImmediatePropagation(); // prevents jQuery from repeating click event, which produces error because can't find button anymore and messes up annotorious
-        e.preventDefault();
-
-        $j(jQbuttonObj).off();
-
-        if (jQbuttonObj[0].click) {
-          jQbuttonObj[0].click(); // annotorious.js uses goog.Events (from Google Closure library), rather than actual 'click' event, FYI, ex. goog.events.dispatchEvent(jQbuttonObj, goog.events.EventType.CLICK);
-        // for non-Chrome or Safari
+      function clickButtonOnce (jQbuttonObj) {
+        var btn = jQbuttonObj[0];
+        if (btn.click) {
+          btn.click(); // annotorious.js uses goog.Events (from Google Closure library), rather than actual 'click' event, FYI, ex. goog.events.dispatchEvent(jQbuttonObj, goog.events.EventType.CLICK);
+        // for legacy IE
         } else if (document.createEvent) {
           var newEvent = document.createEvent('MouseEvents');
+          // TODO check if coords below require saveBtn coords
           newEvent.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
           jQbuttonObj[0].dispatchEvent(newEvent);
         }
