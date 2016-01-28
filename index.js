@@ -93,7 +93,8 @@ var $j = jQuery.noConflict();
 
     if (params.TODAY_DATA_DATE === '20160114') {
       assetId = getAssetId(assetsCounts, data.data[params.TODAY_DATA_DATE]);
-    } else if (params.TODAY_DATA_DATE === '20160123') {
+    // any dates past 20160114
+    } else {
       assetId = getAssetId(assetsCounts[params.ASSET_TYPE], data.data[params.TODAY_DATA_DATE]);
       // console.log('assetId', assetId);
     }
@@ -117,7 +118,6 @@ var $j = jQuery.noConflict();
     mediaArea = document.getElementById('media_area');
     controls = document.getElementsByClassName('controls');
     responseArea = document.getElementById('response_area');
-    enterKeyword;
     submitBtn = document.getElementById('submit_btn');
 
     // non img+annotorious tasks
@@ -158,13 +158,13 @@ var $j = jQuery.noConflict();
         if (params.TASK_NUM === 1) {
           instructions.innerHTML = '<li>Press play to watch the video.</li>' +
                                     '<li>Enter a keyword or phrase for each action or sound in the video.</li>' +
-                                    '<li>Note: the video will pause when you start typing and resume when you hit Enter.</li>' +
+                                    '<li>Note: the video will pause when you start typing.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         } else if (params.TASK_NUM === 2) {
           instructions.innerHTML = '<li>Press play to watch the video related to <b>cars</b>.</li>' +
                                     '<li>Enter a keyword or phrase for each action or sound related to <b>cars</b> in the video.</li>' +
-                                    '<li>Note: the video will pause when you start typing and resume when you hit Enter.</li>' +
+                                    '<li>Note: the video will pause when you start typing.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         }
@@ -188,6 +188,7 @@ var $j = jQuery.noConflict();
             enterKeyword.setAttribute('disabled', 'disabled');
           } else {
             enterKeyword.removeAttribute('disabled');
+            player.pauseVideo();
           }
         });
       }
@@ -196,7 +197,7 @@ var $j = jQuery.noConflict();
 
       instructions.innerHTML = '<li>Use your mouse to draw a box around each concept or object you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase to describe the concept. Separate multiple with commas.</li>' +
-                                '<li>Note: The same concept may appear across multiple images.</li>' +
+                                '<li>Note: The same concept may appear in multiple images.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT below.</li>';
 
 
