@@ -9,39 +9,21 @@
 	<script type="text/javascript" src="https://code.jquery.com/jquery.min.js"></script>
 	<script type="text/javascript" src="utils.js"></script>
 	<script type="text/javascript" src="index.js"></script>
-	<!-- adding annotorious.js OR YouTube Iframe API dynamically -->
-	<!-- <link type="text/css" rel="stylesheet" href="https://annotorious.github.com/latest/annotorious.css" /> -->
-	<!-- <script type="text/javascript" src="https://annotorious.github.com/latest/annotorious.min.js"></script> -->
-	<!-- <script type="text/javascript" src="https://www.youtube.com/iframe_api"></script> -->
+	<!-- adding annotorious OR YouTube Iframe API dynamically -->
 </head>
 <body>
 	<div id="instructions_area">
 		<ol id="instructions"></ol>
 	</div>
 	<div id="task_area">
-		<div id="carousel">
-			<div>
-				<button class="prev_btn" disabled>Prev Set</button>
-				<button class="next_btn" disabled>Next Set</button>
-			</div>
-			<div>
-				<span class="img_count">Total images remaining to annotate: <span class="img_counter"></span></span>
-			</div>
-			<div id="media_area"></div>
+		<div class="controls">
 		</div>
+		<div id="media_area"></div>
+		<div class="controls">
+		</div>
+		<div id="response_area"></div>
 		<div>
-			<div id="response_area">
-			</div>
-			<div>
-				<button class="prev_btn" disabled>Prev Set</button>
-				<button class="next_btn" disabled>Next Set</button>
-			</div>
-			<div>
-				<span class="img_count">Total images remaining to annotate: <span class="img_counter"></span></span>
-			</div>
-			<div>
-				<button id="submit_btn" disabled>Submit HIT</button>
-			</div>
+			<button id="submit_btn" disabled>Submit HIT</button>
 		</div>
 	</div>
 </body>

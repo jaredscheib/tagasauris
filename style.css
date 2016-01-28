@@ -49,6 +49,7 @@ div {
 .prev_btn, .next_btn {
 	font-size: 14px;
 	margin: 2px;
+	display: inline-block;
 }
 
 #img_grid {
@@ -74,16 +75,17 @@ div {
 
 #response_area {
 	margin: 15px 15px 0px 15px;
+	display: block;
 }
 
 #annotext {
 	width: 200px;
-	height: 20px;
+	height: 25px;
 	font-size: 16px;
 	display: inline-block;
 }
 
-#enterKeyword {
+#enter_keyword {
     width: 50px;
     height: 25px;
     font-size: 14px;
@@ -95,8 +97,13 @@ div {
 #annochecks {
 }
 
-#img_count {
+#img_remain {
 	margin: 5px;
+	display: block;
+}
+
+#img_count {
+	font-style: em;
 }
 
 #submit_btn {
