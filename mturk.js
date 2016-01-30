@@ -1,4 +1,4 @@
-var _ = require('./utils.js');
+var _ = require('./server-utils.js');
 var secrets = require('./secrets.js');
 
 var args = process.argv.slice(2);
