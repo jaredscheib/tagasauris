@@ -18,6 +18,7 @@ th, td {
 body {
 	height: 100%;
 	margin: 0px;
+	padding: 0px;
 	text-align: center;
 	font-family: 'Open Sans', sans-serif;
 }
@@ -52,25 +53,84 @@ div {
 	display: inline-block;
 }
 
-#img_grid {
-	display: inline-block;
-	width: 80%;
-	zoom: 1;
-	display*: inline;
+#media_area {
+	width: 100%;
 }
 
-.img_row {
-	margin: 0px;
+#img_grid {
 	display: inline-block;
 	width: 100%;
 	zoom: 1;
 	display*: inline;
 }
 
+.img_row {
+	margin: 0px;
+	padding: 0px;
+	display: inline-block;
+	width: 100%;
+	zoom: 1;
+	display*: inline;
+}
+
+.img_bank {
+	display: inline-block;
+	padding: 0px;
+}
+
 .anno_img {
-	margin: 5px;
+	margin: 0px 5px;
 	/*float: left;*/
 	width: 480px;
+}
+
+.label_bank {
+	vertical-align: top;
+	width: 120px;
+	display: inline-block;
+	border: 0px dashed black;
+	border-radius: 5px;
+	padding: 5px 0;
+	overflow: scroll; /* TODO change to vert wrap */
+}
+
+.bank-lft {
+	margin: 0 0 0 15px;f
+	float: left;
+}
+
+.bank-rgt {
+	margin: 0 15px 0 0;
+	float: right;
+}
+
+/*.bank_title {
+	font-size: 13px;
+	font-style: oblique;
+	text-decoration: underline;
+}*/
+
+.label_container {
+	margin: 0 2px;
+}
+
+.label-lft {
+	text-align: right;
+}
+
+.label-rgt {
+	text-align: left;
+}
+
+.label {
+	font-size: 10px;
+	border: 1px solid black;
+	border-radius: 8px;
+	background-color: #EAEAEA;
+	text-align: left;
+	display: inline-block;
+	margin: 0;
+	padding: 2px;
 }
 
 #response_area {

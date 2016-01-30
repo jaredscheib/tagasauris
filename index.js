@@ -195,8 +195,8 @@ var $j = jQuery.noConflict();
     // img+annotorious tasks
     } else if (params.ASSET_TYPE === 'img') {
 
-      instructions.innerHTML = '<li>Use your mouse to draw a box around each concept or object you see in each image.</li>' +
-                                '<li>Enter a keyword or phrase to describe the concept. Separate multiple with commas.</li>' +
+      instructions.innerHTML = '<li>Use your mouse to draw a box around every concept or object you see in each image.</li>' +
+                                '<li>Enter a keyword or phrase to describe each concept within that box.</li>' +
                                 '<li>Note: The same concept may appear in multiple images.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT below.</li>';
 
@@ -275,18 +275,6 @@ var $j = jQuery.noConflict();
         updatePersistedAnnotations(updatedAnno);
         // console.log('update annotation event');
       });
-
-      function invalidateAnnotation (invalidAnno) {
-        anno.removeAnnotation(invalidAnno);
-        // alert('Text must be a valid keyword. Deleting annotation...')
-      }
-
-      function updatePersistedAnnotations (annoToUpdate) {
-        var imgNum = getImgNum(annoToUpdate);
-        annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
-        setImgCounter();
-        // console.log('annotations after update persisted', annotations);
-      }
 
       // make 'Enter' simulate clicking 'Save'
       $j(mediaArea).on('focus', '.annotorious-editor-text', function (e) {
@@ -371,10 +359,41 @@ var $j = jQuery.noConflict();
     mturkCheckPreview();
   };
 
+  function invalidateAnnotation (invalidAnno) {
+    anno.removeAnnotation(invalidAnno);
+    // alert('Text must be a valid keyword. Deleting annotation...')
+  }
+
+  function updatePersistedAnnotations (annoToUpdate) {
+    var imgNum = getImgNum(annoToUpdate);
+    annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
+    updateLabelBank(imgNum);
+    setImgCounter();
+    // console.log('annotations after update persisted', annotations);
+  }
+
+  function updateLabelBank (imgNum) {
+    var labelBank = document.getElementById('labelBank' + imgNum);
+    var align = labelBank.classList[1].slice(-3);
+    // var bankTitle = document.createElement('span');
+
+    $j(labelBank).children().remove();
+    
+    // bankTitle.className = 'bank_title';
+    // bankTitle.innerHTML = 'annotations';
+    // $j(labelBank).append(bankTitle);
+    
+    _.each(annotations[imgNum], function(tempAnno) {
+      var label = document.createElement('div');
+      label.className = 'label_container label-' + align;
+      $j(labelBank).append(label);
+      label.innerHTML = '<span class="label">' + tempAnno.text + '</span>';
+    });
+  }
+
   function getAssetId(ac, d) {
     if (Object.keys(d).length === 0) {
       return Object.keys(ac)[0];
-      // return setVidHTML(assetId);
     } else {
       var assetsCountsClone = _.deepClone(ac);
       var assetsCountsRemaining = [];
@@ -389,15 +408,10 @@ var $j = jQuery.noConflict();
         if (val !== false) assetsCountsRemaining.push([key, val]);
       });
 
-      // console.log('ac', ac);
-      // console.log('assetsCountsClone', assetsCountsClone);
-      // console.log('assetsCountsRemaining', assetsCountsRemaining);
-
       if (assetsCountsRemaining.length > 0) {
-        // return vid with least views
+        // return media with least annotations
         assetsCountsRemaining.sort(function (a, b) { return a[1] < b[1]; });
         return assetsCountsRemaining.pop()[0];
-        // return setVidHTML(assetId);
       } else {
         _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false);
         $j('body').click(function () {
@@ -411,7 +425,6 @@ var $j = jQuery.noConflict();
   if (params.ASSET_TYPE === 'img') {
     // create image grid
     function drawImgGrid () {
-      // console.log(firstImgToDisplay);
       $j(mediaArea).children().remove();
       var imgGrid = document.createElement('div');
       imgGrid.id = 'img_grid';
@@ -432,6 +445,9 @@ var $j = jQuery.noConflict();
 
         // console.log('j, limit', j, limit);
         for (j; j < limit; j++) {
+          var imgBank = document.createElement('div');
+          imgBank.className = 'img_bank';
+
           var imgNum = String(j);
           if (imgNum.length < 2) imgNum = '0' + imgNum;
           imgNum += '00'; // until non-integer frames added
@@ -440,10 +456,30 @@ var $j = jQuery.noConflict();
           newImg.id = 'img' + imgNum;
           newImg.className = 'anno_img';
           newImg.src = 'assets/img/' + assetId + '-' + imgNum + '.jpg';
-          imgRow.appendChild(newImg);
+
+          var labelBank = document.createElement('div');
+          labelBank.className = 'label_bank ';
+          labelBank.id = 'labelBank' + imgNum;
+          
+          // newImg.parentNode.insertBefore(labelBank, newImg.nextSibling);
+          if (j % 2 === 0) {
+            labelBank.className += ' bank-lft';
+            imgBank.appendChild(labelBank);
+            imgBank.appendChild(newImg);
+          } else {
+            labelBank.className += ' bank-rgt';
+            imgBank.appendChild(newImg);
+            imgBank.appendChild(labelBank);
+          }
+
+          imgRow.appendChild(imgBank);
+
           $j(newImg).load(function () { // on img load event so annotorious loads properly
-            anno.makeAnnotatable(this);
             var imgNum = this.id.slice(3);
+            var labelBank = document.getElementById('labelBank' + imgNum);
+            labelBank.style.height = String(this.height) + 'px';
+            updateLabelBank(imgNum);
+            anno.makeAnnotatable(this);
             if (annotations[imgNum]) {
               // console.log('annotations[imgNum]', annotations[imgNum]);
               _.each(annotations[imgNum], function (tempAnno) {
