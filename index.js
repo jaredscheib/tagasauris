@@ -7,8 +7,6 @@ var $j = jQuery.noConflict();
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
   var params = _.getUrlParams(); params.TASK_NUM = Number(params.TASK_NUM);
   var annotations = {};
-  var annotext;
-  var player;
   var vidEvents = {};
   var vidCompleted = false;
   var data;
@@ -31,15 +29,38 @@ var $j = jQuery.noConflict();
   var nextBtns;
   var mediaArea;
   var controls;
+  var imgCounters;
+  var player;
+  var annotext;
   var responseArea;
-  var enterKeyword;
+  var enterKeywordBtn;
   var submitBtn;
 
   console.log('params', params);
 
   if (params.ASSET_TYPE === 'img') {
     loadScript('lib/annotorious.css'); // local lib since GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
-    loadScript('lib/annotorious.min.js');
+    loadScript('lib/annotorious.min.js', function () {
+      // annotorious event handlers
+      anno.addHandler('onAnnotationCreated', function (createdAnno) {
+        if (createdAnno.text.length < 2) return anno.removeAnnotation(createdAnno);
+        // persist annotations to later remove and restore on Next/Prev
+        updatePersistedAnnotations(createdAnno);
+        // console.log('create annotation event');
+      });
+
+      anno.addHandler('onAnnotationRemoved', function (removedAnno) {
+        updatePersistedAnnotations(removedAnno);
+        // console.log('remove annotation event');
+      });
+
+      anno.addHandler('onAnnotationUpdated', function (updatedAnno) {
+        // remove blank/invalid anno from update
+        if (updatedAnno.text.length < 2) anno.removeAnnotation(updatedAnno);
+        updatePersistedAnnotations(updatedAnno);
+        // console.log('update annotation event');
+      });
+    });
   // load and set callback for YouTube API
   } else if (params.ASSET_TYPE === 'vid') {
     // must be in global namespace to be triggered upon script load
@@ -105,7 +126,7 @@ var $j = jQuery.noConflict();
       drawImgGrid();
       setImgCounter();
     } else if (params.ASSET_TYPE === 'vid') {
-      loadScript('https://www.youtube.com/iframe_api', false);
+      loadScript('https://www.youtube.com/iframe_api');
     }
   });
 
@@ -169,12 +190,13 @@ var $j = jQuery.noConflict();
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         }
 
-        responseArea.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword" disabled>Enter</button>';
+        responseArea.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword_btn" disabled>Enter</button>';
         annotext = document.getElementById('annotext');
         annotext.focus();
-        enterKeyword = document.getElementById('enter_keyword');
+        enterKeywordBtn = document.getElementById('enter_keyword_btn');
 
         annotext.addEventListener('keydown', function (event) {
+          if (annotext.value === '') return;
           if (event.keyCode === 13) {
             event.preventDefault();
             annotations[getNow()] = {text: annotext.value, timestamp: player.getCurrentTime()};
@@ -185,9 +207,9 @@ var $j = jQuery.noConflict();
 
         annotext.addEventListener('keyup', function () {
           if (annotext.value === '') {
-            enterKeyword.setAttribute('disabled', 'disabled');
+            enterKeywordBtn.setAttribute('disabled', 'disabled');
           } else {
-            enterKeyword.removeAttribute('disabled');
+            enterKeywordBtn.removeAttribute('disabled');
             player.pauseVideo();
           }
         });
@@ -208,6 +230,8 @@ var $j = jQuery.noConflict();
                          '</div>' +
                           '<span class="img_remain">Total images remaining to annotate: <span class="img_count"></span></span>';
       });
+
+      imgCounters = document.getElementsByClassName('img_count');
 
       responseArea.remove();
       // set up prev and next buttons for carousel
@@ -251,30 +275,6 @@ var $j = jQuery.noConflict();
         }
       });
 
-
-      // annotorious event handlers
-      anno.addHandler('onAnnotationCreated', function (createdAnno) {
-        if (createdAnno.text.length < 2) {
-          return invalidateAnnotation(createdAnno);
-        }
-        // persist annotations to later remove and restore on Next/Prev
-        updatePersistedAnnotations(createdAnno);
-        // console.log('create annotation event');
-      });
-
-      anno.addHandler('onAnnotationRemoved', function (removedAnno) {
-        updatePersistedAnnotations(removedAnno);
-        // console.log('remove annotation event');
-      });
-
-      anno.addHandler('onAnnotationUpdated', function (updatedAnno) {
-        if (updatedAnno.text.length < 2) {
-          // console.log('remove blank/invalid anno from update');
-          invalidateAnnotation(updatedAnno);
-        }
-        updatePersistedAnnotations(updatedAnno);
-        // console.log('update annotation event');
-      });
 
       // make 'Enter' simulate clicking 'Save'
       $j(mediaArea).on('focus', '.annotorious-editor-text', function (e) {
@@ -359,11 +359,6 @@ var $j = jQuery.noConflict();
     mturkCheckPreview();
   };
 
-  function invalidateAnnotation (invalidAnno) {
-    anno.removeAnnotation(invalidAnno);
-    // alert('Text must be a valid keyword. Deleting annotation...')
-  }
-
   function updatePersistedAnnotations (annoToUpdate) {
     var imgNum = getImgNum(annoToUpdate);
     annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
@@ -415,7 +410,7 @@ var $j = jQuery.noConflict();
       } else {
         _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false);
         $j('body').click(function () {
-          alert('You have annotated all videos. Please return this HIT.');
+          alert('You have annotated all media. Please return this HIT.');
         });
         return true;
       }
@@ -429,11 +424,14 @@ var $j = jQuery.noConflict();
       var imgGrid = document.createElement('div');
       imgGrid.id = 'img_grid';
 
+      // TODO: get an array of image URLs to know limit, and only build rows and image banks accordingly
+      // create and populate the grid
       for (var i = 0; i < 2; i++) {
         anno.reset(); // necessary for addAnnotation functionality below
         var imgRow = document.createElement('div');
         imgRow.className = 'img_row';
 
+        // determine image number for use in iterator below
         var j, limit;
         if (i === 0) {
           j = firstImgToDisplay;
@@ -461,7 +459,7 @@ var $j = jQuery.noConflict();
           labelBank.className = 'label_bank ';
           labelBank.id = 'labelBank' + imgNum;
           
-          // newImg.parentNode.insertBefore(labelBank, newImg.nextSibling);
+          // add class of label bank depending on which side image is on
           if (j % 2 === 0) {
             labelBank.className += ' bank-lft';
             imgBank.appendChild(labelBank);
@@ -472,12 +470,16 @@ var $j = jQuery.noConflict();
             imgBank.appendChild(labelBank);
           }
 
+          // add current image bank to current image row
           imgRow.appendChild(imgBank);
 
+          // when image actually loads, make annotatable and set style of label bank to image height
           $j(newImg).load(function () { // on img load event so annotorious loads properly
             var imgNum = this.id.slice(3);
+
             var labelBank = document.getElementById('labelBank' + imgNum);
             labelBank.style.height = String(this.height) + 'px';
+
             updateLabelBank(imgNum);
             anno.makeAnnotatable(this);
             if (annotations[imgNum]) {
@@ -489,9 +491,11 @@ var $j = jQuery.noConflict();
                 anno.addAnnotation(tempAnno);
               });
             }
+          // TODO: remove this hacky solution while images not being served up with array of filenames
           }).error(function () {
+            console.log('this', this);
             $j(this).remove();
-          }).bind(newImg);
+          }.bind(imgBank));
         }
 
         imgGrid.appendChild(imgRow);
@@ -527,7 +531,6 @@ var $j = jQuery.noConflict();
     }
 
     function setImgCounter() {
-      var imgCounters = document.getElementsByClassName('img_count');
       _.each(imgCounters, function (counter) {
         counter.innerHTML = imgRemaining();
       });
@@ -554,21 +557,24 @@ var $j = jQuery.noConflict();
     return new Date().getTime();
   }
 
-  function loadScript(url, hasExtension) {
-    if (hasExtension === undefined) hasExtension = true;
-    var fileType = hasExtension ? url.split('.').reverse()[0] : 'js';
+  function loadScript(url, callback) {
+    var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
     var script;
     if (fileType === 'js') {
       script = document.createElement('script');
-      script.setAttribute('src', url);
+      document.head.appendChild(script); // ideal practice to add to DOM, then set onload, then src, though clunkier
+      if (callback !== undefined) script.onload = callback;
       script.setAttribute('type', 'text/javascript');
+      script.setAttribute('src', url);
     } else if (fileType === 'css') {
       script = document.createElement('link');
+      document.head.appendChild(script); // ideal practice to add to DOM, then set onload, then src, though clunkier
+      if (callback !== undefined) script.onload = callback;
       script.setAttribute('rel', 'stylesheet');
       script.setAttribute('type', 'text/css');
       script.setAttribute('href', url);
     }
-    // console.log('script dynamically added', script);
-    $j('script').parent().append(script);
+
+    return script;
   }
 }());
