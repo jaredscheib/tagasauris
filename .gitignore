@@ -30,7 +30,9 @@ node_modules
 work_log.txt
 secrets.js
 notes.js
-/results
+results
 temp.js
-/assets/vid
+assets/vid
 fixtures.js
+classes
+schema.txt

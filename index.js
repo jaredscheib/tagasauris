@@ -5,7 +5,7 @@ var $j = jQuery.noConflict();
 // wrap in IIFE to not expose global variables
 (function app() {
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
-  var params = _.getUrlParams(); params.TASK_NUM = Number(params.TASK_NUM);
+  var params = _.getUrlParams(); if (params.TASK_NUM) params.TASK_NUM = Number(params.TASK_NUM);
   var annotations = {};
   var vidEvents = {};
   var vidCompleted = false;
@@ -24,19 +24,27 @@ var $j = jQuery.noConflict();
     '05': 33,
   };
   // page elements
-  var instructions;
-  var prevBtns;
-  var nextBtns;
-  var mediaArea;
-  var controls;
+  window.elements = {
+    instructionsList: document.getElementById('instructions_list'),
+    prevBtns: document.getElementsByClassName('prev_btn'),
+    nextBtns: document.getElementsByClassName('next_btn'),
+    controlsArea: document.getElementsByClassName('controls_area'),
+    mediaArea: document.getElementById('media_area'),
+    responseArea: document.getElementById('response_area'),
+    submitBtn: document.getElementById('submit_btn'),
+  };
   var imgCounters;
   var player;
   var annotext;
-  var responseArea;
   var enterKeywordBtn;
-  var submitBtn;
 
   console.log('params', params);
+
+  if (params.taskName) {
+    loadScript('tasks/' + params.taskName + '.js', function () {
+      console.log('callback after loading task: ' + params.taskName);
+    });
+  }
 
   if (params.ASSET_TYPE === 'img') {
     loadScript('lib/annotorious.css'); // local lib since GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
@@ -105,17 +113,19 @@ var $j = jQuery.noConflict();
     }
   }
 
-
   db.once('value', function (snapshot) {
-    // console.log('db.once event');
+    console.log('db.once event');
     data = snapshot.val();
-    assetsCounts = data.assets[params.TODAY_DATA_DATE];
-    if (data.data[params.TODAY_DATA_DATE] === undefined) data.data[params.TODAY_DATA_DATE] = {};
+
+    if (params.TODAY_DATA_DATE) {
+      assetsCounts = data.assets[params.TODAY_DATA_DATE];
+      if (data.data[params.TODAY_DATA_DATE] === undefined) data.data[params.TODAY_DATA_DATE] = {};
+    }
 
     if (params.TODAY_DATA_DATE === '20160114') {
       assetId = getAssetId(assetsCounts, data.data[params.TODAY_DATA_DATE]);
     // any dates past 20160114
-    } else {
+    } else if (params.TODAY_DATA_DATE === '20160123') {
       assetId = getAssetId(assetsCounts[params.ASSET_TYPE], data.data[params.TODAY_DATA_DATE]);
       // console.log('assetId', assetId);
     }
@@ -133,27 +143,19 @@ var $j = jQuery.noConflict();
 
   // set HTML and create event listeners on window load
   window.onload = function () {
-    instructions = document.getElementById('instructions');
-    prevBtns = document.getElementsByClassName('prev_btn');
-    nextBtns = document.getElementsByClassName('next_btn');
-    mediaArea = document.getElementById('media_area');
-    controls = document.getElementsByClassName('controls');
-    responseArea = document.getElementById('response_area');
-    submitBtn = document.getElementById('submit_btn');
-
     // non img+annotorious tasks
     if (params.ASSET_TYPE === 'vid') {
       var playerDiv = document.createElement('div');
       playerDiv.id = 'player';
-      mediaArea.appendChild(playerDiv);
+      elements.mediaArea.appendChild(playerDiv);
       
       if (params.TASK_NUM === 3) { // checkboxes response
         
-        instructions.innerHTML = 'Please watch the entire video. Pause and replay as necessary.<br>' +
+        elements.instructionsList.innerHTML = 'Please watch the entire video. Pause and replay as necessary.<br>' +
                                   'At the moment you see anything, click that concept from among the checkboxes below.<br>' +
                                   'Please pause and replay as necessary in order to submit multiple simultaneous concepts.<br>' +
                                   'When you have entered every concept and finished the video, click submit.';
-        responseArea.innerHTML = '<div id="annochecks">' +
+        elements.responseArea.innerHTML = '<div id="annochecks">' +
                                   '<input type="checkbox" name="checkboxes" value="driving">driving</input><br>' +
                                   '<input type="checkbox" name="checkboxes" value="carExterior">car exterior</input><br>' +
                                   '<input type="checkbox" name="checkboxes" value="carInterior">car interior</input><br>' +
@@ -177,20 +179,20 @@ var $j = jQuery.noConflict();
       } else { // textarea response
 
         if (params.TASK_NUM === 1) {
-          instructions.innerHTML = '<li>Press play to watch the video.</li>' +
+          elements.instructionsList.innerHTML = '<li>Press play to watch the video.</li>' +
                                     '<li>Enter a keyword or phrase for each action or sound in the video.</li>' +
                                     '<li>Note: the video will pause when you start typing.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         } else if (params.TASK_NUM === 2) {
-          instructions.innerHTML = '<li>Press play to watch the video related to <b>cars</b>.</li>' +
+          elements.instructionsList.innerHTML = '<li>Press play to watch the video related to <b>cars</b>.</li>' +
                                     '<li>Enter a keyword or phrase for each action or sound related to <b>cars</b> in the video.</li>' +
                                     '<li>Note: the video will pause when you start typing.</li>' +
                                     '<li>Pause and replay the video as necessary to enter all keywords.</li>' +
                                     '<li>When you have entered keywords for the entire video, click Submit HIT below.</li>';
         }
 
-        responseArea.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword_btn" disabled>Enter</button>';
+        elements.responseArea.innerHTML = '<textarea id="annotext" placeholder="Enter keyword or phrase"></textarea><button id="enter_keyword_btn" disabled>Enter</button>';
         annotext = document.getElementById('annotext');
         annotext.focus();
         enterKeywordBtn = document.getElementById('enter_keyword_btn');
@@ -217,13 +219,13 @@ var $j = jQuery.noConflict();
     // img+annotorious tasks
     } else if (params.ASSET_TYPE === 'img') {
 
-      instructions.innerHTML = '<li>Use your mouse to draw a box around every concept or object you see in each image.</li>' +
+      elements.instructionsList.innerHTML = '<li>Use your mouse to draw a box around every concept or object you see in each image.</li>' +
                                 '<li>Enter a keyword or phrase to describe each concept within that box.</li>' +
                                 '<li>Note: The same concept may appear in multiple images.</li>' +
                                 '<li>When you have annotated every image, click Submit HIT below.</li>';
 
 
-      _.each(controls, function(div){
+      _.each(controlsArea, function(div){
         div.innerHTML = '<div>' +
                           '<button class="prev_btn" disabled>Prev Set</button>' +
                           '<button class="next_btn" disabled>Next Set</button>' +
@@ -233,9 +235,9 @@ var $j = jQuery.noConflict();
 
       imgCounters = document.getElementsByClassName('img_count');
 
-      responseArea.remove();
+      elements.responseArea.remove();
       // set up prev and next buttons for carousel
-      $j(prevBtns)
+      $j(elements.prevBtns)
       .prop('disabled', false)
       .on('click', function (e) {
         e.preventDefault();
@@ -256,7 +258,7 @@ var $j = jQuery.noConflict();
         }
       });
 
-      $j(nextBtns)
+      $j(elements.nextBtns)
       .prop('disabled', false)
       .on('click', function (e) {
         e.preventDefault();
@@ -277,7 +279,7 @@ var $j = jQuery.noConflict();
 
 
       // make 'Enter' simulate clicking 'Save'
-      $j(mediaArea).on('focus', '.annotorious-editor-text', function (e) {
+      $j(elements.mediaArea).on('focus', '.annotorious-editor-text', function (e) {
         $j(e.target).on('keypress', function (e) {
           if (e.which === 13) {
             var saveBtn = $j(e.target).parent().find('.annotorious-editor-button-save');
@@ -289,7 +291,7 @@ var $j = jQuery.noConflict();
       });
 
       // create new bounding box after and 'Enter' on current open one if exists
-      $j(mediaArea).on('mousedown', '.annotorious-annotationlayer', function (e) {
+      $j(elements.mediaArea).on('mousedown', '.annotorious-annotationlayer', function (e) {
         e.stopImmediatePropagation(); // prevents repeat click event resulting in annotorious error after Save button has disappeared
         e.preventDefault();
 
@@ -320,8 +322,13 @@ var $j = jQuery.noConflict();
     }
 
 
-    submitBtn.addEventListener('click', function (event) {
+    elements.submitBtn.addEventListener('click', function (event) {
       event.preventDefault();
+
+      if (!params.TASK_NUM) {
+
+        return;
+      }
 
       if (params.TASK_NUM < 4 && !vidCompleted) {
         return alert('Please finish watching the video.');
@@ -420,7 +427,7 @@ var $j = jQuery.noConflict();
   if (params.ASSET_TYPE === 'img') {
     // create image grid
     function drawImgGrid () {
-      $j(mediaArea).children().remove();
+      $j(elements.mediaArea).children().remove();
       var imgGrid = document.createElement('div');
       imgGrid.id = 'img_grid';
 
@@ -501,7 +508,7 @@ var $j = jQuery.noConflict();
         imgGrid.appendChild(imgRow);
       }
 
-      mediaArea.appendChild(imgGrid);
+      elements.mediaArea.appendChild(imgGrid);
     }
 
     function getImgNum (annotation) {
@@ -517,13 +524,13 @@ var $j = jQuery.noConflict();
         }
       });
 
-      if (submitBtn.disabled === true) {
+      if (elements.submitBtn.disabled === true) {
         if (remaining === 0) {
-          submitBtn.disabled = false;
+          elements.submitBtn.disabled = false;
         }
       } else {
         if (remaining > 0) {
-          submitBtn.disabled = true;
+          elements.submitBtn.disabled = true;
         }
       }
 
