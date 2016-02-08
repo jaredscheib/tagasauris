@@ -3,7 +3,7 @@
 var $j = jQuery.noConflict();
 
 // wrap in IIFE to not expose global variables
-(function app() {
+// (function app() {
   var db = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
   var params = _.getUrlParams(); if (params.TASK_NUM) params.TASK_NUM = Number(params.TASK_NUM);
   var annotations = {};
@@ -42,7 +42,7 @@ var $j = jQuery.noConflict();
 
   if (params.taskName) {
     loadScript('tasks/' + params.taskName + '.js', function () {
-      console.log('callback after loading task: ' + params.taskName);
+      console.log('loaded task: ' + params.taskName);
     });
   }
 
@@ -584,4 +584,4 @@ var $j = jQuery.noConflict();
 
     return script;
   }
-}());
+// }());
