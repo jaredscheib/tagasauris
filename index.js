@@ -564,6 +564,10 @@ var $j = jQuery.noConflict();
     return new Date().getTime();
   }
 
+  function minToMs(min) {
+    return min * 60 * 1000;
+  }
+
   function loadScript(url, callback) {
     var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
     var script;
