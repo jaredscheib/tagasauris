@@ -17,7 +17,7 @@ stub_db = {
   taskTicketsPoolRef: db.child(ticketsPool),
   taskTicketsReqRef: db.child(ticketsReq),
   taskTicketsResRef: db.child(ticketsRes),
-  imgTickets: data.img_ref,
+  imgData: data.img_ref,
   taskTicketsPool: data[ticketsPool],
   taskTicketsReq: data[ticketsReq] || {},
   taskTicketsRes: data[ticketsRes] || {},
@@ -70,6 +70,9 @@ stub_db = {
       }
     }
     return Promise.all(ticketsToServe);
+  },
+  getImage: function (ticket) {
+    return imgData[taskTicketsPool[ticket[taskTicketsPool_uid]][img_ref_uid]];
   },
 };
 
