@@ -1,4 +1,6 @@
-/* global jQuery, Firebase, _, db, data, params */
+/* global jQuery, Firebase, _, Promise, db, data, params */
+
+var ticketsToGet = 30;
 
 var taskName = 'task_img_verification_trinary';
 var ticketsPool = taskName + '_tickets_pool'
@@ -10,14 +12,15 @@ var ticketsRes_uid = ticketsRes + '_uid';
 
 // stub db helpers & fixtures
 stub_db = {
-  imgRef: db.child('img_ref'), // TODO: need to resolve this before allowing methods below to be invoked?
-  taskTicketsRef: db.child(ticketsPool),
+  // TODO: need to resolve these refs before allowing methods below to be invoked?
+  imgRef: db.child('img_ref'),
+  taskTicketsPoolRef: db.child(ticketsPool),
   taskTicketsReqRef: db.child(ticketsReq),
   taskTicketsResRef: db.child(ticketsRes),
   imgTickets: data.img_ref,
   taskTicketsPool: data[ticketsPool],
-  taskTicketsReq: data[ticketsReq] || [],
-  taskTicketsRes: data[ticketsRes] || [],
+  taskTicketsReq: data[ticketsReq] || {},
+  taskTicketsRes: data[ticketsRes] || {},
   isTicketInReqAndNotExpired: function (ticket) {
     for (var reqTicketKey in this.taskTicketsReq) {
       var reqTicket = this.taskTicketsReq[reqTicketKey];
@@ -36,47 +39,46 @@ stub_db = {
     return (getNow() - reqTicket.timeSubmitted) > reqTicket.taskDuration; // TODO create these keys, normalize taskDuration and reference it back from jobs bucket
   },
   remainsOpen: function (ticket) {
-    // if ticket is in res or (ticket is in req and is not expired ((getNow() - timeSubmitted) > taskDuration))
-    if (isTicketInRes(ticket) || (isTicketInReqAndNotExpired(ticket))) return false;
+    if (this.isTicketInRes(ticket) || (this.isTicketInReqAndNotExpired(ticket))) return false;
     else return true;
-    // var backChain = this.taskTickets[]
-    // var backChain = this.taskTickets[this.taskTicketsReq[this.taskTicketsRes[ticketsReq]][ticketsPool_uid]].img_ref_uid;
-    // if (ticket.img_ref_uid === backChain) return false;
   },
-  // find up to first 30 open tickets from task_img_verification that are not in _req or _res
+  // retrieve up to n open tickets
   getTickets: function (taskName, maxCount) {
     var ticketsToServe = [];
-    // stub_db.imgTickets, stub_db.taskTickets, stub_db.taskTicketsReq, stub_db.taskTicketsRes
-    debugger;
-    for (var i = 0; i < Object.keys(this.taskTickets).length; i++) {
-      var ticket = this.taskTickets[i];
+    for (var uid in this.taskTicketsPool) {
+      var ticket = this.taskTicketsPool[uid];
       if (ticketsToServe.length === maxCount) break;
       if (this.remainsOpen(ticket)) {
-        console.log('ticketsToServe.push:', ticket);
-        var ticketPromise = this.taskTicketsReqRef.push(ticket)
-          .then((pushedTicketRef) => {
-            var newUID = pushedTicketRef.path.u[1];
-            pushedTicketRef.set({task_img_verification_trinary_uid: this.uid, uid: newUID}, function(err) {
-              if (err) console.log(err, 'failed to set in Firebase', this);
-              else console.log('succeeded to set in Firebase', this);
-            }).bind(this);
-            this.task_img_verification_trinary_uid = this.uid;
-            this.uid = newUID;
-            return this;
-          }).bind(ticket)
-        ticketsToServe.push(ticketPromise);
+        ticketsToServe.push(this.taskTicketsReqRef.push(ticket)
+        .then(function (pushedReqTicketRef) {
+          this[ticketsPool_uid] = this.uid;
+          this.uid = pushedReqTicketRef.path.u[1];
+          this.timeSubmitted = getNow();
+          this.taskDuration = minToMs(1); // TODO add this via reference to job entry
+          delete this.img_ref_uid;
+          pushedReqTicketRef.set({
+            task_img_verification_trinary_tickets_pool_uid: this[ticketsPool_uid],
+            uid: this.uid,
+            timeSubmitted: this.timeSubmitted,
+            taskDuration: this.taskDuration,
+          });
+          return this;
+        }.bind(ticket))
+        .catch(function (err) {
+          throw err;
+        }));
       }
-    } 
+    }
     return Promise.all(ticketsToServe);
   },
 };
 
 // query db for next 30 images (server will determine these but for now on client-side)
-stub_db.getTickets(taskName, 30)
+stub_db.getTickets(taskName, ticketsToGet)
   .then(function(ticketsToServe) {
-    debugger;
   // iterate over server response
-    console.log('succeeded to get tickets for task', ticketsToServe);
+    console.log('succeeded to get', ticketsToServe.length, 'of', ticketsToGet, 'requested for task', taskName);
+    console.log(ticketsToServe);
     ticketsToServe.forEach(function(ticket){
     // instantiate imgTrinary class per image (follow angular pattern)
     // event listeners on trinary
