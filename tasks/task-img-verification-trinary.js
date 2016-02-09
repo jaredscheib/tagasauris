@@ -80,8 +80,17 @@ var stub_db = {
   },
 };
 
-loadScript('./classes/imgTrinary.js');
-loadScript('./classes/imgRow.js');
+var loadClasses = function () {
+  loadScript('./classes/instructionsList.js', function () {
+    elements.instructionsList.appendChild(makeInstructionsList([
+      'For each image, select whether the title matches what you see.'
+      ], 'li'));
+  });
+  loadScript('./classes/imgTrinary.js');
+  loadScript('./classes/imgRow.js');
+};
+
+loadClasses();
 
 // query db for next 30 images (server will determine these but for now on client-side)
 stub_db.getTickets(taskName, ticketsToGet)
