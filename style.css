@@ -172,3 +172,15 @@ div {
 	font-size: 16px;
 	margin: 10px;
 }
+
+.container_trinary {
+	width: 30%;
+}
+
+.img_trinary {
+	display: block;
+}
+
+.radio_trinary {
+	display: inline-block;
+}

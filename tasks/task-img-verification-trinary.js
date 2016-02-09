@@ -1,4 +1,4 @@
-/* global jQuery, Firebase, _, Promise, db, data, params */
+/* global jQuery, Firebase, _, Promise, elements, db, data, params */
 
 var ticketsToGet = 30;
 
@@ -11,7 +11,7 @@ var ticketsReq_uid = ticketsReq + '_uid';
 var ticketsRes_uid = ticketsRes + '_uid';
 
 // stub db helpers & fixtures
-stub_db = {
+var stub_db = {
   // TODO: need to resolve these refs before allowing methods below to be invoked?
   imgRef: db.child('img_ref'),
   taskTicketsPoolRef: db.child(ticketsPool),
@@ -63,7 +63,7 @@ stub_db = {
             taskDuration: this.taskDuration,
           });
           return this;
-        }.bind(ticket))
+        }.bind(_.deepClone(ticket)))
         .catch(function (err) {
           throw err;
         }));
@@ -71,19 +71,30 @@ stub_db = {
     }
     return Promise.all(ticketsToServe);
   },
-  getImage: function (ticket) {
-    return imgData[taskTicketsPool[ticket[taskTicketsPool_uid]][img_ref_uid]];
+  getImage: function (reqTicket) {
+    var ticketsPoolKey = reqTicket[ticketsPool_uid];
+    var ticketsPoolTask = this.taskTicketsPool[ticketsPoolKey];
+    var gottenImg = this.imgData[ticketsPoolTask.img_ref_uid];
+    console.log('got image', gottenImg);
+    return gottenImg;
   },
 };
 
+loadScript('./classes/imgTrinary.js');
+loadScript('./classes/imgRow.js');
+
 // query db for next 30 images (server will determine these but for now on client-side)
 stub_db.getTickets(taskName, ticketsToGet)
-  .then(function(ticketsToServe) {
+  .then(function(reqTickets) {
   // iterate over server response
-    console.log('succeeded to get', ticketsToServe.length, 'of', ticketsToGet, 'requested for task', taskName);
-    console.log(ticketsToServe);
-    ticketsToServe.forEach(function(ticket){
-    // instantiate imgTrinary class per image (follow angular pattern)
+    console.log('succeeded to get', reqTickets.length, 'of', ticketsToGet, 'tickets requested for task', taskName);
+    console.log(reqTickets);
+    // instantiate imgTrinary class per image
+    reqTickets.forEach(function(reqTicket, i){
+      console.log('reqTicket', reqTicket);
+      if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
+      debugger;
+      elements.mediaArea.lastElementChild.appendChild(makeImgTrinary(stub_db.getImage(reqTicket), reqTicket));
     // event listeners on trinary
       // add response and other metadata (worker id, img_ref) to flat output obj based on trinary state change
       // enable submitBtn if all images completed
