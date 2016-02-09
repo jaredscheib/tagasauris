@@ -83,7 +83,7 @@ var stub_db = {
 var loadClasses = function () {
   loadScript('./classes/instructionsList.js', function () {
     elements.instructionsArea.appendChild(makeInstructionsList([
-      'For each image, select whether the title matches what you see.'
+      'Indicate if each of the' + ticketsToGet + 'images contains the named concept.'
       ], 'li'));
   });
   loadScript('./classes/imgTrinary.js');
