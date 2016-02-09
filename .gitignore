@@ -34,5 +34,6 @@ results
 temp.js
 assets/vid
 fixtures.js
-classes
+classes/imgBank.js
+classes/labelBank.js
 schema.txt
