@@ -54,7 +54,7 @@ var stub_db = {
           this[ticketsPool_uid] = this.uid;
           this.uid = pushedReqTicketRef.path.u[1];
           this.timeSubmitted = getNow();
-          this.taskDuration = minToMs(1); // TODO add this via reference to job entry
+          this.taskDuration = minToMs(15); // TODO add this via reference to job entry
           delete this.img_ref_uid;
           pushedReqTicketRef.set({
             task_img_verification_trinary_tickets_pool_uid: this[ticketsPool_uid],
@@ -80,39 +80,43 @@ var stub_db = {
   },
 };
 
-var loadClasses = function () {
+var loadClasses = function (callback) {
   loadScript('./classes/instructionsList.js', function () {
     elements.instructionsArea.appendChild(makeInstructionsList([
-      'Indicate if each of the' + ticketsToGet + 'images contains the named concept.'
+      'Indicate if each of the ' + ticketsToGet + ' images contains the named concept.'
       ], 'li'));
+    loadScript('./classes/imgTrinary.js', function () {
+      loadScript('./classes/imgRow.js', function () {
+        callback();
+      });
+    });
   });
-  loadScript('./classes/imgTrinary.js');
-  loadScript('./classes/imgRow.js');
 };
 
-loadClasses();
+loadClasses(function () {
+  // query db for next 30 images (server will determine these but for now on client-side)
+  stub_db.getTickets(taskName, ticketsToGet)
+    .then(function(reqTickets) {
+    // iterate over server response
+      console.log('succeeded to get', reqTickets.length, 'of', ticketsToGet, 'tickets requested for task', taskName);
+      console.log(reqTickets);
+      // instantiate imgTrinary class per image
+      reqTickets.forEach(function(reqTicket, i){
+        console.log('reqTicket', reqTicket);
+        if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
+        elements.mediaArea.lastElementChild.appendChild(makeImgTrinary(stub_db.getImage(reqTicket), reqTicket, i));
+      // event listeners on trinary
+        // add response and other metadata (worker id, img_ref) to flat output obj based on trinary state change
+        // enable submitBtn if all images completed
+      });   
+    })
+    .catch(function(err) {
+      console.log('failed to get tickets for task');
+      throw err;
+    });
+    
+  // event listener on submitBtn for click
+    // iterate over results obj
+      // push to img_sanitizer_task_worker_res  
+});
 
-// query db for next 30 images (server will determine these but for now on client-side)
-stub_db.getTickets(taskName, ticketsToGet)
-  .then(function(reqTickets) {
-  // iterate over server response
-    console.log('succeeded to get', reqTickets.length, 'of', ticketsToGet, 'tickets requested for task', taskName);
-    console.log(reqTickets);
-    // instantiate imgTrinary class per image
-    reqTickets.forEach(function(reqTicket, i){
-      console.log('reqTicket', reqTicket);
-      if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
-      elements.mediaArea.lastElementChild.appendChild(makeImgTrinary(stub_db.getImage(reqTicket), reqTicket, i));
-    // event listeners on trinary
-      // add response and other metadata (worker id, img_ref) to flat output obj based on trinary state change
-      // enable submitBtn if all images completed
-    });   
-  })
-  .catch(function(err) {
-    console.log('failed to get tickets for task');
-    throw err;
-  });
-  
-// event listener on submitBtn for click
-  // iterate over results obj
-    // push to img_sanitizer_task_worker_res
