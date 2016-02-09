@@ -82,7 +82,7 @@ var stub_db = {
 
 var loadClasses = function () {
   loadScript('./classes/instructionsList.js', function () {
-    elements.instructionsList.appendChild(makeInstructionsList([
+    elements.instructionsArea.appendChild(makeInstructionsList([
       'For each image, select whether the title matches what you see.'
       ], 'li'));
   });
