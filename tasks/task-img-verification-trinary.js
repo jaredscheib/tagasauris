@@ -93,8 +93,7 @@ stub_db.getTickets(taskName, ticketsToGet)
     reqTickets.forEach(function(reqTicket, i){
       console.log('reqTicket', reqTicket);
       if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
-      debugger;
-      elements.mediaArea.lastElementChild.appendChild(makeImgTrinary(stub_db.getImage(reqTicket), reqTicket));
+      elements.mediaArea.lastElementChild.appendChild(makeImgTrinary(stub_db.getImage(reqTicket), reqTicket, i));
     // event listeners on trinary
       // add response and other metadata (worker id, img_ref) to flat output obj based on trinary state change
       // enable submitBtn if all images completed

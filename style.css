@@ -167,20 +167,39 @@ div {
 }
 
 #submit_btn {
-	width:100px;
+	width: 100px;
 	height: 30px;
 	font-size: 16px;
 	margin: 10px;
 }
 
-.container_trinary {
-	width: 30%;
-}
-
-.img_trinary {
-	display: block;
-}
-
-.radio_trinary {
+.trinary_container {
+	height: 100%;
+	margin: 10px;
+	padding: 0px;
+	border: 1px solid black;
 	display: inline-block;
+	vertical-align: bottom;
+}
+
+.trinary_img {
+	width: 400px;
+	/*border: 1px dotted black;*/
+	display: block;
+	vertical-align: bottom;
+}
+
+.div_trinary_radio {
+	margin: 6px 0;
+}
+
+.trinary_radio {
+	margin: 3px;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.trinary_label {
+	margin: 0 10px 0 0;
+	font-size: 14px;
 }
