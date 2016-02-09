@@ -182,6 +182,13 @@ div {
 	vertical-align: bottom;
 }
 
+.trinary_p {
+	font-size: 19px;
+	text-transform: capitalize;
+	margin: 5px;
+	display: block;
+}
+
 .trinary_img {
 	width: 400px;
 	/*border: 1px dotted black;*/
