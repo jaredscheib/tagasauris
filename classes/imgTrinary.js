@@ -1,5 +1,6 @@
 var makeImgTrinary = function (imgData, reqTicket, i) {
   var trinaryContainer = document.createElement('div');
+  var pTrinary = document.createElement('p');
   var imgTrinary = document.createElement('img');
   var divTrinaryRadio = document.createElement('div');
   var radioTrinary1 = document.createElement('input');
@@ -14,7 +15,12 @@ var makeImgTrinary = function (imgData, reqTicket, i) {
   var iTrinary_mid = iTrinary + '_+0';
   var iTrinary_pos = iTrinary + '_+1';
 
+  trinaryContainer.id = iTrinary;
   trinaryContainer.className = 'trinary_container';
+
+  pTrinary.className = 'trinary_p';
+  pTrinary.id = iTrinary + '_p';
+  pTrinary.innerHTML = imgData.query.split('_').join(' ');
 
   imgTrinary.className = 'trinary_img';
   imgTrinary.src = imgData.url;
@@ -28,7 +34,7 @@ var makeImgTrinary = function (imgData, reqTicket, i) {
 
   labelTrinary1.setAttribute('for', iTrinary_neg);
   labelTrinary1.className = 'trinary_label';
-  labelTrinary1.innerText = '-1: No Way';
+  labelTrinary1.innerText = 'No Way';
 
   radioTrinary2.setAttribute('type', 'radio');
   radioTrinary2.setAttribute('name', iTrinary);
@@ -37,7 +43,7 @@ var makeImgTrinary = function (imgData, reqTicket, i) {
 
   labelTrinary2.setAttribute('for', iTrinary_mid);
   labelTrinary2.className = 'trinary_label';
-  labelTrinary2.innerText = '0: Unclear';
+  labelTrinary2.innerText = 'Unclear';
 
   radioTrinary3.setAttribute('type', 'radio');
   radioTrinary3.setAttribute('name', iTrinary);
@@ -46,8 +52,9 @@ var makeImgTrinary = function (imgData, reqTicket, i) {
 
   labelTrinary3.setAttribute('for', iTrinary_pos);
   labelTrinary3.className = 'trinary_label';
-  labelTrinary3.innerText = '1: Definitely';
+  labelTrinary3.innerText = 'Definitely';
 
+  trinaryContainer.appendChild(pTrinary);
   trinaryContainer.appendChild(imgTrinary);
   divTrinaryRadio.appendChild(radioTrinary1);
   divTrinaryRadio.appendChild(labelTrinary1);
