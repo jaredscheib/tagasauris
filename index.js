@@ -23,9 +23,15 @@ var $j = jQuery.noConflict();
     '04': 38,
     '05': 33,
   };
+
+  var imgCounters;
+  var player;
+  var annotext;
+  var enterKeywordBtn;
+
   // page elements
   window.elements = {
-    instructionsList: document.getElementById('instructions_list'),
+    instructionsArea: document.getElementById('instructions_area'),
     prevBtns: document.getElementsByClassName('prev_btn'),
     nextBtns: document.getElementsByClassName('next_btn'),
     controlsArea: document.getElementsByClassName('controls_area'),
@@ -33,10 +39,6 @@ var $j = jQuery.noConflict();
     responseArea: document.getElementById('response_area'),
     submitBtn: document.getElementById('submit_btn'),
   };
-  var imgCounters;
-  var player;
-  var annotext;
-  var enterKeywordBtn;
 
   console.log('params', params);
 
