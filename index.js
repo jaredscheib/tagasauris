@@ -40,12 +40,6 @@ var $j = jQuery.noConflict();
 
   console.log('params', params);
 
-  if (params.taskName) {
-    loadScript('tasks/' + params.taskName + '.js', function () {
-      console.log('loaded task: ' + params.taskName);
-    });
-  }
-
   if (params.ASSET_TYPE === 'img') {
     loadScript('lib/annotorious.css'); // local lib since GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
     loadScript('lib/annotorious.min.js', function () {
@@ -116,6 +110,12 @@ var $j = jQuery.noConflict();
   db.once('value', function (snapshot) {
     console.log('db.once event');
     data = snapshot.val();
+
+    if (params.taskName) {
+      loadScript('tasks/' + params.taskName + '.js', function () {
+        console.log('loaded task: ' + params.taskName);
+      });
+    }
 
     if (params.TODAY_DATA_DATE) {
       assetsCounts = data.assets[params.TODAY_DATA_DATE];
