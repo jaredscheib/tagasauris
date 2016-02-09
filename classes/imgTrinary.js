@@ -10,9 +10,9 @@ var makeImgTrinary = function (imgData, reqTicket, i) {
   var labelTrinary3 = document.createElement('label');
 
   var iTrinary = 'trinary' + String(i);
-  var iTrinary_neg = iTrinary + '-1';
-  var iTrinary_mid = iTrinary + '0';
-  var iTrinary_pos = iTrinary + '1';
+  var iTrinary_neg = iTrinary + '_-1';
+  var iTrinary_mid = iTrinary + '_+0';
+  var iTrinary_pos = iTrinary + '_+1';
 
   trinaryContainer.className = 'trinary_container';
 
