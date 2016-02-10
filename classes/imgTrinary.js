@@ -73,7 +73,12 @@ var ImgTrinary = function (imgData, reqTicket, i) {
 
   this.addRadioChangeHandler = function (radio) {
     radio.addEventListener('change', function (event) {
-      // if ()
-    }).call(this);;
+      console.log(event);
+      console.log(radio.value);
+    });
   };
+
+  this.addRadioChangeHandler(this.radioTrinary1);
+  this.addRadioChangeHandler(this.radioTrinary2);
+  this.addRadioChangeHandler(this.radioTrinary3);
 };
