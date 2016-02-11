@@ -162,8 +162,8 @@ div {
 	display: block;
 }
 
-#img_count {
-	font-style: em;
+#img_counter {
+	font-weight: bold;
 }
 
 #submit_btn {
@@ -206,7 +206,21 @@ div {
 	vertical-align: bottom;
 }
 
-.trinary_label {
+.trinary_radio_label {
 	margin: 0 10px 0 0;
-	font-size: 14px;
+	font-size: 15px;
+}
+
+.div_trinary_checkbox {
+	/*margin: 3px 0;*/
+	/*border: 1px solid black;*/
+}
+
+.trinary_checkbox {
+
+}
+
+.trinary_checkbox_label {
+	margin: 0;
+	font-size: 12px;
 }
