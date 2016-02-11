@@ -7,8 +7,9 @@ var $j = jQuery.noConflict();
 var params = _.getUrlParams(); if (params.TASK_NUM) params.TASK_NUM = Number(params.TASK_NUM);
 
 var taskInfo = {
-  ticketsToGet: Number(params.ticketsToGet),
-  taskName: params.taskName,
+  ticketsToGet: Number(params.ticketsToGet) || 30,
+  ticketsReceived: 0,
+  taskName: params.taskName || 'task_img_verification_trinary',
   taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || minToMs(10)), // TODO refactor?
 };
 
@@ -41,7 +42,6 @@ var assetToImgTotal = {
   '05': 33,
 };
 
-var imgCounters;
 var player;
 var annotext;
 var enterKeywordBtn;
@@ -53,6 +53,7 @@ var elements = {
   nextBtns: document.getElementsByClassName('next_btn'),
   controlsArea: document.getElementsByClassName('controls_area'),
   mediaArea: document.getElementById('media_area'),
+  resTicketItems: [],
   responseArea: document.getElementById('response_area'),
   submitBtn: document.getElementById('submit_btn'),
 };
@@ -153,7 +154,7 @@ dbRef.root.once('value')
     imgTotal = assetToImgTotal[assetId];
 
     drawImgGrid();
-    setImgCounter();
+    setImgCounters();
   } else if (params.ASSET_TYPE === 'vid') {
     loadScript('https://www.youtube.com/iframe_api');
   }
@@ -272,10 +273,8 @@ window.onload = function () {
                         '<button class="prev_btn" disabled>Prev Set</button>' +
                         '<button class="next_btn" disabled>Next Set</button>' +
                        '</div>' +
-                        '<span class="img_remain">Total images remaining to annotate: <span class="img_count"></span></span>';
+                        '<span class="img_remain">Total images remaining to annotate: <span class="img_counter"></span></span>';
     });
-
-    imgCounters = document.getElementsByClassName('img_count');
 
     elements.responseArea.remove();
     // set up prev and next buttons for carousel
@@ -363,17 +362,17 @@ window.onload = function () {
     }
   }
 
-
+  debugger;
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
     if (!params.TASK_NUM) {
       var postRef = dbRef.root.child(ticketsInfo.ticketsRes);
-      elements.resTicketItems.forEach(function (item) {
-        item[ticketsInfo.ticketsReq_uid] = item.reqTicket.uid;
-        item.workerId = params.workerId;
-        item.timeSubmitted = getNow();
-        postRef.push(item);
+      elements.resTicketItems.forEach(function (resTicketItem) {
+        resTicketItem.resTicket[ticketsInfo.ticketsReq_uid] = resTicketItem.resTicket.reqTicket.uid;
+        resTicketItem.resTicket.workerId = params.workerId;
+        resTicketItem.resTicket.timeSubmitted = getNow();
+        postRef.push(resTicketItem.resTicket);
       });
       return;
     }
@@ -418,7 +417,7 @@ function updatePersistedAnnotations (annoToUpdate) {
   var imgNum = getImgNum(annoToUpdate);
   annotations[imgNum] = _.deepClone(anno.getAnnotations(annoToUpdate.src));
   updateLabelBank(imgNum);
-  setImgCounter();
+  setImgCounters();
   // console.log('annotations after update persisted', annotations);
 }
 
@@ -566,10 +565,8 @@ if (params.ASSET_TYPE === 'img') {
   function imgRemaining () {
     var remaining = imgTotal;
 
-    _.each(annotations, function (tempAnno) {
-      if (tempAnno.length > 0) {
-        remaining--;
-      }
+    elements.resTicketItems.forEach(function (resTicketItem) {
+      if (resTicketItem.resTicket.result) remaining--;
     });
 
     if (elements.submitBtn.disabled === true) {
@@ -585,9 +582,10 @@ if (params.ASSET_TYPE === 'img') {
     return remaining;
   }
 
-  function setImgCounter() {
-    _.each(imgCounters, function (counter) {
-      counter.innerHTML = imgRemaining();
+  function setImgCounters() {
+    if (!elements.imgCounters) elements.imgCounters = document.getElementsByClassName('img_counter');
+    _.each(elements.imgCounters, function (imgCounter) {
+      imgCounter.innerHTML = imgRemaining();
     });
   }
 }
@@ -617,23 +615,23 @@ function minToMs(min) {
 }
 
 function loadScript(url, callback) {
+  var returnCallback = function(arg) { return callback(arg); };
   var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
   var script;
   if (fileType === 'js') {
     script = document.createElement('script');
-    document.head.appendChild(script); // ideal practice to add to DOM, then set onload, then src, though clunkier
-    if (callback !== undefined) script.onload = callback;
-    script.setAttribute('type', 'text/javascript');
-    script.setAttribute('src', url);
+    script.src = url;
+    script.type = 'text/javascript';
+    if (callback !== undefined) script.onload = returnCallback;
   } else if (fileType === 'css') {
     script = document.createElement('link');
-    document.head.appendChild(script); // ideal practice to add to DOM, then set onload, then src, though clunkier
-    if (callback !== undefined) script.onload = callback;
-    script.setAttribute('rel', 'stylesheet');
-    script.setAttribute('type', 'text/css');
-    script.setAttribute('href', url);
+    script.href = url;
+    script.type = 'text/css';
+    script.rel = 'stylesheet';
+    if (callback !== undefined) script.onload = returnCallback;
   }
-
-  return script;
+  script.async = 'false';
+  document.body.appendChild(script);
+  return returnCallback;
 }
 // }());
