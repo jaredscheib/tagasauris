@@ -27,6 +27,6 @@ build/Release
 node_modules
 
 # Dev
-dev/
-assets/
-results/
+dev
+assets
+results
