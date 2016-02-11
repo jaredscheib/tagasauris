@@ -1,6 +1,6 @@
 /* global _, Promise, elements, getNow, minToMs, loadScript */
 /* global taskInfo, ticketsInfo, dbRef, taskData */
-/* global makeInstructionsList, makeImgRow, ImgTrinary */
+/* global setImgCounters, removeLoader, makeInstructionsList, makeImgRow, ImgTrinary */
 
 // stub db helpers
 var stub_db = {
@@ -57,6 +57,7 @@ var stub_db = {
         }));
       }
     }
+    taskInfo.ticketsReceived = ticketsToServe.length;
     return Promise.all(ticketsToServe);
   },
   getImage: function (reqTicket) {
@@ -82,7 +83,7 @@ var stub_db = {
 var loadClasses = function (callback) {
   loadScript('./classes/instructionsList.js', function () {
     elements.instructionsArea.appendChild(makeInstructionsList([
-      'Indicate if each of the ' + taskInfo.ticketsToGet + ' images contains the named concept.'
+      'Does each of the <span class="img_counter"></span> photos below contain the named concept?'
     ], 'li'));
     loadScript('./classes/imgTrinary.js', function () {
       loadScript('./classes/imgRow.js', function () {
@@ -100,7 +101,7 @@ loadClasses(function () {
       // console.log('succeeded to get', reqTickets.length, 'of', taskInfo.ticketsToGet, 'tickets requested for task', taskInfo.taskName);
       // console.log(reqTickets);
       // instantiate imgTrinary class per image
-      elements.resTicketItems = [];
+      removeLoader();
       reqTickets.map(function(reqTicket, i){
         if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
         var newImgTrinary = new ImgTrinary(stub_db.getImage(reqTicket), reqTicket, i);
@@ -110,6 +111,7 @@ loadClasses(function () {
         // add response and other metadata (worker id, img_ref) to flat output obj based on trinary state change
         // enable submitBtn if all images completed
       });   
+      setImgCounters();
     })
     .catch(function(err) {
       console.log('failed to get tickets for task');
@@ -121,3 +123,6 @@ loadClasses(function () {
       // push to img_sanitizer_task_worker_res  
 });
 
+var isTaskComplete = function () {
+  // return !$j('input[name=""')
+};
