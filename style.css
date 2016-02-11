@@ -1,0 +1,226 @@
+html {
+	height: 100%;
+	box-sizing: border-box;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+/*table {
+	border-collapse: collapse;
+}
+
+th, td {
+	padding: 0px;
+}*/
+
+body {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+	text-align: center;
+	font-family: 'Open Sans', sans-serif;
+}
+
+div {
+	margin: 0px;
+	padding: 0px;
+	border: 0px;
+}
+
+#instructions_area {
+	/*border: 1px solid black;*/
+	padding: 0px;
+	margin: 10px auto;
+	width: 55%;
+	display: block;
+}
+
+#instructions_list {
+	font-size: 16px;
+	text-align: left;
+	display: inline-block;
+}
+
+#task_area {
+	width: 100%;
+}
+
+.prev_btn, .next_btn {
+	font-size: 14px;
+	margin: 2px;
+	display: inline-block;
+}
+
+#media_area {
+	width: 100%;
+}
+
+#img_grid {
+	display: inline-block;
+	width: 100%;
+	zoom: 1;
+	display*: inline;
+}
+
+.img_row {
+	margin: 0px;
+	padding: 0px;
+	display: inline-block;
+	width: 100%;
+	zoom: 1;
+	display*: inline;
+}
+
+.img_bank {
+	display: inline-block;
+	padding: 0px;
+}
+
+.anno_img {
+	margin: 0px 5px;
+	/*float: left;*/
+	width: 480px;
+}
+
+.label_bank {
+	vertical-align: top;
+	width: 120px;
+	display: inline-block;
+	border: 0px dashed black;
+	border-radius: 5px;
+	padding: 5px 0;
+	overflow: scroll; /* TODO change to vert wrap */
+}
+
+.bank-lft {
+	margin: 0 0 0 15px;f
+	float: left;
+}
+
+.bank-rgt {
+	margin: 0 15px 0 0;
+	float: right;
+}
+
+/*.bank_title {
+	font-size: 13px;
+	font-style: oblique;
+	text-decoration: underline;
+}*/
+
+.label_container {
+	margin: 0 2px;
+}
+
+.label-lft {
+	text-align: right;
+}
+
+.label-rgt {
+	text-align: left;
+}
+
+.label {
+	font-size: 10px;
+	border: 1px solid black;
+	border-radius: 8px;
+	background-color: #EAEAEA;
+	text-align: left;
+	display: inline-block;
+	margin: 0;
+	padding: 2px;
+}
+
+#response_area {
+	margin: 15px 15px 0px 15px;
+	display: block;
+}
+
+#annotext {
+	width: 200px;
+	height: 25px;
+	font-size: 16px;
+	display: inline-block;
+}
+
+#enter_keyword {
+    width: 50px;
+    height: 25px;
+    font-size: 14px;
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: top;
+}
+
+#annochecks {
+}
+
+#img_remain {
+	margin: 5px;
+	display: block;
+}
+
+#img_counter {
+	font-weight: bold;
+}
+
+#submit_btn {
+	width: 100px;
+	height: 30px;
+	font-size: 16px;
+	margin: 10px;
+}
+
+.trinary_container {
+	height: 100%;
+	margin: 10px;
+	padding: 0px;
+	border: 1px solid black;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.trinary_p {
+	font-size: 19px;
+	text-transform: capitalize;
+	margin: 5px;
+	display: block;
+}
+
+.trinary_img {
+	width: 400px;
+	/*border: 1px dotted black;*/
+	display: block;
+	vertical-align: bottom;
+}
+
+.div_trinary_radio {
+	margin: 6px 0;
+}
+
+.trinary_radio {
+	margin: 3px;
+	display: inline-block;
+	vertical-align: bottom;
+}
+
+.trinary_radio_label {
+	margin: 0 10px 0 0;
+	font-size: 15px;
+}
+
+.div_trinary_checkbox {
+	/*margin: 3px 0;*/
+	/*border: 1px solid black;*/
+}
+
+.trinary_checkbox {
+
+}
+
+.trinary_checkbox_label {
+	margin: 0;
+	font-size: 12px;
+}

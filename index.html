@@ -1,11 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" /><!-- compatibility with IE8+ for .setAttribute -->
 	<title>Crowdsourced Annotations</title>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script type="text/javascript" src="loader.js"></script>
+	<script src="https://cdn.firebase.com/js/client/2.4.0/firebase.js"></script>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+	<script type="text/javascript" src="utils.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/3.2.2/bluebird.core.min.js"></script>
+	<!-- adding annotorious OR YouTube Iframe API dynamically -->
 </head>
 <body>
-	<div>
-		<span>Hello world</span>
+	<div id="instructions_area"></div>
+	<div id="task_area">
+		<div class="controls_area"></div>
+		<div id="media_area"></div>
+		<div class="controls_area"></div>
+		<div id="response_area"></div><div>
+			<button id="submit_btn" disabled>Submit HIT</button>
+		</div>
 	</div>
+	<script type="text/javascript" src="index.js"></script>
 </body>
 </html>
