@@ -11,10 +11,10 @@ app.get('/tickets', (req, res) => {
   const task = req.query.task;
   const num = req.query.num;
   
-  db.getTickets(task, num)
+  db.getOpenTickets(task, num)
   .then(data => {
     console.log('GOT DATA!');
-    console.log(data);
+    console.log(data.length, data);
     res.status(200).send(data);
   })
   .catch(err => {
