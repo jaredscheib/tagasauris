@@ -10,7 +10,7 @@ var taskInfo = {
   ticketsToGet: Number(params.ticketsToGet) || 30,
   ticketsReceived: 0,
   taskName: params.taskName || 'task_img_verification_trinary',
-  taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || minToMs(10)), // TODO refactor?
+  taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || _.minToMs(10)), // TODO refactor?
 };
 
 var taskData = {};
@@ -66,7 +66,7 @@ window.onload = function () {
     elements.resTicketItems.forEach(function (resTicketItem) {
       resTicketItem.resTicket[ticketsInfo.ticketsReq_uid] = resTicketItem.resTicket.reqTicket.uid;
       resTicketItem.resTicket.workerId = params.workerId;
-      resTicketItem.resTicket.timeSubmitted = getNow();
+      resTicketItem.resTicket.timeSubmitted = _.getNow();
       postRef.push(resTicketItem.resTicket);
     });
     return;
@@ -128,14 +128,6 @@ function mturkCheckPreview() {
     });
     return true;
   }
-}
-
-function getNow() {
-  return new Date().getTime();
-}
-
-function minToMs(min) {
-  return min * 60 * 1000;
 }
 
 function loadScript(url, callback) {
