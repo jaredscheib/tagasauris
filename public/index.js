@@ -1,17 +1,20 @@
-/* global jQuery, Firebase, _, YT, anno */
+/* global jQuery, _ */
 
 var $j = jQuery.noConflict();
 
 // wrap in IIFE to not expose global variables
 // (function app() {
+
 var params = _.getUrlParams(); if (params.TASK_NUM) params.TASK_NUM = Number(params.TASK_NUM);
 
 var taskInfo = {
   ticketsToGet: Number(params.ticketsToGet) || 30,
   ticketsReceived: 0,
-  taskName: params.taskName || 'task_img_verification_trinary',
+  taskName: params.task || 'task_img_verification_trinary',
   taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || _.minToMs(10)), // TODO refactor?
 };
+
+loadScript('tasks/' + taskInfo.taskName + '.js')
 
 var server = 'http://127.0.0.1:3020';
 var apiRoute = server + '/tickets';

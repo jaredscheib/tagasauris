@@ -1,6 +1,6 @@
 // non img+annotorious tasks
 
-/* global jQuery, Firebase, _, anno */
+/* global jQuery, Firebase, _, YT */
 /* global elements, params */
 
 var assetsCounts;
