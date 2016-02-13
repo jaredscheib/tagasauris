@@ -19,3 +19,5 @@ app.get('/test', (req, res) => {
 app.listen(app.get('port'), () => {
   console.log('api-server is listening on port', app.get('port'));
 });
+
+module.exports = app;

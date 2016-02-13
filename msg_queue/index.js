@@ -13,3 +13,5 @@ app.set('port', mqServerConfig.port);
 app.listen(app.get('port'), () => {
   console.log('MsgQueueServer is running on port', app.get('port'));
 });
+
+module.exports = app;
