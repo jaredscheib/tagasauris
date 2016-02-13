@@ -19,6 +19,28 @@ var assetToImgTotal = {
   '05': 33,
 };
 
+  // if (params.TODAY_DATA_DATE) {
+  //   assetsCounts = taskData.all.assets[params.TODAY_DATA_DATE];
+  //   if (taskData.all.data[params.TODAY_DATA_DATE] === undefined) taskData.all.data[params.TODAY_DATA_DATE] = {};
+  // }
+
+  // if (params.TODAY_DATA_DATE === '20160114') {
+  //   assetId = getAssetId(assetsCounts, taskData.all.data[params.TODAY_DATA_DATE]);
+  // // any dates past 20160114
+  // } else if (params.TODAY_DATA_DATE === '20160123') {
+  //   assetId = getAssetId(assetsCounts[params.ASSET_TYPE], taskData.all.data[params.TODAY_DATA_DATE]);
+  //   // console.log('assetId', assetId);
+  // }
+
+  // if (params.ASSET_TYPE === 'img') {
+  //   imgTotal = assetToImgTotal[assetId];
+
+  //   drawImgGrid();
+  //   setImgCounters();
+  // } else if (params.ASSET_TYPE === 'vid') {
+  //   loadScript('https://www.youtube.com/iframe_api');
+  // }
+
 loadScript('lib/annotorious.css'); // local lib since GitHub Pages not over SSL: https://github.com/isaacs/github/issues/156
 loadScript('lib/annotorious.min.js', function () {
   // annotorious event handlers
