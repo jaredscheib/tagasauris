@@ -27,13 +27,8 @@ build/Release
 node_modules
 
 # Private files
-work_log.txt
-secrets.js
-notes.js
-results
-temp.js
-assets/vid
-classes/imgBank.js
-classes/labelBank.js
-schema.txt
-fixtures
+dev
+public/assets
+public/tasks/classes/imgBank.js
+public/tasks/classes/labelBank.js
+server/fixtures
