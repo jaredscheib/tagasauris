@@ -1,6 +1,12 @@
-/* global isTaskComplete */
+/* global _, isTaskComplete */
 
-var ImgTrinary = function (imgData, reqTicket, i) {
+var ImgTrinary = function (reqTicket, i) {
+  this.reqTicket = reqTicket;
+  this.resTicket = _.deepClone(this.resTicket); // TODO fix _.deepClone
+
+  console.log('this.reqTicket', this.reqTicket);
+  console.log('this.resTicket', this.resTicket);
+
   this.i = i;
 
   this.trinaryContainer = document.createElement('div');
@@ -27,10 +33,10 @@ var ImgTrinary = function (imgData, reqTicket, i) {
 
   this.pTrinary.className = 'trinary_p';
   this.pTrinary.id = iTrinary + '_p';
-  this.pTrinary.innerHTML = imgData.query.split('_').join(' ');
+  this.pTrinary.innerHTML = this.reqTicket.query.slice().split('_').join(' ');
 
   this.imgTrinary.className = 'trinary_img';
-  this.imgTrinary.src = imgData.url;
+  this.imgTrinary.src = this.reqTicket.url;
 
   this.divTrinaryRadio.className = 'div_trinary_radio';
   this.divTrinaryCheckbox.className = 'div_trinary_checkbox';
@@ -91,10 +97,6 @@ var ImgTrinary = function (imgData, reqTicket, i) {
   this.divTrinaryCheckbox.appendChild(this.labelCheckboxTrinary);
   this.trinaryContainer.appendChild(this.divTrinaryRadio);
   this.trinaryContainer.appendChild(this.divTrinaryCheckbox);
-
-  this.imgData = imgData;
-  this.reqTicket = reqTicket;
-  this.resTicket = {};
 
   this.addRadioChangeHandler = function (radio) {
     radio.addEventListener('change', function (event) {

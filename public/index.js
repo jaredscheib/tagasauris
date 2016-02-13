@@ -27,7 +27,7 @@ var elements = {
   nextBtns: document.getElementsByClassName('next_btn'),
   controlsArea: document.getElementsByClassName('controls_area'),
   mediaArea: document.getElementById('media_area'),
-  resTicketItems: [],
+  ticketComponents: [],
   responseArea: document.getElementById('response_area'),
   submitBtn: document.getElementById('submit_btn'),
 };
@@ -42,10 +42,10 @@ loadScript('tasks/' + taskInfo.taskName + '.js')
 .then(function() {
   getTickets(taskInfo.taskName, taskInfo.ticketsToGet)
   .done(function (ticketsPool) {
-    console.log('got ' + ticketsPool.length + ' tickets via ajax');
+    console.log('got ' + Object.keys(ticketsPool).length + ' tickets via ajax');
     // tempResultsData = ticketsPool.slice(); // TODO remove
-    stub_updateComponentState(ticketsPool);
     removeLoader();
+    stub_updateComponentState(ticketsPool);
     
   })
   .fail(function(err) {

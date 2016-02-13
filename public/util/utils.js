@@ -52,7 +52,7 @@ var gl519 = module.exports = (function () {
     }
   };
 
-  _.deepClone = _.cloneDeep = function (o) {
+  _.deepClone = _.cloneDeep = function (o) { // TODO fix for objects
     if (o == null) return o;
     return _.map(o, function (v) {
       if (typeof(v) == 'object') {
