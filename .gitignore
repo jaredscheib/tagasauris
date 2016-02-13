@@ -26,7 +26,9 @@ build/Release
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
 
-# Dev
+# Private files
 dev
-assets
-results
+public/assets
+public/tasks/classes/imgBank.js
+public/tasks/classes/labelBank.js
+server/fixtures

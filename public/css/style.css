@@ -171,6 +171,7 @@ div {
 	height: 30px;
 	font-size: 16px;
 	margin: 10px;
+	visibility: hidden;
 }
 
 .trinary_container {
@@ -223,4 +224,11 @@ div {
 .trinary_checkbox_label {
 	margin: 0;
 	font-size: 12px;
+}
+
+#loader {
+	font-size: 36px;
+	text-align: center;
+	margin: 100px auto;
+	display: inline-block;
 }
