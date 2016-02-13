@@ -1,9 +1,9 @@
 if (process.env.ENV === 'prod') {
   module.exports = {
-    port: '80'
+    port: process.env.PORT || '80'
   }
 } else {
   module.exports = {
-    port: '65000'
+    port: process.env.PORT || '65000'
   }
 }

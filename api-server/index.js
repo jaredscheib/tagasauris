@@ -7,11 +7,12 @@ const mqServerConfig = require('../common/config/mqserver.js');
 const config = require('./config.js');
 
 const app = express();
-const mQ = new MsgQueueClient(mqServerConfig.url);
+const mQ = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`);
 
 app.set('port', config.port);
 
 app.get('/test', (req, res) => {
+  console.log('GET on /test');
   mQ.enqueue('image_scrape_req');
   res.status(200).send('test hit');
 });
