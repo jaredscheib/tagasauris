@@ -76,37 +76,6 @@ window.onload = function () {
   mturkCheckPreview();
 };
 
-function getAssetId(ac, d) {
-  if (Object.keys(d).length === 0) {
-    return Object.keys(ac)[0];
-  } else {
-    var assetsCountsClone = _.deepClone(ac);
-    var assetsCountsRemaining = [];
-
-    _.each(d[params.workerId], function (entry) {
-      if (params.TASK_NUM === entry.task) {
-        assetsCountsClone[entry.assetId] = false;
-      }
-    });
-
-    _.each(assetsCountsClone, function (val, key) {
-      if (val !== false) assetsCountsRemaining.push([key, val]);
-    });
-
-    if (assetsCountsRemaining.length > 0) {
-      // return media with least annotations
-      assetsCountsRemaining.sort(function (a, b) { return a[1] < b[1]; });
-      return assetsCountsRemaining.pop()[0];
-    } else {
-      _.dialog($j('<div style="background-color: rgba(0,0,0,0.5);color:white;font-size:xx-large;padding:10px"/>').text('all HITs completed'), false);
-      $j('body').click(function () {
-        alert('You have annotated all media. Please return this HIT.');
-      });
-      return true;
-    }
-  }
-}
-
 function getTickets(task, num) {
   // TODO AJAX GET
   console.log('ajax get attempt');
