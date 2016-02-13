@@ -1,6 +1,6 @@
 {
   "rules": {
-    "indent": [1, 2],
+    "indent": [2, 2],
     "quotes": [2, "single"],
     "linebreak-style": [2, "unix"],
     "semi": [2, "always"],
@@ -8,9 +8,12 @@
     "no-console": [1],
     "no-warning-comments": [1],
     "comma-dangle": [0],
+    "no-param-reassign": [1],
+    "prefer-const": [1],
+    "indent": [1],
   },
   "env": {
     "browser": true
   },
-  "extends": "eslint:recommended"
+  "extends": "airbnb/base"
 }
