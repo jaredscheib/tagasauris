@@ -1,28 +1,28 @@
+/* global $j, elements */
+
 var addLoader = function () {
-  var p = document.createElement('p');
-  document.body.appendChild(p);
+  elements.loader = document.createElement('p');
+  document.body.appendChild(elements.loader);
   var loadingHTML = 'Loading task<br>';
-  p.innerHTML = 'Loading task<br>';
-  p.setAttribute('font-size', '36px');
-  p.setAttribute('text-align', 'center');
-  p.setAttribute('margin', '200px auto');
-  p.setAttribute('display', 'inline-block');
-  p.id = 'p_loader';
+  elements.loader.innerHTML = loadingHTML;
+  elements.loader.id = 'loader';
 
   var x = 0;
-  var intervalID = setInterval(function() {
+  elements.loader.intervalID = setInterval(function() {
     if (++x === 5) {
-      x = 0
-      p.innerHTML = loadingHTML;
+      x = 0;
+      elements.loader.innerHTML = loadingHTML;
     }
-    p.innerHTML += '.';
+    elements.loader.innerHTML += '.';
   }, 300);
-
-  setTimeout(function(){ window.clearInterval(intervalID); }, 5000)
-
-  removeLoader.bind(null, intervalID);
 };
 
 var removeLoader = function() {
-  $j('p_loader').remove();
+  window.clearInterval(elements.loader.intervalID);
+  $j('#loader').remove();
+  delete elements.loader;
+};
+
+var showLoader = function() {
+  $j('#loader').style('visibility', true);
 };
