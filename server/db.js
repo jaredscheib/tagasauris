@@ -1,6 +1,6 @@
 'use strict'
 
-const _ = require('../scripts/helpers/utils.js');
+const _ = require('../public/util/utils.js');
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
 const Firebase = require('firebase');
