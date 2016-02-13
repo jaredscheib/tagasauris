@@ -1,5 +1,6 @@
 'use strict';
 
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const methodOverride = require('method-override');
@@ -14,7 +15,7 @@ app.use(morgan('dev')); // log HTTP requests in pre-defined 'dev' format
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false })); // only accept flat objects
 app.use(methodOverride());
-app.use(express.static(__dirname + '/../public')); // serve static HTML files from a dedicated directory and bypasses remaining routes
+app.use(express.static(path.join(__dirname, '/../public'))); // serve static HTML files from a dedicated directory and bypasses remaining routes
 app.use(cors());
 
 app.get('/tickets', (req, res) => {
@@ -53,7 +54,7 @@ app.post('/tickets', (req, res) => {
 
 app.get('*', (req, res) => {
   console.log('* request');
-  res.send(200);
+  res.sendStatus(200);
 });
 
 app.listen(PORT, 'localhost', (err) => {
