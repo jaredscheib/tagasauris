@@ -56,9 +56,15 @@ function sendErr (err) {
 }
 
 function stub_getOpenTickets (task, num) {
-  return fs.readFileAsync('./fixtures/porsche_macan.json', 'utf-8')
+  // TODO check what structure firebase returns
+  return fs.readFileAsync('./fixtures/flat-data.json', 'utf-8')
   .then(data => {
-    var x = JSON.parse(data).slice(0, 30);
+    data = JSON.parse(data);
+    var flatData = [];
+    _.each(data, obj => {
+      flatData.push(obj);
+    });
+    var x = flatData.slice(0, 30);
     console.log(x.length);
     return x;
   });
