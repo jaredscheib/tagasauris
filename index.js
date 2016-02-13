@@ -13,6 +13,9 @@ var taskInfo = {
   taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || _.minToMs(10)), // TODO refactor?
 };
 
+var server = 'http://127.0.0.1:3020';
+var apiRoute = server + '/tickets';
+
 var taskData = {};
 
 // page elements
@@ -30,46 +33,29 @@ var elements = {
 console.log('params', params);
 
 getTickets(taskInfo.taskName, taskInfo.ticketsToGet)
-.then(function (ticketsPool) {
-  updateComponents(ticketsPool);
-  // if (params.TODAY_DATA_DATE) {
-  //   assetsCounts = taskData.all.assets[params.TODAY_DATA_DATE];
-  //   if (taskData.all.data[params.TODAY_DATA_DATE] === undefined) taskData.all.data[params.TODAY_DATA_DATE] = {};
-  // }
-
-  // if (params.TODAY_DATA_DATE === '20160114') {
-  //   assetId = getAssetId(assetsCounts, taskData.all.data[params.TODAY_DATA_DATE]);
-  // // any dates past 20160114
-  // } else if (params.TODAY_DATA_DATE === '20160123') {
-  //   assetId = getAssetId(assetsCounts[params.ASSET_TYPE], taskData.all.data[params.TODAY_DATA_DATE]);
-  //   // console.log('assetId', assetId);
-  // }
-
-  // if (params.ASSET_TYPE === 'img') {
-  //   imgTotal = assetToImgTotal[assetId];
-
-  //   drawImgGrid();
-  //   setImgCounters();
-  // } else if (params.ASSET_TYPE === 'vid') {
-  //   loadScript('https://www.youtube.com/iframe_api');
-  // }
+.done(function (ticketsPool) {
+  console.log('got via ajax');
+  console.log(ticketsPool);
+  tempResultsData = ticketsPool.slice(); // TODO remove
+  stub_updateComponentState(ticketsPool);
 });
 
 // set HTML and create event listeners on window load
 window.onload = function () {
-
   debugger;
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
-    var postRef = dbRef.root.child(ticketsInfo.ticketsRes);
-    elements.resTicketItems.forEach(function (resTicketItem) {
-      resTicketItem.resTicket[ticketsInfo.ticketsReq_uid] = resTicketItem.resTicket.reqTicket.uid;
-      resTicketItem.resTicket.workerId = params.workerId;
-      resTicketItem.resTicket.timeSubmitted = _.getNow();
-      postRef.push(resTicketItem.resTicket);
+    console.log('ajax post attempt');
+    $j.ajax({
+      url: apiRoute,
+      type: 'POST',
+      data: stub_getResultsData()
+    })
+    .done(function (res) {
+      console.log('closed tickets via POST!');
+      console.log('response:', res);
     });
-    return;
   });
 
   mturkCheckPreview();
@@ -108,14 +94,32 @@ function getAssetId(ac, d) {
 
 function getTickets(task, num) {
   // TODO AJAX GET
+  console.log('ajax get attempt');
+  return $j.ajax({
+    url: apiRoute,
+    type: 'GET',
+    data: {
+      task: task,
+      num: num
+    }
+  });
 }
 
-function updateComponents() {
+function stub_updateComponentState() {
  // TODO feed React
 }
 
+function stub_getResultsData() {
+ // TODO get all results data in React style
+  return {
+    here: 'is',
+    is: 'an',
+    object: 'object'
+  };
+}
+
 function mturkSubmit() {
-  var f = $j('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" method="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
+  var f = $j('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" type="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
   $j('body').append(f);
   f.submit();
 }
