@@ -1,0 +1,39 @@
+{
+  "name": "image-scraper",
+  "version": "1.0.0",
+  "description": "Crawl Google & Bing Images, send results to Amazon S3",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tagasauris/image-scraper.git"
+  },
+  "keywords": [
+    "image",
+    "scrape",
+    "google",
+    "bing"
+  ],
+  "author": "Jared Scheib",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tagasauris/image-scraper/issues"
+  },
+  "homepage": "https://github.com/tagasauris/image-scraper#readme",
+  "dependencies": {
+    "bluebird": "^3.2.2",
+    "express": "^4.13.4",
+    "firebase": "^2.4.0",
+    "google-images": "^1.0.0",
+    "images-scraper": "^2.0.8",
+    "react": "^0.14.7",
+    "request": "^2.69.0",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {
+    "eslint": "^1.10.3",
+    "eslint-config-airbnb": "^5.0.0"
+  }
+}

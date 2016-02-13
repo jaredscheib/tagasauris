@@ -1,0 +1,1 @@
+Node Google Images scraper that sends images and metadata to Amazon S3

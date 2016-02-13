@@ -1,0 +1,27 @@
+{
+  "name": "s3-uploader",
+  "version": "1.0.0",
+  "description": "promise s3-upload blobs",
+  "main": "service.js",
+  "dependencies": {
+    "bluebird": "^3.2.2",
+    "s3": "^4.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jaredscheib/s3-uploader.git"
+  },
+  "keywords": [
+    "s3"
+  ],
+  "author": "upload",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaredscheib/s3-uploader/issues"
+  },
+  "homepage": "https://github.com/jaredscheib/s3-uploader#readme"
+}
