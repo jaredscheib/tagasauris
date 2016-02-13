@@ -10,4 +10,9 @@ const mQ = new MsgQueueClient(mqServerConfig.url);
 
 app.get('/test', (req, res) => {
   mQ.enqueue('scrape_req');
+  res.status(200).send('test hit');
+});
+
+app.listen(app.get('port'), () => {
+  console.log('api-server is listening on port', app.get('port'));
 });
