@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "bluebird": "^3.3.0",
+    "body-parser": "^1.15.0",
+    "cors": "^2.7.1",
     "express": "^4.13.4",
     "fibers": "^1.0.8",
     "firebase": "^2.4.0",
