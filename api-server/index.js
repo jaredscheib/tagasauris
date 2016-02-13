@@ -9,7 +9,7 @@ const app = express();
 const mQ = new MsgQueueClient(mqServerConfig.url);
 
 app.get('/test', (req, res) => {
-  mQ.enqueue('scrape_req');
+  mQ.enqueue('image_scrape_req');
   res.status(200).send('test hit');
 });
 
