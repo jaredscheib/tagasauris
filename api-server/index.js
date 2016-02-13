@@ -3,10 +3,10 @@
 const express = require('express');
 const MsgQueueClient = require('msgqueue-client');
 
-const mqServerConfig = require('../common/config/mqserver.js');
+const config = require('./config.js');
 
 const app = express();
-const mQ = new MsgQueueClient(mqServerConfig.url);
+const mQ = new MsgQueueClient(config.url);
 
 app.get('/test', (req, res) => {
   mQ.enqueue('image_scrape_req');
