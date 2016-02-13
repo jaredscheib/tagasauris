@@ -1,4 +1,5 @@
 /* global jQuery, _ */
+/* global addLoader, removeLoader */
 
 var $j = jQuery.noConflict();
 
@@ -13,8 +14,6 @@ var taskInfo = {
   taskName: params.task || 'task_img_verification_trinary',
   taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || _.minToMs(10)), // TODO refactor?
 };
-
-loadScript('tasks/' + taskInfo.taskName + '.js')
 
 var server = 'http://127.0.0.1:3020';
 var apiRoute = server + '/tickets';
@@ -35,17 +34,30 @@ var elements = {
 
 console.log('params', params);
 
-getTickets(taskInfo.taskName, taskInfo.ticketsToGet)
-.done(function (ticketsPool) {
-  console.log('got via ajax');
-  console.log(ticketsPool);
-  tempResultsData = ticketsPool.slice(); // TODO remove
-  stub_updateComponentState(ticketsPool);
+loadScript('loader.js')
+.then(function() {
+  addLoader();
+});
+loadScript('tasks/' + taskInfo.taskName + '.js')
+.then(function() {
+  getTickets(taskInfo.taskName, taskInfo.ticketsToGet)
+  .done(function (ticketsPool) {
+    console.log('got ' + ticketsPool.length + ' tickets via ajax');
+    // tempResultsData = ticketsPool.slice(); // TODO remove
+    stub_updateComponentState(ticketsPool);
+    removeLoader();
+    
+  })
+  .fail(function(err) {
+    console.log('failed to get tickets for task');
+    throw err;
+  });
 });
 
 // set HTML and create event listeners on window load
 window.onload = function () {
   debugger;
+
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
@@ -108,19 +120,6 @@ function getTickets(task, num) {
   });
 }
 
-function stub_updateComponentState() {
- // TODO feed React
-}
-
-function stub_getResultsData() {
- // TODO get all results data in React style
-  return {
-    here: 'is',
-    is: 'an',
-    object: 'object'
-  };
-}
-
 function mturkSubmit() {
   var f = $j('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" type="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
   $j('body').append(f);
@@ -137,24 +136,23 @@ function mturkCheckPreview() {
   }
 }
 
-function loadScript(url, callback) {
-  var returnCallback = function(arg) { return callback(arg); };
-  var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
-  var script;
-  if (fileType === 'js') {
-    script = document.createElement('script');
-    script.src = url;
-    script.type = 'text/javascript';
-    if (callback !== undefined) script.onload = returnCallback;
-  } else if (fileType === 'css') {
-    script = document.createElement('link');
-    script.href = url;
-    script.type = 'text/css';
-    script.rel = 'stylesheet';
-    if (callback !== undefined) script.onload = returnCallback;
-  }
-  script.async = 'false';
-  document.body.appendChild(script);
-  return returnCallback;
+function loadScript(url) {
+  return new Promise(function(resolve, reject) {
+    var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
+    var script;
+    if (fileType === 'js') {
+      script = document.createElement('script');
+      script.src = url;
+      script.type = 'text/javascript';
+    } else if (fileType === 'css') {
+      script = document.createElement('link');
+      script.href = url;
+      script.type = 'text/css';
+      script.rel = 'stylesheet';
+    }
+    script.onload = resolve;
+    script.async = 'false';
+    document.body.appendChild(script);
+  });
 }
 // }());
