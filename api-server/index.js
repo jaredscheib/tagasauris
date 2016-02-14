@@ -13,10 +13,10 @@ mq.on('connected', () => { console.log('connected to mq'); });
 
 app.set('port', config.port);
 
-app.get('/test', (req, res) => {
-  console.log('GET on /test');
-  mq.enqueue('image_scrape_req');
-  res.status(200).send('test');
+app.get('/images', (req, res) => {
+  console.log('GET on /images');
+  mq.enqueue('image_scrape_req', req.body);
+  res.status(200).send('images');
 });
 
 app.listen(app.get('port'), () => {
