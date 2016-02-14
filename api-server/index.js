@@ -16,7 +16,7 @@ app.set('port', config.port);
 app.get('/test', (req, res) => {
   console.log('GET on /test');
   mq.enqueue('image_scrape_req');
-  res.status(200).send('test hit');
+  res.status(200).send('test');
 });
 
 app.listen(app.get('port'), () => {

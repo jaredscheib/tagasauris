@@ -9,17 +9,17 @@ const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`, { 
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
-mq.listen('hit_gen_req', (ack, reject, payload) => {
+mq.listen('ticket_gen_req', (ack, reject, payload) => {
   // TODO
   // create task in tasks pool
     // create ticket pool
     // register task with AMT
-    // then enqueue hit gen res
-    let queue = 'hit_gen_res';
+    // then enqueue ticket gen res
+    let queue = 'ticket_gen_res';
     mq.enqueue(queue, { dummy: 'dummy' }) // TODO payload
     .then(() => {
       mq.log = false;
-      console.log('service: hit_gen_req --> hit_get_res')
+      console.log('service: ticket_gen_req --> ticket_get_res')
       ack();
     });
 });
