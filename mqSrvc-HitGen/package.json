@@ -10,6 +10,7 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
-    "msgqueue-client": "^0.1.8"
+    "express": "^4.13.4",
+    "msgqueue-client": "^0.1.9"
   }
 }

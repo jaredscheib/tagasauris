@@ -5,11 +5,12 @@ const MsgQueueClient = require('msgqueue-client');
 
 const mqServerConfig = require('../common/config/mqserver.js');
 
-const mq = MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`);
+const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`);
+mq.log = true;
+
 mq.on('connected', () => { console.log('connected to mq'); });
 
 mq.listen('hit_gen_req', (resolve, reject, payload) => {
-  console.log('mq: hit_gen_req');
   // TODO
   // create task in tasks pool
     // create ticket pool
@@ -18,6 +19,5 @@ mq.listen('hit_gen_req', (resolve, reject, payload) => {
     let queue = 'hit_gen_res';
     mq.enqueue(enqueue, { dummy: 'dummy' }) // TODO payload
     .then(() => {
-      console.log(`enqueue ${queue}`);
     });
 });
