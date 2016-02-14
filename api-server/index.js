@@ -8,6 +8,8 @@ const config = require('./config.js');
 
 const app = express();
 const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`);
+mq.log = true;
+
 mq.on('connected', () => { console.log('connected to mq'); });
 
 app.set('port', config.port);
