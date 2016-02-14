@@ -1,9 +1,12 @@
-# Deployment
-# Environmental Variables, if change desired:
-1) api-server -> {
+## Deployment
+
+* Environmental Variables (if change desired)
+
+  * api-server -> {
     process.env.ENV: prod, dev, etc.
     process.env.PORT
   }
-2) msg-queue -> {
+  
+  * msg-queue -> {
     process.env.MQ_PORT
   }
