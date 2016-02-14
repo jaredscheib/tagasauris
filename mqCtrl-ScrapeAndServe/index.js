@@ -11,7 +11,6 @@ mq.on('connected', () => { console.log('connected to mq'); });
 mq.listen('image_scrape_res', (ack, reject, payload) => {
   mq.enqueue('ticket_gen_req', payload) // TODO determine which task this can serve
   .then(() => {
-    mq.log = false;
     console.log('controller: image_scrape_res --> ticket_get_req')
     ack();
   });

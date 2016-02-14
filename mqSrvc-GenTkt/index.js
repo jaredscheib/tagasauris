@@ -18,7 +18,6 @@ mq.listen('ticket_gen_req', (ack, reject, payload) => {
     let queue = 'ticket_gen_res';
     mq.enqueue(queue, { dummy: 'dummy' }) // TODO payload
     .then(() => {
-      mq.log = false;
       console.log('service: ticket_gen_req --> ticket_get_res')
       ack();
     });
