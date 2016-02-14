@@ -11,6 +11,6 @@
   "private": true,
   "dependencies": {
     "express": "^4.13.4",
-    "msgqueue-client": "^0.1.9"
+    "msgqueue-client": "^0.1.14"
   }
 }
