@@ -13,9 +13,11 @@ const s3 = new AWS.S3(credentials);
 // Promise.promisifyAll(Object.getPrototypeOf(s3));
 const s3Stream = require('s3-upload-stream')(s3);
 
-function pipeTransformAndUploadToS3 (bucket) {
+function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
+  bucket = bucket || s3_fixtures.defBucketRef;
+  console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
   return new Promise((resolve, reject) => {
-    let file = this.orig_url.split('/').reverse()[0];
+    let file = imgObj.orig_url.split('/').reverse()[0];
     let name = file.split('.');
     let ext = name.pop();
     ext = ext === 'jpg' ? 'jpeg' : ext;
@@ -33,19 +35,19 @@ function pipeTransformAndUploadToS3 (bucket) {
           Key: `${name}-w${options[i].width}-q${options[i].quality}.${ext}`,
           ACL: 'public-read',
           StorageClass: 'REDUCED_REDUNDANCY',
-          ContentType: this.type
+          ContentType: imgObj.type
         })
         .on('error', err => {
           console.log(err, err.stack);
           reject(err);
         })
         .on('uploaded', details => {
-          this.s3_url = details.Location;
-          this.s3_bucket = details.Bucket;
-          this.s3_key = details.Key;
-          this.s3_etag = details.ETag;
-          console.log(`uploaded ${file} to ${this.s3_bucket} on s3`);
-          resolve(this);
+          imgObj.s3_url = details.Location;
+          imgObj.s3_bucket = details.Bucket;
+          imgObj.s3_key = details.Key;
+          imgObj.s3_etag = details.ETag;
+          console.log(`uploaded ${file} to ${imgObj.s3_bucket} on s3`);
+          resolve(imgObj);
         });
       });
 
@@ -54,7 +56,7 @@ function pipeTransformAndUploadToS3 (bucket) {
     pipeline.clone().resize(options[1].width).quality(options[1].quality).withMetadata().pipe(writableStreams[1]);
     pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
 
-    var req = request.get(this.orig_url) // readableStream
+    var req = request.get(imgObj.orig_url) // readableStream
     .on('response', response => {
       console.log(response.statusCode);
       console.log(response.headers['content-type']);
@@ -73,19 +75,19 @@ function pipeTransformAndUploadToS3 (bucket) {
   });
 }
 
-function pipeImgSetToBucket (imgSet, bucket) {
-  // let pipePromises = [];
-  imgSet.forEach(imgObj => {
-    pipeTransformAndUploadToS3.call(imgObj, bucket)
-    .then(obj => {
-      console.log('resolved pipePromise', obj);
-      // console.log('resolved pipePromise', obj.details);
-    });
-  });
-  // return Promise.all(pipePromises);
-}
+// function pipeImgSetToBucket (imgSet, bucket) {
+//   let pipePromises = [];
+//   imgSet.forEach(imgObj => {
+//     pipeTransformAndUploadImgObjToS3(imgObj, bucket)
+//     .then(obj => {
+//       // console.log('resolved pipePromise', obj);
+//       // console.log('resolved pipePromise', obj.details);
+//     });
+//   });
+//   return Promise.all(pipePromises);
+// }
 
-pipeImgSetToBucket(s3_fixtures.myImgObjs, s3_fixtures.myBucketRef)
+// pipeImgSetToBucket(s3_fixtures.myImgObjs, s3_fixtures.myBucketRef)
 // .then(res => {
 //   console.log('all promises resolved, images uploaded');
 // });
@@ -155,3 +157,7 @@ function multiplexToLocalFiles (file, options, targetDir) {
 //   console.log(err);
 //   throw err;
 // }  
+
+module.exports = {
+  pipeTransformAndUploadImgObjToS3: pipeTransformAndUploadImgObjToS3
+};
