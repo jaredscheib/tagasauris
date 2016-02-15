@@ -17,21 +17,27 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
   bucket = bucket || s3_fixtures.defBucketRef;
   console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
   return new Promise((resolve, reject) => {
-    let file = imgObj.orig_url.split('/').reverse()[0];
+    let req, writableStreams, pipeline;
+    let file = reverse(reverse(imgObj.orig_url).split('/')[0]);
     let name = file.split('.');
     let ext = name.pop();
     ext = ext === 'jpg' ? 'jpeg' : ext;
+    if ('jpg|jpeg|png|gif'.indexOf(ext) === -1) {
+      console.log('ext', ext, 'fulfilling null')
+      resolve(null); // hotfix for files with no extensions
+    }
 
     let options = [
-      { width: 'full', quality: 100 },
-      { width: 300, quality: 40 },
-      { width: 600, quality: 80 },
+      { bucket: `${bucket}/wfullq100`, width: 'full', quality: 100 },
+      { bucket: `${bucket}/w300q40`, width: 300, quality: 40 },
+      { bucket: `${bucket}/w600q80`, width: 600, quality: 80 }
     ];
     
-    // let writableStream = fs.createWriteStream(`${bucket}/${file}`);
-    let writableStreams = options.map((item, i) => {
-        return s3Stream.upload({
-          Bucket: bucket,
+    let uploadCount = 0;
+    // create a writable stream for each option set
+    writableStreams = options.map((item, i) => {
+        let s3WritableStream = s3Stream.upload({
+          Bucket: options[i].bucket,
           Key: `${name}-w${options[i].width}-q${options[i].quality}.${ext}`,
           ACL: 'public-read',
           StorageClass: 'REDUCED_REDUNDANCY',
@@ -42,21 +48,33 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
           reject(err);
         })
         .on('uploaded', details => {
-          imgObj.s3_url = details.Location;
-          imgObj.s3_bucket = details.Bucket;
-          imgObj.s3_key = details.Key;
-          imgObj.s3_etag = details.ETag;
-          console.log(`uploaded ${file} to ${imgObj.s3_bucket} on s3`);
-          resolve(imgObj);
+          uploadCount++;
+          console.log(`uploaded to s3: ${details.Key}`);
+          if (details.Key.split('/')[1] === 'w600q80') {
+            imgObj.s3_url = details.Location;
+            imgObj.s3_bucket = details.Bucket;
+            imgObj.s3_key = details.Key;
+            imgObj.s3_etag = details.ETag;
+          }
+          if (uploadCount === options.length) {
+            req.removeAllListeners();
+            writableStreams.forEach(s => { s.removeAllListeners(); });
+            pipeline.removeAllListeners();
+            resolve(imgObj);
+          }
         });
+
+        return s3WritableStream;
       });
 
-    let pipeline = sharp().withMetadata().on('error', err => { console.log(err); });
+    // image processing multiplexer pipeline
+    pipeline = sharp().withMetadata().on('error', err => { console.log(err); });
     pipeline.pipe(writableStreams[0])
     pipeline.clone().resize(options[1].width).quality(options[1].quality).withMetadata().pipe(writableStreams[1]);
     pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
 
-    var req = request.get(imgObj.orig_url) // readableStream
+    // begin pipe from image url
+    req = request.get(imgObj.orig_url) // readableStream
     .on('response', response => {
       console.log(response.statusCode);
       console.log(response.headers['content-type']);
@@ -64,11 +82,13 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
         console.log('URL resolved to image');
         req.pipe(pipeline)
       } else {
-        resolve({}); // TODO come up with solution for when image url does not resolve to an image successfully
+        req.removeAllListeners();
+        resolve(null); // TODO come up with solution for when image url does not resolve to an image successfully
       }
     })
     .on('error', err => {
       console.log(err, err.stack);
+      req.removeAllListeners();
       reject(err);
     });
     // .pipe(pipeline);
@@ -157,6 +177,13 @@ function multiplexToLocalFiles (file, options, targetDir) {
 //   console.log(err);
 //   throw err;
 // }  
+
+function reverse (str) {
+  var output = '';
+  for (var i = str.length - 1; i >= 0; i--) 
+    output += str[i];
+  return output;
+}
 
 module.exports = {
   pipeTransformAndUploadImgObjToS3: pipeTransformAndUploadImgObjToS3
