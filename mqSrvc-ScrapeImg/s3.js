@@ -6,13 +6,14 @@ const request = require('request');
 const url = require('url');
 const fs = require('fs');
 const sharp = require('sharp');
-// const AWS = require('aws-sdk');
-// const credentials = require('../common/secrets/aws.js').S3_credentials;
+const AWS = require('aws-sdk');
+const credentials = require('../common/secrets/aws.js').S3_credentials;
 // const s3 = new AWS.S3(credentials);
 // Promise.promisifyAll(Object.getPrototypeOf(s3));
-// const s3Stream = require('s3-upload-stream')(new AWS.S3(credentials));
+const s3Stream = require('s3-upload-stream')(new AWS.S3(credentials));
 
-let myBucketRef = './test_bucket'
+let myDirRef = './test_bucket'
+let myBucketRef = 'vid_decomp'
 
 let myImgSet = [
   'http://gtspirit.com/wp-content/uploads/2015/09/Mansory-Porsche-Macan-2.jpg',
@@ -28,7 +29,12 @@ let myFileSet = [
 
 function pipeImgToBucket (imgURL, bucket) {
   let file = imgURL.split('/').reverse()[0];
-  let writableStream = fs.createWriteStream(`${bucket}/${file}`);
+  // let writableStream = fs.createWriteStream(`${bucket}/${file}`);
+  let writableStream = s3Stream.upload({
+    Bucket: bucket,
+    Key: file
+  });
+
   request.get(imgURL)
   .on('response', response => {
     console.log(response.statusCode);
@@ -39,8 +45,12 @@ function pipeImgToBucket (imgURL, bucket) {
   })
   .pipe(writableStream);
 
-  writableStream.on('close', () => {
-    console.log('finished write stream', file);
+  writableStream.on('error', (err) => {
+    console.log('error with s3 stream', err);
+  })
+
+  writableStream.on('close', (res) => {
+    console.log('finished write stream', file, res);
     // createResizedImg(file);
   });
 }
@@ -51,24 +61,25 @@ function pipeImgSetToBucket (imgSet, bucket) {
   });
 }
 
-// pipeImgSetToBucket(myImgSet, myBucketRef);
-_(myFileSet).map(file => {
-  let options = {
-    width: [400, 800],
-    quality: [50, 80]
-  };
+pipeImgSetToBucket(myImgSet, myBucketRef);
 
-  return pipeTransform(file, myBucketRef, options);
-})
-.each(res => {
-  console.log('res', typeof res);
-  res.metadata()
-  .then(metadata => {
-    console.log('metadata', metadata);
-  })
-})
+// _(myFileSet).map(file => {
+//   let options = {
+//     width: [400, 800],
+//     quality: [50, 80]
+//   };
 
-function pipeTransform (file, targetDir, options) {
+//   return addProcessingStreams(file, myDirRef, options);
+// })
+// .each(imgStream => {
+//   console.log('imgStream', typeof imgStream);
+//   imgStream.metadata()
+//   .then(metadata => {
+//     console.log('metadata', metadata);
+//   })
+// })
+
+function addProcessingStreams (file, options, targetBucket) {
   let name = file.split('.');
   let ext = name.pop();
 
@@ -83,7 +94,7 @@ function pipeTransform (file, targetDir, options) {
   let pipeline = sharp();
   pipeline.clone().resize(options.width[0]).quality(options.quality[0]).pipe(writableStream1);
   pipeline.clone().resize(options.width[1]).quality(options.quality[1]).pipe(writableStream2);
-  return readableStream.pipe(pipeline);
+  readableStream.pipe(pipeline);
 }
 
 // AWS helpers
