@@ -1,6 +1,6 @@
 'use strict';
 
-const altSearchEngines = require('./scraper-alt-enginers.js');
+const altSearchEngines = require('./scraper-alt-engines.js');
 const googleImages = require('google-images');
 
 const secrets = require('./secrets.js');
@@ -11,9 +11,9 @@ const googleClient = googleImages(secrets.CSE_ID, secrets.API_KEY);
 const dbRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 const imgRef = 'img_ref';
 
-const args = process.argv.slice(2);
-const queryStr = String(args[0]);
-const resultsCnt = Number(args[1]);
+// const args = process.argv.slice(2);
+// const queryStr = String(args[0]);
+// const resultsCnt = Number(args[1]);
 // const taskNameStr = String(args[2]) || 'task_img_verification';
 
 function flattenArray(arrTwoDim) {
@@ -93,7 +93,7 @@ function fetchAndStore(queryString, resultsCount) {
 function createTicketsPool(taskName) {
   return new Promise((resolve, reject) => {
     dbRef.child(imgRef).once('value', (snapshot) => {
-      const imgData = snapshot.val();
+      let imgData = snapshot.val();
       const allPromises = [];
       for (const UID in imgData) {
         if (imgData.hasOwnProperty(UID)) {
@@ -101,11 +101,12 @@ function createTicketsPool(taskName) {
             img_ref_uid: UID,
             status: true // true === open; false === closed
           };
+          imgData[UID].url = imgData[UID].s3_url;
           allPromises.push(pushAndAddUID(dbRef.child(`${taskName}_tickets_pool`), poolTicket));
         }
       }
       Promise.all(allPromises)
-      .then(() => { console.log('created tickets'); Firebase.goOffline(); resolve(200); })
+      .then(() => { dbRef.child('img_ref3').set(imgData); console.log('created tickets'); Firebase.goOffline(); resolve(200); })
       .catch((err) => {
         sendErr(err);
         reject(err);
@@ -120,9 +121,11 @@ function createTicketsPool(taskName) {
 //   .catch(sendErr);
 // }
 
-if (queryStr && resultsCnt) {
-  fetchAndStore(queryStr, resultsCnt);
-}
+// if (queryStr && resultsCnt) {
+//   fetchAndStore(queryStr, resultsCnt);
+// }
+
+// createTicketsPool('task_img_verification');
 
 module.exports.fetchAndStore = fetchAndStore;
 module.exports.createTicketsPool = createTicketsPool;
