@@ -12,8 +12,9 @@ const credentials = require('../common/secrets/aws.js').S3_credentials;
 // Promise.promisifyAll(Object.getPrototypeOf(s3));
 const s3Stream = require('s3-upload-stream')(new AWS.S3(credentials));
 
-let myDirRef = './test_bucket'
-let myBucketRef = 'vid_decomp'
+let mySourceDirRef = './test_bucket';
+let myTargetDirRef = './test_bucket/output';
+let myBucketRef = 'vid_decomp';
 
 let myImgSet = [
   'http://gtspirit.com/wp-content/uploads/2015/09/Mansory-Porsche-Macan-2.jpg',
@@ -27,15 +28,33 @@ let myFileSet = [
   'maxresdefault.jpg'
 ];
 
-function pipeImgToBucket (imgURL, bucket) {
-  let file = imgURL.split('/').reverse()[0];
+function pipeImgToBucket (url, bucket) {
+  let file = url.split('/').reverse()[0];
+  let name = file.split('.');
+  let ext = name.pop();
+  
   // let writableStream = fs.createWriteStream(`${bucket}/${file}`);
-  let writableStream = s3Stream.upload({
+  let writableStreams = [];
+  writableStreams.push(s3Stream.upload({
     Bucket: bucket,
     Key: file
-  });
+  }));
 
-  request.get(imgURL)
+  let options = {
+    width: [400, 800],
+    quality: [50, 80]
+  };
+
+  let writableStream1 = fs.createWriteStream(writePath1);
+  let writableStream2 = fs.createWriteStream(writePath2);
+
+  let pipeline = sharp();
+  pipeline.pipe(writableStream0);
+  pipeline.clone().resize(options.width[0]).quality(options.quality[0]).pipe(writableStream1);
+  pipeline.clone().resize(options.width[1]).quality(options.quality[1]).pipe(writableStream2);
+  readableStream.pipe(pipeline);
+
+  request.get(url) // readableStream
   .on('response', response => {
     console.log(response.statusCode);
     console.log(response.headers['content-type']);
@@ -46,7 +65,7 @@ function pipeImgToBucket (imgURL, bucket) {
   .pipe(writableStream);
 
   writableStream.on('error', (err) => {
-    console.log('error with s3 stream', err);
+    console.log(err);
   })
 
   writableStream.on('close', (res) => {
@@ -56,45 +75,57 @@ function pipeImgToBucket (imgURL, bucket) {
 }
 
 function pipeImgSetToBucket (imgSet, bucket) {
-  imgSet.forEach(imgURL => {
-    pipeImgToBucket(imgURL, bucket);
+  imgSet.forEach(url => {
+    pipeImgToBucket(url, bucket);
   });
 }
 
-pipeImgSetToBucket(myImgSet, myBucketRef);
+// for each image
+  // create a writable stream
+  // multiplex
+  // pipe to multiplex
 
-// _(myFileSet).map(file => {
-//   let options = {
-//     width: [400, 800],
-//     quality: [50, 80]
-//   };
 
-//   return addProcessingStreams(file, myDirRef, options);
-// })
-// .each(imgStream => {
-//   console.log('imgStream', typeof imgStream);
-//   imgStream.metadata()
-//   .then(metadata => {
-//     console.log('metadata', metadata);
-//   })
-// })
 
-function addProcessingStreams (file, options, targetBucket) {
+
+// pipeImgSetToBucket(myImgSet, myBucketRef);
+
+_(myFileSet).map(file => {
+  let options = {
+    width: [400, 800],
+    quality: [50, 80]
+  };
+
+  let readableStream = fs.createReadStream(`${mySourceDirRef}/${file}`);
+  let pipeline = multiplex(file, options, myTargetDirRef);
+  return readableStream.pipe(pipeline);
+})
+.each(imgStream => {
+  console.log('imgStream', typeof imgStream);
+  imgStream.metadata()
+  .then(metadata => {
+    console.log('metadata', metadata);
+  })
+})
+
+function multiplex (file, options, targetDir) {
   let name = file.split('.');
   let ext = name.pop();
 
-  let readPath = `${targetDir}/${name}.${ext}`;
+  let readPath = file;
+  let writePath0 = `${targetDir}/${name}-orig.${ext}`;
   let writePath1 = `${targetDir}/${name}-w${options.width[0]}-q${options.quality[0]}.${ext}`;
   let writePath2 = `${targetDir}/${name}-w${options.width[1]}-q${options.quality[1]}.${ext}`;
 
-  let readableStream = fs.createReadStream(readPath);
+  let writableStream0 = fs.createWriteStream(writePath0);
   let writableStream1 = fs.createWriteStream(writePath1);
   let writableStream2 = fs.createWriteStream(writePath2);
 
   let pipeline = sharp();
+  pipeline.clone().pipe(writableStream0);
   pipeline.clone().resize(options.width[0]).quality(options.quality[0]).pipe(writableStream1);
   pipeline.clone().resize(options.width[1]).quality(options.quality[1]).pipe(writableStream2);
-  readableStream.pipe(pipeline);
+  return pipeline;
 }
 
 // AWS helpers
