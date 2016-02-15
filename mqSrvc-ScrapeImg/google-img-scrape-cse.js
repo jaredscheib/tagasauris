@@ -38,10 +38,10 @@ GoogleClient.prototype._buildResponse = function (res) {
       width: item.image.width,
       height: item.image.height,
       size: item.image.byteSize,
-      web_url: item.link,
-      thumbnail_url: item.image.thumbnailLink,
-      thumbnail_width: item.image.thumbnailWidth,
-      thumbnail_height: item.image.thumbnailHeight
+      orig_url: item.link,
+      thumb_url: item.image.thumbnailLink,
+      thumb_width: item.image.thumbnailWidth,
+      thumb_height: item.image.thumbnailHeight
     };
   });
 };
