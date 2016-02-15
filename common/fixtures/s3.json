@@ -1,8 +1,8 @@
 {
-    "mySourceDirRef": "./test_bucket",
-    "myTargetDirRef": "./test_bucket/output",
-    "myBucketRef": "vid_decomp/img_ref",
-    "myImgObjs": [
+    "defSourceDirRef": "./test_bucket",
+    "defTargetDirRef": "./test_bucket/output",
+    "defBucketRef": "vid_decomp/img_ref",
+    "defImgObjs": [
         {
             "orig_url": "http://www.thenextcars.com/wp-content/uploads/2013/11/img_2014_porsche_macan_02.jpg",
             "width": "1600",
@@ -40,12 +40,12 @@
             "type": "image/jpeg"
         }
     ],
-    "myURLSet": [
+    "defURLSet": [
         "http://gtspirit.com/wp-content/uploads/2015/09/Mansory-Porsche-Macan-2.jpg",
         "http://pngimg.com/upload/audi_PNG1736.png",
         "https://i.ytimg.com/vi/0E05jQYpdpE/maxresdefault.jpg"
     ],
-    "myFileSet": [
+    "defFileSet": [
         "Mansory-Porsche-Macan-2.jpg",
         "audi_PNG1736.png",
         "maxresdefault.jpg"
