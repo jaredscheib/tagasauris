@@ -1,6 +1,7 @@
 'use strict';
 
 const MsgQueueClient = require('msgqueue-client');
+const Firebase = require('firebase');
 const GoogleScrape = require('./google-img-scrape-cse.js');
 const s3 = require('./s3.js');
 const fb = require('./firebase.js');
@@ -13,35 +14,38 @@ const gClient = new GoogleScrape(CSE_secrets.CSE_ID, CSE_secrets.API_KEY);
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
-mq.listen('srvc_img_scrape_req', (ack, reject, payload) => {
-    // fire off query via search clients
+let lQ = 'srvc_img_scrape_req';
+mq.listen(lQ, (ack, reject, payload) => {
+  // fire off query via search clients
+  Firebase.goOnline();
   getWebImgObjSet(payload.query, payload.num)
   .then(webImgObjSet => {
     return Promise.all(
-      flattenArray(webImgObjSet).map(webImgObj => {
-        console.log(`got back webImgObjSet from ${payload.query}, ${webImgObj.length} of ${payload.num}`);
+      flattenArray(webImgObjSet).map((webImgObj, i) => {
+        console.log(`got back webImgObj from ${payload.query}, ${i} of ${payload.num}`);
         // console.log(webImgObj);
+        webImgObj.query = payload.query;
         return uploadWebImgObjToS3(webImgObj)
             // TODO save img obj to db
           .then(s3ImgObj => {
             console.log('got back s3ImgObj');
-            ack();
-            syncToFirebase(s3ImgObj);
+            console.log(s3ImgObj);
+            if (s3ImgObj) syncToFirebase(s3ImgObj); // TODO reconsider this hotfix to exclude failing urls
           })
           .then(fbImgRef => {
-            console.log('got back fbImgRef');
-            console.log(fbImgRef);
+            console.log('synced s3ImgObj to firebase');
           });
       })
     );
   })
   .then(allImgRefs => {
-    // TODO enqueue img refs to db
-    let queue = 'ctrl_img_scrape_res';
-    mq.enqueue(queue, imgObjRefs) // TODO add payload (firebase ref to obj that contains img ref to S3 img)
+    console.log('synced', allImgRefs.length, 'to Firebase');
+    ack();
+    Firebase.goOffline();
+    let nQ = 'ctrl_img_scrape_res';
+    mq.enqueue(nQ, payload) // TODO add payload (firebase ref to obj that contains img ref to S3 img)
     .then(() => {
-      console.log('service: srvc_img_scrape_req --> ctrl_img_scrape_res')
-      ack();
+      console.log(`service: ${lQ} --> ${nQ}`);
     });
   })
 });
