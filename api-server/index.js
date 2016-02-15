@@ -17,7 +17,8 @@ app.set('port', config.port);
 app.get('/images', (req, res) => {
   console.log('GET on /images');
   if (req.query.num > 1000) res.status(400).send('Can only query for up to 1000 images currently.');
-  mq.enqueue('ctrl_sns_img_scrape_req', req.query); // query, num, task (optional)
+  let nQ = 'ctrl_sns_img_scrape_req';
+  mq.enqueue(nQ, req.query); // query, num, task (optional)
   res.status(200).send('images');
 });
 

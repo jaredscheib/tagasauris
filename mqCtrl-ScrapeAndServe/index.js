@@ -8,18 +8,22 @@ const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`, { 
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
-mq.listen('ctrl_sns_img_scrape_req', (ack, reject, payload) => {
-  mq.enqueue('srvc_img_scrape_req', payload) // TODO determine which task this can serve
+let lQ1 = 'ctrl_sns_img_scrape_req';
+mq.listen(lQ1, (ack, reject, payload) => {
+  let nQ1 = 'srvc_img_scrape_req';
+  mq.enqueue(nQ1, payload) // TODO determine which task this can serve
   .then(() => {
-    console.log('controller: ctrl_sns_img_scrape_req --> srvc_img_scrape_req');
+    console.log(`controller: ${lQ1} --> ${nQ1}`);
     ack();
   });
 });
 
-mq.listen('ctrl_img_scrape_res', (ack, reject, payload) => {
-  mq.enqueue('ticket_gen_req', payload) // TODO determine which task this can serve
+let lQ2 = 'ctrl_img_scrape_res';
+mq.listen(lQ2, (ack, reject, payload) => {
+  let nQ2 = 'srvc_ticket_gen_req';
+  mq.enqueue(nQ2, payload) // TODO determine which task this can serve
   .then(() => {
-    console.log('controller: img_scrape_res --> ticket_get_req');
+    console.log(`controller: ${lQ2} --> ${nQ2}`);
     ack();
   });
 });
