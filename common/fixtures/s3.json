@@ -1,0 +1,53 @@
+{
+    "mySourceDirRef": "./test_bucket",
+    "myTargetDirRef": "./test_bucket/output",
+    "myBucketRef": "vid_decomp/img_ref",
+    "myImgObjs": [
+        {
+            "orig_url": "http://www.thenextcars.com/wp-content/uploads/2013/11/img_2014_porsche_macan_02.jpg",
+            "width": "1600",
+            "height": "1000",
+            "format": "jpeg",
+            "size": "152000",
+            "thumb_url": "http://tse3.mm.bing.net/th?id=OIP.M9c7d17bdbf0694d22b4fafe4b26af5adH0&w=230&h=170&rs=1&pcl=dddddd&pid=1.1",
+            "type": "image/jpeg"
+        },
+        {
+            "orig_url": "http://s1.cdn.autoevolution.com/images/news/gallery/porsche-macan-v6-diesel-model-coming-to-america-in-2015_1.jpg",
+            "width": "2048",
+            "height": "1536",
+            "format": "jpeg",
+            "size": "863000",
+            "thumb_url": "http://tse3.mm.bing.net/th?id=OIP.M9d88610a878779f69ed6711c22927554H0&w=230&h=170&rs=1&pcl=dddddd&pid=1.1",
+            "type": "image/jpeg"
+        },
+        {
+            "orig_url": "http://www.caradvice.com.au/wp-content/uploads/2013/11/Porsche-Macan-6.jpg",
+            "width": "1600",
+            "height": "945",
+            "format": "jpeg",
+            "size": "231000",
+            "thumb_url": "http://tse4.mm.bing.net/th?id=OIP.M0fdd6ea61065a06288a0324dc9dbbf8aH0&w=230&h=170&rs=1&pcl=dddddd&pid=1.1",
+            "type": "image/jpeg"
+        },
+        {
+            "orig_url": "http://media.caranddriver.com/images/14q1/569317/2015-porsche-macan-turbo-photo-575592-s-1280x782.jpg",
+            "width": "1280",
+            "height": "782",
+            "format": "jpeg",
+            "size": "72000",
+            "thumb_url": "http://tse4.mm.bing.net/th?id=OIP.M99322ec51e9b2f6ae222995b7a2cb272H0&w=230&h=170&rs=1&pcl=dddddd&pid=1.1",
+            "type": "image/jpeg"
+        }
+    ],
+    "myURLSet": [
+        "http://gtspirit.com/wp-content/uploads/2015/09/Mansory-Porsche-Macan-2.jpg",
+        "http://pngimg.com/upload/audi_PNG1736.png",
+        "https://i.ytimg.com/vi/0E05jQYpdpE/maxresdefault.jpg"
+    ],
+    "myFileSet": [
+        "Mansory-Porsche-Macan-2.jpg",
+        "audi_PNG1736.png",
+        "maxresdefault.jpg"
+    ]
+}
