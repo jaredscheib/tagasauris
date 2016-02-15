@@ -125,6 +125,7 @@ function createTicketsPool(taskName) {
 //   fetchAndStore(queryStr, resultsCnt);
 // }
 
+// createTicketsPool('task_img_verification_trinary');
 // createTicketsPool('task_img_verification');
 
 module.exports.fetchAndStore = fetchAndStore;
