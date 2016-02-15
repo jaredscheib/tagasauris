@@ -2,48 +2,62 @@
 
 const MsgQueueClient = require('msgqueue-client');
 const GoogleScrape = require('./google-img-scrape-cse.js');
+const s3 = require('./s3.js');
+const fb = require('./firebase.js');
 
 const mqServerConfig = require('../common/config/mqserver.js');
-const secrets = require('../common/secrets/scrape-img.js');
+const CSE_secrets = require('../common/secrets/scrape-img.js').CSE;
 
 const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`, { log: true });
-const gClient = new GoogleScrape(secrets.CSE_ID, secrets.API_KEY);
+const gClient = new GoogleScrape(CSE_secrets.CSE_ID, CSE_secrets.API_KEY);
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
 mq.listen('srvc_img_scrape_req', (ack, reject, payload) => {
     // fire off query via search clients
-  getWebImgRefs(payload.query, payload.num)
-  .then(imgRefsWeb => {
-    imgRefsWeb.forEach(ref => {
-      uploadToS3(ref)
-    })
+  getWebImgObjSet(payload.query, payload.num)
+  .then(webImgObjSet => {
+    return Promise.all(
+      flattenArray(webImgObjSet).map(webImgObj => {
+        console.log(`got back webImgObjSet from ${payload.query}, ${webImgObj.length} of ${payload.num}`);
+        // console.log(webImgObj);
+        return uploadWebImgObjToS3(webImgObj)
+            // TODO save img obj to db
+          .then(s3ImgObj => {
+            console.log('got back s3ImgObj');
+            ack();
+            syncToFirebase(s3ImgObj);
+          })
+          .then(fbImgRef => {
+            console.log('got back fbImgRef');
+            console.log(fbImgRef);
+          });
+      })
+    );
   })
-  // .then(uploadToS3)
-    // require('aws-sdk');
-    // require('s3-upload-stream');
-    // set up config file for now, env variables later
-    // follow example at https://www.npmjs.com/package/s3-upload-stream
-  // .then(pushToDb)
-  // .then()
-
-    // save successfully scraped img refs to database
-
-    // then enqueue final results to mq
-  .then(imgRefsS3 => {
+  .then(allImgRefs => {
+    // TODO enqueue img refs to db
     let queue = 'ctrl_img_scrape_res';
-    mq.enqueue(queue, imgRefsS3) // TODO add payload (firebase ref to obj that contains img ref to S3 img)
+    mq.enqueue(queue, imgObjRefs) // TODO add payload (firebase ref to obj that contains img ref to S3 img)
     .then(() => {
       console.log('service: srvc_img_scrape_req --> ctrl_img_scrape_res')
       ack();
     });
-  });
+  })
 });
 
-function getWebImgRefs (query, num) {
+function getWebImgObjSet (query, num) {
   return gClient.search(query, num);
 }
 
-function uploadToS3 (ref) {
+function uploadWebImgObjToS3 (imgObj) {
+  return s3.pipeTransformAndUploadImgObjToS3(imgObj);
+}
 
+function syncToFirebase (imgObj) {
+  return fb.pushAndAddUID(imgObj);
+}
+
+function flattenArray(arrTwoDim) {
+  return [].concat.apply([], arrTwoDim);
 }
