@@ -10,7 +10,12 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
+    "aws-sdk": "^2.2.35",
     "got": "^6.1.1",
-    "msgqueue-client": "^0.1.8"
+    "highland": "^2.6.0",
+    "images-scraper": "git+https://github.com/jaredscheib/images-scraper.git",
+    "msgqueue-client": "^0.1.8",
+    "s3-upload-stream": "^1.0.7",
+    "sharp": "^0.12.2"
   }
 }
