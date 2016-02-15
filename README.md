@@ -1,5 +1,9 @@
 ## Deployment
 
+* Dependencies
+
+  * brew install homebrew/science/vips (required for npm module 'sharp' for image resizing)
+
 * Environmental Variables (if change desired)
 
   * api-server -> {
