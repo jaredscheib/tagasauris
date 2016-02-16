@@ -13,8 +13,8 @@ const s3 = new AWS.S3(credentials);
 // Promise.promisifyAll(Object.getPrototypeOf(s3));
 const s3Stream = require('s3-upload-stream')(s3);
 
-function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
-  bucket = bucket || `${s3_fixtures.defBucketRef}/${imgObj.concept}`;
+function pipeTransformAndUploadImgObjToS3 (imgObj) {
+  let bucket = `${s3_fixtures.defBucketRef}/${imgObj.concept}`;
   console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
   return new Promise((resolve, reject) => {
     let req, writableStreams, pipeline;

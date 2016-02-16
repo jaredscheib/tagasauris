@@ -9,14 +9,14 @@ const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`, { 
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
-let lQ = 'srvc_ticket_gen_req';
+let lQ = 'srvc_tickets_gen_req';
 mq.listen(lQ, (ack, reject, payload) => {
   // TODO
   // create task in tasks pool
     // create ticket pool
     // register task with AMT
     // then enqueue ticket gen res
-    let nQ = 'srvc_ticket_gen_res';
+    let nQ = 'srvc_tickets_gen_res';
     mq.enqueue(nQ, payload) // TODO payload
     .then(() => {
       console.log(`service: ${lQ} --> ${nQ}`);
