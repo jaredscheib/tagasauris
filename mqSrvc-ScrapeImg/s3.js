@@ -75,7 +75,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
     pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
 
     // begin readable stream pipe from image url
-    req = request.get(imgObj.orig_url, { followRedirect: res => {
+    req = request.get(imgObj.orig_url, { timeout: 2000, followRedirect: res => {
         console.log('redirect!');
         req.removeAllListeners();
         resolve(null); // skip any images that try to redirect
