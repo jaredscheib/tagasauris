@@ -23,12 +23,13 @@ mq.listen(lQ, (ack, reject, payload) => {
   getWebImgObjSet(payload.query, payload.num)
   .then(webImgObjSet => {
     let flatSet = flattenArray(webImgObjSet);
+    console.log(`got ${flatSet.length} images in webImgObjSet`);
     // fs.writeFile('./temp/imgData.json', JSON.stringify(flatSet, null, 4), { flags: 'w' });
     return Promise.all(
       flatSet.map((webImgObj, i) => {
-        console.log(`got back webImgObj from ${payload.query}, ${i+1} of ${payload.num}`);
-        webImgObj.concept = payload.concept;
-        webImgObj.query = payload.query;
+        console.log(`got webImgObj from ${payload.query}, ${i+1} of ${payload.num}`);
+        webImgObj.concept = payload.concept.slice().split(' ').join('_').toLowerCase();
+        webImgObj.query = payload.query.slice().split(' ').join('_').toLowerCase();
         return uploadWebImgObjToS3(webImgObj)
           .then(s3ImgObj => {
             if (s3ImgObj === null) {
