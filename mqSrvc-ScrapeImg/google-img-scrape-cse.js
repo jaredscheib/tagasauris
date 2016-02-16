@@ -31,10 +31,10 @@ GoogleClient.prototype._buildOptions = function (query, options) {
   return build;
 }
 
-GoogleClient.prototype._buildResponse = function (res) {
+GoogleClient.prototype._buildResponse = function (res, mod) {
   console.log('Google search success: ', res.body.items.length, 'results');
   return res.body.items.map(function (item) {
-    return {
+    return extend({
       type: item.mime,
       width: item.image.width,
       height: item.image.height,
@@ -43,11 +43,11 @@ GoogleClient.prototype._buildResponse = function (res) {
       thumb_url: item.image.thumbnailLink,
       thumb_width: item.image.thumbnailWidth,
       thumb_height: item.image.thumbnailHeight
-    };
+    }, mod);
   });
 };
 
-GoogleClient.prototype.search = function (query, maxResults) {
+GoogleClient.prototype.search = function (query, maxResults, mod) {
   if (!query) {
     throw new TypeError('Expected a query');
   }
@@ -63,15 +63,26 @@ GoogleClient.prototype.search = function (query, maxResults) {
         query: this._buildOptions(query, { start: start, num: num < 10 ? num : 10 }),
         json: true
       })
-      .then(this._buildResponse)
+      .then(res => {
+        return this._buildResponse(res, mod);
+      })
       .catch(err => {
-        console.log('Google search error');
-        throw err;
+        console.log('Google search error', err);
+        return;
       })
     );
   }
   
-  return Promise.all(reqQueriesToResolve)
+  return Promise.all(reqQueriesToResolve);
 };
+
+function extend (addTo, addFrom) {
+  for (var key in addFrom) {
+    if (!addTo.hasOwnProperty(key)) {
+      addTo[key] = addFrom[key];
+    }
+  }
+  return addTo;
+}
 
 module.exports = GoogleClient;
