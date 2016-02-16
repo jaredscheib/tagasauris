@@ -18,12 +18,12 @@ mq.listen(lQ1, (ack, reject, payload) => {
   });
 });
 
-let lQ2 = 'ctrl_img_scrape_res';
-mq.listen(lQ2, (ack, reject, payload) => {
-  let nQ2 = 'srvc_ticket_gen_req';
-  mq.enqueue(nQ2, payload) // TODO determine which task this can serve
-  .then(() => {
-    console.log(`controller: ${lQ2} --> ${nQ2}`);
-    ack();
-  });
-});
+// let lQ2 = 'ctrl_img_scrape_res';
+// mq.listen(lQ2, (ack, reject, payload) => {
+//   let nQ2 = 'srvc_ticket_gen_req';
+//   mq.enqueue(nQ2, payload) // TODO determine which task this can serve
+//   .then(() => {
+//     console.log(`controller: ${lQ2} --> ${nQ2}`);
+//     ack();
+//   });
+// });
