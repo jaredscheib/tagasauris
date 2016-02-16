@@ -45,7 +45,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
         })
         .on('error', err => {
           console.log(err, err.stack);
-          reject(err);
+          resolve(null); // no reject
         })
         .on('uploaded', details => {
           uploadCount++;
@@ -74,10 +74,17 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
     pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
 
     // begin pipe from image url
-    req = request.get(imgObj.orig_url) // readableStream
+    req = request.get(imgObj.orig_url, { followRedirect: res => {
+        console.log('redirect!');
+        req.removeAllListeners();
+        resolve(null); // skip any images that try to redirect
+        return false;
+      }
+    }) // readableStream
+    // .setMaxListeners(10)
     .on('response', response => {
       console.log(response.statusCode);
-      console.log(response.headers['content-type']);
+      console.log('content-type', response.headers['content-type']);
       if (response.headers['content-type'].split('/')[0] === 'image' ) {
         console.log('URL resolved to image');
         req.pipe(pipeline)
@@ -89,7 +96,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
     .on('error', err => {
       console.log(err, err.stack);
       req.removeAllListeners();
-      reject(err);
+      resolve(null); // no reject
     });
     // .pipe(pipeline);
   });

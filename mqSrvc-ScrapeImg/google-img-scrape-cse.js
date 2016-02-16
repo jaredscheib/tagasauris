@@ -63,6 +63,9 @@ GoogleClient.prototype.search = function (query, maxResults) {
         json: true
       })
       .then(this._buildResponse)
+      .catch(err => {
+        throw err;
+      })
     );
   }
   

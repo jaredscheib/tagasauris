@@ -44,7 +44,8 @@ mq.listen(lQ, (ack, reject, payload) => {
             }
           })
           .then(fbImgRef => {
-            console.log('synced s3ImgObj to firebase');
+            if (fbImgRef === null) console.log('null not synced to firebase');
+            else console.log('synced s3ImgObj to firebase');
             return fbImgRef;
           });
       })
@@ -56,7 +57,7 @@ mq.listen(lQ, (ack, reject, payload) => {
     ack();
     Firebase.goOffline();
     let nQ = 'ctrl_img_scrape_res';
-    mq.enqueue(nQ, allImgRefs)
+    mq.enqueue(nQ, allImgRefs.filter(imgRef => { return imgRef !== null; }))
     .then(() => {
       console.log(`service: ${lQ} --> ${nQ}`);
     });
