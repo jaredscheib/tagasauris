@@ -55,13 +55,12 @@ function normalizeSet (arr) {
 
 function saveLocalCopy (webImgObjSet) {
   return new Promise((fulfill, reject) => {
-    fs.writeFileAsync(
-      `./results_redundancy/google${webImgObjSet.length}-C${fs_prep(webImgObjSet[0].concept)}-Q${fs_prep(webImgObjSet[0].query)}.json`,
-      JSON.stringify(webImgObjSet, null, 4),
-      { flags: 'w' })
+    let path = './results_redundancy/';
+    let filename = `google${webImgObjSet.length}-C${fs_prep(webImgObjSet[0].concept)}-Q${fs_prep(webImgObjSet[0].query)}.json`;
+    fs.writeFileAsync(`${path}${filename}`, JSON.stringify(webImgObjSet, null, 4), { flags: 'w' })
     .then(() => {
       fulfill(webImgObjSet);
-      console.log(`saved ${webImgObjSet.length} images in webImgObjSet to disk`);
+      console.log(`saved ${webImgObjSet.length} web image objects to ${path}${filename}`);
     });
   });
 }

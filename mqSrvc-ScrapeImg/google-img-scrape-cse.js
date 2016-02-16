@@ -1,6 +1,7 @@
 'use strict';
 
-const got = require('got');
+const _ = require('underscore');
+const got = _.throttle(require('got'), 10000);
 
 function GoogleClient (cse_id, api_key) {
   if (!(this instanceof GoogleClient)) {
