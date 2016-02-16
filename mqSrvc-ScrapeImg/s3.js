@@ -39,7 +39,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj) {
     writableStreams = options.map((item, i) => {
         let s3WritableStream = s3Stream.upload({
           Bucket: options[i].bucket,
-          Key: `${uuid}-C${imgObj.concept}-Q${imgObj.query}-W${options[i].width}-L${options[i].quality}.${ext}`,
+          Key: `${uuid}-C${fs_prep(imgObj.concept)}-Q${fs_prep(imgObj.query)}-W${options[i].width}-L${options[i].quality}.${ext}`,
           ACL: 'public-read',
           StorageClass: 'REDUCED_REDUNDANCY',
           ContentType: imgObj.type
@@ -132,6 +132,10 @@ function generateUUID(){
     return (c === 'x' ? r : (r&0x3|0x8)).toString(16);
   });
   return uuid;
+}
+
+function fs_prep (str) {
+  return str.slice().split(' ').join('_').toLowerCase()
 }
 
 module.exports = {
