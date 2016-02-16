@@ -13,8 +13,8 @@ mq.on('connected', () => { console.log('connected to mq'); });
 
 app.set('port', config.port);
 
-// curl 'http://localhost:65000/images?query=porsche&concept=porsche&num=200&task=img_verification'
-// curl 'http://localhost:65000/images?query=porsche+macan&concept=porsche&num=12&task=img_verification'
+// curl 'http://localhost:65000/images?task=img_verification&num=200&concept=porsche&query=porsche'
+// curl 'http://localhost:65000/images?task=img_verification&num=200&concept=porsche&query=porsche+macan'
 app.get('/images', (req, res) => {
   console.log('GET on /images');
   if (req.query.num > 1000) res.status(400).send('Can only query for up to 1000 images currently.');
