@@ -8,7 +8,7 @@ const mq = new MsgQueueClient(`${mqServerConfig.url}:${mqServerConfig.port}`, { 
 
 mq.on('connected', () => { console.log('connected to mq'); });
 
-let lQ1 = 'ctrl_sns_img_scrape_req';
+let lQ1 = 'ctrl_img_scrape_req';
 mq.listen(lQ1, (ack, reject, payload) => {
   let nQ1 = 'srvc_img_scrape_req';
   mq.enqueue(nQ1, payload) // TODO determine which task this can serve
