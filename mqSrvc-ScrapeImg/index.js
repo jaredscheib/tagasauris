@@ -20,12 +20,13 @@ let lQ_scrape = 'srvc_img_scrape_req';
 let lQ_upload_sync = 'srvc_upload_sync_req';
 
 mq.listen(lQ_scrape, (ack, reject, payload) => {
-  getWebImgObjSet(payload.query, payload.num)
-  .then(finalizeSetAndSaveLocal)
-  .then(flatFinalSet => {
+  getWebImgObjSet(payload.query, payload.num, { query: payload.query, concept: payload.concept })
+  .then(normalizeSet)
+  .then(saveLocalCopy)
+  .then(webImgObjSet => {
     ack();
     let nQ = 'ctrl_img_scrape_res';
-    my.enqueue(nQ, flatFinalSet)
+    my.enqueue(nQ, webImgObjSet)
     .then(console.log(`service: ${lQ_scrape} --> ${nQ}`));
   });
 });
@@ -44,31 +45,30 @@ mq.listen(lQ_upload_sync, (ack, reject, payload) => {
   })
 });
 
-function getWebImgObjSet (query, num) {
-  return gClient.search(query, num);
+function getWebImgObjSet (query, num, mod) {
+  return gClient.search(query, num, mod);
 }
 
-function finalizeSetAndSaveLocal (webImgObjSet) {
-  let pConcept = payload.concept.slice().split(' ').join('_').toLowerCase();
-  let pQuery = payload.query.slice().split(' ').join('_').toLowerCase();
-  let flatFinalSet = flattenArray(webImgObjSet)
-    .forEach((webImgObj, i) => {
-      console.log(`got webImgObj from ${payload.query}, ${i+1} of ${payload.num}`);
-      webImgObj.concept = pConcept;
-      webImgObj.query = pQuery;
-    });
-  console.log(`got ${flatFinalSet.length} images in webImgObjSet`);
+function normalizeSet (arr) {
+  return arr.reduce((a, b) => { return a.concat(b); }, []).filter(x => { return x; });
+}
+
+function saveLocalCopy (webImgObjSet) {
   return new Promise((fulfill, reject) => {
-    fs.writeFileAsync(`./results_redundancy/google1000-C${pConcept}-Q${pQuery}.json`, JSON.stringify(flatFinalSet, null, 4), { flags: 'w' })
+    fs.writeFileAsync(
+      `./results_redundancy/google${webImgObjSet.length}-C${fs_prep(webImgObjSet[0].concept)}-Q${fs_prep(webImgObjSet[0].query)}.json`,
+      JSON.stringify(webImgObjSet, null, 4),
+      { flags: 'w' })
     .then(() => {
-      fulfill(flatFinalSet);
-    });      
+      fulfill(webImgObjSet);
+      console.log(`saved ${webImgObjSet.length} images in webImgObjSet to disk`);
+    });
   });
 }
 
-function s3UploadFirebaseSyncImgSet (imgObjSet) {
+function s3UploadFirebaseSyncImgSet (webImgObjSet) {
   return Promise.all(
-    flatFinalSet.map(
+    webImgObjSet.map(
       s3UploadImgObj
       .then(s3ImgObj => {
         if (s3ImgObj === null) {
@@ -83,9 +83,7 @@ function s3UploadFirebaseSyncImgSet (imgObjSet) {
         if (fbImgRef === null) console.log('null not synced to firebase');
         else console.log('synced s3ImgObj to firebase');
         return fbImgRef;
-      })
-    )
-  );
+      })));
 }
 
 function s3UploadImgObj (imgObj) {
@@ -96,6 +94,6 @@ function firebaseSync (imgObj) {
   return fb.pushAndAddUID(imgObj);
 }
 
-function flattenArray(arrTwoDim) {
-  return [].concat.apply([], arrTwoDim);
+function fs_prep (str) {
+  return str.slice().split(' ').join('_').toLowerCase()
 }
