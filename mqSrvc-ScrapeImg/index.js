@@ -27,20 +27,17 @@ mq.listen(lQ, (ack, reject, payload) => {
     return Promise.all(
       flatSet.map((webImgObj, i) => {
         console.log(`got back webImgObj from ${payload.query}, ${i+1} of ${payload.num}`);
-        // console.log(webImgObj);
         webImgObj.concept = payload.concept;
         webImgObj.query = payload.query;
         return uploadWebImgObjToS3(webImgObj)
-            // TODO save img obj to db
           .then(s3ImgObj => {
-            // console.log(s3ImgObj);
             if (s3ImgObj === null) {
               console.log('null on s3ImgObj');
               return null;
             } else {
               console.log('successful upload of imgObj to s3');
               syncedToFb++;
-              return syncToFirebase(s3ImgObj) // TODO reconsider this hotfix to exclude failing urls
+              return syncToFirebase(s3ImgObj);
             }
           })
           .then(fbImgRef => {
@@ -52,7 +49,7 @@ mq.listen(lQ, (ack, reject, payload) => {
     );
   })
   .then(allImgRefs => {
-    // allImgRefs.forEach(imgRef => { console.log('final imgRef', imgRef); });
+    // allImgRefs.forEach((imgRef, i) => { console.log(`imgRef ${i} of ${allImgRefs.length}`); });
     console.log(`uploaded and synced ${syncedToFb} valid images out of ${allImgRefs.length} search results`);
     ack();
     Firebase.goOffline();

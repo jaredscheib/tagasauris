@@ -18,14 +18,14 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
   console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
   return new Promise((resolve, reject) => {
     let req, writableStreams, pipeline;
-    let ext = reverse(reverse(imgObj.orig_url).slice(0, 5).split('.')[0]);
-    if ('jpg|jpeg|png|gif'.indexOf(ext) === -1) {
+    let fileArr = imgObj.orig_url.split('/').pop().split('.');
+    // let name = fileArr[0];
+    let ext = fileArr[1];
+    ext = ext === 'jpeg' ? 'jpg' : ext;
+    if ('jpg|png|gif'.indexOf(ext) === -1) {
       console.log('Image has no decoding extension. Fulfilling null.', ext)
       return resolve(null); // hotfix for files with no extensions
     }
-    let file = reverse(reverse(imgObj.orig_url).split('/')[0]);
-    let name = file.split('.');
-    ext = ext === 'jpeg' ? 'jpg' : ext;
 
     let options = [
       { bucket: `${bucket}/wfullq100`, width: 'full', quality: 100 },
@@ -34,11 +34,12 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
     ];
     
     let uploadCount = 0;
+    let uuid = generateUUID();
     // create a writable stream for each option set
     writableStreams = options.map((item, i) => {
         let s3WritableStream = s3Stream.upload({
           Bucket: options[i].bucket,
-          Key: `${name}-w${options[i].width}-q${options[i].quality}.${ext}`,
+          Key: `${uuid}-C${imgObj.concept}-Q${imgObj.query}-W${options[i].width}-L${options[i].quality}.${ext}`,
           ACL: 'public-read',
           StorageClass: 'REDUCED_REDUNDANCY',
           ContentType: imgObj.type
@@ -73,14 +74,14 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
     pipeline.clone().resize(options[1].width).quality(options[1].quality).withMetadata().pipe(writableStreams[1]);
     pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
 
-    // begin pipe from image url
+    // begin readable stream pipe from image url
     req = request.get(imgObj.orig_url, { followRedirect: res => {
         console.log('redirect!');
         req.removeAllListeners();
         resolve(null); // skip any images that try to redirect
         return false;
       }
-    }) // readableStream
+    })
     // .setMaxListeners(10)
     .on('response', response => {
       console.log(response.statusCode);
@@ -98,51 +99,8 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
       req.removeAllListeners();
       resolve(null); // no reject
     });
-    // .pipe(pipeline);
   });
 }
-
-// function pipeImgSetToBucket (imgSet, bucket) {
-//   let pipePromises = [];
-//   imgSet.forEach(imgObj => {
-//     pipeTransformAndUploadImgObjToS3(imgObj, bucket)
-//     .then(obj => {
-//       // console.log('resolved pipePromise', obj);
-//       // console.log('resolved pipePromise', obj.details);
-//     });
-//   });
-//   return Promise.all(pipePromises);
-// }
-
-// pipeImgSetToBucket(s3_fixtures.myImgObjs, s3_fixtures.myBucketRef)
-// .then(res => {
-//   console.log('all promises resolved, images uploaded');
-// });
-// .then(res => {
-//   console.log('piped', res);
-  // s3Stream.listObjects({ Bucket: myBucketRef }, (err, res) => {
-  //   if (err) console.log(err, err.stack);
-  //   else console.log(res);
-  // });
-// });
-
-// _(myFileSet).map(file => {
-//   let options = {
-//     width: [400, 800],
-//     quality: [50, 80]
-//   };
-
-//   let readableStream = fs.createReadStream(`${mySourceDirRef}/${file}`);
-//   let pipeline = multiplexToLocalFiles(file, options, myTargetDirRef);
-//   return readableStream.pipe(pipeline);
-// })
-// .each(imgStream => {
-//   console.log('imgStream', typeof imgStream);
-//   imgStream.metadata()
-//   .then(metadata => {
-//     console.log('metadata', metadata);
-//   })
-// })
 
 function multiplexToLocalFiles (file, options, targetDir) {
   let name = file.split('.');
@@ -164,32 +122,16 @@ function multiplexToLocalFiles (file, options, targetDir) {
   return pipeline;
 }
 
-// AWS helpers
+function generateUUID(){
+  var d = new Date().getTime();
+  d += process.hrtime()[0];
 
-// function createBucket () {
-//   s3.createBucketAsync({Bucket: 'vid_decomp'})
-//   .then((res) => {
-//     console.log('res', res)
-//     var params = {Bucket: 'vid_decomp', Key: 'test', Body: 'testStr'};
-
-//     return s3.putObjectAsync(params);
-//   })
-//   .then(data => {
-//     console.log('data', data);
-//   })
-//   .catch(throwErr);
-// }
-
-// function throwErr (err) {
-//   console.log(err);
-//   throw err;
-// }  
-
-function reverse (str) {
-  var output = '';
-  for (var i = str.length - 1; i >= 0; i--) 
-    output += str[i];
-  return output;
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    var r = (d + Math.random()*16)%16 | 0;
+    d = Math.floor(d/16);
+    return (c === 'x' ? r : (r&0x3|0x8)).toString(16);
+  });
+  return uuid;
 }
 
 module.exports = {
