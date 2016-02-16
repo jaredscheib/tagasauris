@@ -9,7 +9,7 @@ const mqServerConfig = require('../common/config/mqserver.js');
 const app = express();
 const msgQueue = new MsgQueueServer(app);
 
-app.use(bodyParser({ limit: '50mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
 
 app.set('port', mqServerConfig.port);
 
