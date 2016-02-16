@@ -32,6 +32,7 @@ GoogleClient.prototype._buildOptions = function (query, options) {
 }
 
 GoogleClient.prototype._buildResponse = function (res) {
+  console.log('Google search success: ', res.body.items.length, 'results');
   return res.body.items.map(function (item) {
     return {
       type: item.mime,
@@ -52,7 +53,7 @@ GoogleClient.prototype.search = function (query, maxResults) {
   }
 
   if (maxResults < 1) throw 'Must search for at least 1 result';
-  console.log(query, maxResults);
+  console.log('GoogleClient search', query, maxResults);
 
   let reqQueriesToResolve = [];
   for (let start = 1; start <= maxResults; start += 10) {
@@ -64,6 +65,7 @@ GoogleClient.prototype.search = function (query, maxResults) {
       })
       .then(this._buildResponse)
       .catch(err => {
+        console.log('Google search error');
         throw err;
       })
     );
