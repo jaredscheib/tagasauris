@@ -4,7 +4,7 @@ const MsgQueueClient = require('msgqueue-client');
 const Firebase = require('firebase');
 const Promise = require('bluebird');
 const fs = Promise.promisifyAll(require('fs'));
-const GoogleScrape = require('./google-img-scrape-cse.js');
+const GoogleScrape = require('./img-scrape-google-cse.js');
 const s3 = require('./s3.js');
 const fb = require('./firebase.js');
 
@@ -51,18 +51,25 @@ function getWebImgObjSet (query, num, mod) {
 
 function normalizeSet (arr) {
   console.log('normalizing..');
-  return arr.reduce((a, b) => { return a.concat(b); }, []).filter(x => { return x; });
+  return arr.reduce((a, b) => { return typeof b === 'function' ? a : a.concat(b); }, []);
 }
 
 function saveLocalCopy (webImgObjSet) {
   console.log('saving..');
   return new Promise((fulfill, reject) => {
-    let path = './results_redundancy/';
-    let filename = `google${webImgObjSet.length}-C${fs_prep(webImgObjSet[0].concept)}-Q${fs_prep(webImgObjSet[0].query)}.json`;
-    fs.writeFileAsync(`${path}${filename}`, JSON.stringify(webImgObjSet, null, 4), { flags: 'w' })
+    let pathJSON = './results_redundancy/json/';
+    let pathJS = './results_redundancy/js/';
+    let concept = fs_prep(webImgObjSet[0].concept);
+    let query = fs_prep(webImgObjSet[0].query);
+    let filenameJS = `google${webImgObjSet.length}-C${concept}-Q${query}.js`;
+    let filenameJSON = `${filenameJS}on`;
+    fs.writeFileAsync(`${pathJSON}${filenameJSON}`, JSON.stringify(webImgObjSet, null, 4), { flags: 'w' })
     .then(() => {
+      console.log(`saved ${webImgObjSet.length} web image objects to ${pathJSON}${filenameJSON}`);
+      return fs.writeFileAsync(`${pathJS}${filenameJS}`, `var ${query} = ${JSON.stringify(webImgObjSet, null, 4)};\n`, { flags: 'w' });
+    }).then(() => {
+      console.log(`saved ${webImgObjSet.length} web image objects to ${pathJS}${filenameJS}`);
       fulfill(webImgObjSet);
-      console.log(`saved ${webImgObjSet.length} web image objects to ${path}${filename}`);
     });
   });
 }
