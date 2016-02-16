@@ -50,10 +50,12 @@ function getWebImgObjSet (query, num, mod) {
 }
 
 function normalizeSet (arr) {
+  console.log('normalizing..');
   return arr.reduce((a, b) => { return a.concat(b); }, []).filter(x => { return x; });
 }
 
 function saveLocalCopy (webImgObjSet) {
+  console.log('saving..');
   return new Promise((fulfill, reject) => {
     let path = './results_redundancy/';
     let filename = `google${webImgObjSet.length}-C${fs_prep(webImgObjSet[0].concept)}-Q${fs_prep(webImgObjSet[0].query)}.json`;
