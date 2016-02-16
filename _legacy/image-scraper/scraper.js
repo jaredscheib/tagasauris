@@ -99,14 +99,19 @@ function createTicketsPool(taskName) {
         if (imgData.hasOwnProperty(UID)) {
           const poolTicket = {
             img_ref_uid: UID,
-            status: true // true === open; false === closed
+            // status: true // true === open; false === closed
           };
-          imgData[UID].url = imgData[UID].s3_url;
+          // imgData[UID].url = imgData[UID].s3_url;
           allPromises.push(pushAndAddUID(dbRef.child(`${taskName}_tickets_pool`), poolTicket));
         }
       }
       Promise.all(allPromises)
-      .then(() => { dbRef.child('img_ref3').set(imgData); console.log('created tickets'); Firebase.goOffline(); resolve(200); })
+      .then(() => {
+        // dbRef.child('img_ref3').set(imgData);
+        console.log('created tickets');
+        Firebase.goOffline();
+        resolve(200);
+      })
       .catch((err) => {
         sendErr(err);
         reject(err);
@@ -125,7 +130,7 @@ function createTicketsPool(taskName) {
 //   fetchAndStore(queryStr, resultsCnt);
 // }
 
-// createTicketsPool('task_img_verification_trinary');
+createTicketsPool('task_img_verification_trinary');
 // createTicketsPool('task_img_verification');
 
 module.exports.fetchAndStore = fetchAndStore;

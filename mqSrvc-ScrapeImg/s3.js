@@ -14,18 +14,18 @@ const s3 = new AWS.S3(credentials);
 const s3Stream = require('s3-upload-stream')(s3);
 
 function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
-  bucket = bucket || s3_fixtures.defBucketRef;
+  bucket = bucket || `${s3_fixtures.defBucketRef}/${imgObj.concept}`;
   console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
   return new Promise((resolve, reject) => {
     let req, writableStreams, pipeline;
+    let ext = reverse(reverse(imgObj.orig_url).slice(0, 5).split('.')[0]);
+    if ('jpg|jpeg|png|gif'.indexOf(ext) === -1) {
+      console.log('Image has no decoding extension. Fulfilling null.', ext)
+      return resolve(null); // hotfix for files with no extensions
+    }
     let file = reverse(reverse(imgObj.orig_url).split('/')[0]);
     let name = file.split('.');
-    let ext = name.pop();
-    ext = ext === 'jpg' ? 'jpeg' : ext;
-    if ('jpg|jpeg|png|gif'.indexOf(ext) === -1) {
-      console.log('ext', ext, 'fulfilling null')
-      resolve(null); // hotfix for files with no extensions
-    }
+    ext = ext === 'jpeg' ? 'jpg' : ext;
 
     let options = [
       { bucket: `${bucket}/wfullq100`, width: 'full', quality: 100 },
@@ -50,8 +50,8 @@ function pipeTransformAndUploadImgObjToS3 (imgObj, bucket) {
         .on('uploaded', details => {
           uploadCount++;
           console.log(`uploaded to s3: ${details.Key}`);
-          if (details.Key.split('/')[1] === 'w600q80') {
-            imgObj.s3_url = details.Location;
+          if (details.Key.indexOf('w600q80') !== -1) {
+            imgObj.url = details.Location;
             imgObj.s3_bucket = details.Bucket;
             imgObj.s3_key = details.Key;
             imgObj.s3_etag = details.ETag;

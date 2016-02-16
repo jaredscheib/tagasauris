@@ -31,7 +31,7 @@ function scrapeGoogle(queryString, maxResultsNum) {
 function normalizeBingToGoogle(imgObjSet) {
   return imgObjSet.map(item => {
     let imgObj = item;
-    imgObj.thumbnail_url = imgObj.thumb;
+    imgObj.thumb_url = imgObj.thumb;
     delete imgObj.thumb;
     imgObj.size = `${imgObj.size.slice(0, -2)}000`;
     imgObj.type = `image/${imgObj.format}`;

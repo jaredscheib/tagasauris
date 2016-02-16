@@ -2,6 +2,7 @@
 
 const MsgQueueClient = require('msgqueue-client');
 const Firebase = require('firebase');
+const fs = require('fs');
 const GoogleScrape = require('./google-img-scrape-cse.js');
 const s3 = require('./s3.js');
 const fb = require('./firebase.js');
@@ -20,10 +21,13 @@ mq.listen(lQ, (ack, reject, payload) => {
   Firebase.goOnline();
   getWebImgObjSet(payload.query, payload.num)
   .then(webImgObjSet => {
+    let flatSet = flattenArray(webImgObjSet);
+    // fs.writeFile('./temp/imgData.json', JSON.stringify(flatSet, null, 4), { flags: 'w' });
     return Promise.all(
-      flattenArray(webImgObjSet).map((webImgObj, i) => {
+      flatSet.map((webImgObj, i) => {
         console.log(`got back webImgObj from ${payload.query}, ${i} of ${payload.num}`);
         // console.log(webImgObj);
+        webImgObj.concept = payload.concept;
         webImgObj.query = payload.query;
         return uploadWebImgObjToS3(webImgObj)
             // TODO save img obj to db
@@ -54,8 +58,8 @@ function getWebImgObjSet (query, num) {
   return gClient.search(query, num);
 }
 
-function uploadWebImgObjToS3 (imgObj) {
-  return s3.pipeTransformAndUploadImgObjToS3(imgObj);
+function uploadWebImgObjToS3 (imgObj, bucket) {
+  return s3.pipeTransformAndUploadImgObjToS3(imgObj, bucket);
 }
 
 function syncToFirebase (imgObj) {
