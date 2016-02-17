@@ -1,23 +1,26 @@
 'use strict';
 
-const _ = require('highland');
 const Promise = require('bluebird');
 const request = require('request');
-const url = require('url');
-const fs = require('fs');
 const sharp = require('sharp');
 const AWS = require('aws-sdk');
-const credentials = require('../common/secrets/aws.json');
-const s3_fixtures = require('../common/fixtures/s3.json');
-const s3 = new AWS.S3(credentials);
-// Promise.promisifyAll(Object.getPrototypeOf(s3));
+const s3 = new AWS.S3(require('../common/secrets/aws.json'));
 const s3Stream = require('s3-upload-stream')(s3);
+
+const s3_fixtures = require('../common/fixtures/s3.json');
+
+// request.on('uncaughtException', err => {
+//   console.log('here it is');
+//   console.log(err, err.stack);
+//   return Promise.resolve;
+// });
 
 function pipeTransformAndUploadImgObjToS3 (imgObj) {
   let bucket = `${s3_fixtures.defBucketRef}/${imgObj.concept}`;
-  console.log(`pipeTransform called on ${imgObj} to go to ${bucket}`);
+  console.log(`pipeTransform ${JSON.stringify(imgObj).substr(0,15)}(...) to go to ${bucket}`);
   return new Promise((resolve, reject) => {
     let req, writableStreams, pipeline;
+
     let fileArr = imgObj.orig_url.split('/').pop().split('.');
     // let name = fileArr[0];
     let ext = fileArr[1];
@@ -44,10 +47,8 @@ function pipeTransformAndUploadImgObjToS3 (imgObj) {
           StorageClass: 'REDUCED_REDUNDANCY',
           ContentType: imgObj.type
         })
-        .on('error', err => {
-          console.log(err, err.stack);
-          resolve(null); // no reject
-        })
+        .on('error', handler)
+        .on('uncaughtException', handler)
         .on('uploaded', details => {
           uploadCount++;
           console.log(`uploaded to s3: ${details.Key}`);
@@ -58,9 +59,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj) {
             imgObj.s3_etag = details.ETag;
           }
           if (uploadCount === options.length) {
-            req.removeAllListeners();
-            writableStreams.forEach(s => { s.removeAllListeners(); });
-            pipeline.removeAllListeners();
+            removeAllListeners();
             resolve(imgObj);
           }
         });
@@ -69,40 +68,65 @@ function pipeTransformAndUploadImgObjToS3 (imgObj) {
       });
 
     // image processing multiplexer pipeline
-    pipeline = sharp().withMetadata().on('error', err => { console.log(err); });
+    pipeline = sharp().withMetadata();
+    pipeline.on('error', handler);
     pipeline.pipe(writableStreams[0])
-    pipeline.clone().resize(options[1].width).quality(options[1].quality).withMetadata().pipe(writableStreams[1]);
-    pipeline.clone().resize(options[2].width).quality(options[2].quality).withMetadata().pipe(writableStreams[2]);
+      .on('error', handler);
+    pipeline.clone()
+      .on('error', handler)
+      .resize(options[1].width).quality(options[1].quality).withMetadata()
+      .pipe(writableStreams[1]);
+    pipeline.clone()
+      .on('error', handler)
+      .resize(options[2].width).quality(options[2].quality).withMetadata()
+      .pipe(writableStreams[2]);
 
     // begin readable stream pipe from image url
-    req = request.get(imgObj.orig_url, { timeout: 2000, followRedirect: res => {
+    req = request
+    .get(imgObj.orig_url, { timeout: 5000, followRedirect: res => {
         console.log('redirect!');
-        req.removeAllListeners();
+        removeAllListeners();
         resolve(null); // skip any images that try to redirect
         return false;
-      }
-    })
+      }})
     // .setMaxListeners(10)
+    .on('error', handler)
+    .on('uncaughtException', handler)
     .on('response', response => {
       console.log(response.statusCode);
       console.log('content-type', response.headers['content-type']);
       if (response.headers['content-type'].split('/')[0] === 'image' ) {
         console.log('URL resolved to image');
-        req.pipe(pipeline)
+        req.pipe(pipeline).on('error', handler);
       } else {
-        req.removeAllListeners();
+        console.log('URL failed to resolve to image');
+        removeAllListeners();
         resolve(null); // TODO come up with solution for when image url does not resolve to an image successfully
       }
     })
-    .on('error', err => {
-      console.log(err, err.stack);
-      req.removeAllListeners();
-      resolve(null); // no reject
+    .on('end', () => {
+      console.log('req stream end event');
     });
+
+    function handler (err) {
+      console.log('req stream error, resolving null..');
+      console.log(err, err.code, err.stack);
+      removeAllListeners();
+      req.end();
+      return resolve(null); // no reject
+    }
+
+    function removeAllListeners (listener) {
+      req.removeAllListeners(listener);
+      writableStreams.forEach(s => { s.removeAllListeners(listener); });
+      pipeline.removeAllListeners(listener);
+    }
   });
 }
 
 function multiplexToLocalFiles (file, options, targetDir) {
+  const fs = require('fs');
+
   let name = file.split('.');
   let ext = name.pop();
 
