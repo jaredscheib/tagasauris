@@ -37,20 +37,32 @@ div {
 	display: block;
 }
 
-.instruction_item {
-	font-style: italic;
+#question_span {
+	margin: 26px 0 4px;
+	font-size: 24px;
+	display: block;
 }
 
-#question_span {
-	margin: 20px 0 4px;
-	font-size: 22px;
+#subtitle_span {
+	font-size: 19px;
 	display: block;
+	text-align: center;
+	margin: 4px;
+	font-style: bold;
 }
 
 #instructions_list {
 	font-size: 16px;
-	text-align: left;
+	text-align: center;
 	display: inline-block;
+	text-align: left;
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+}
+
+.instruction_item {
+	font-style: italic;
 }
 
 #task_area {

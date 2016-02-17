@@ -20,11 +20,11 @@ var stub_rx = {
       elements.imgCounter.innerHTML = info.received;
       elements.instructionsArea.appendChild(makeInstructionsList([
         'Click on each image to select your answer.',
-        'Click ONCE if the image IS A CLEAR DEPICTION of ' + info.concept.toUpperCase() + '.',
-        'Click TWICE if the image is CLEARLY NOT A DEPICTION of ' + info.concept.toUpperCase() + '.',
-        'Click THRICE if the image is NOT A CLEAR DEPICTION of ' + info.concept.toUpperCase() + '.',
-        'Click FRICE if the image is NOT A PHOTOGRAPH.'
-      ], 'li'));
+        '1 click: if the image IS A CLEAR DEPICTION of ' + info.concept.toUpperCase() + '.',
+        '2 clicks: if there IS NO ' + info.concept.toUpperCase() + ' in the image.',
+        '3 clicks: if the image IS UNCLEAR.',
+        '4 clicks: if the image is NOT A PHOTOGRAPH.'
+      ], 'ul', true));
 
       // instantiate Operand class per image
       elements.ticketComponents = tickets.map(function(ticket, i){

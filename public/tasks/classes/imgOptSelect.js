@@ -32,12 +32,12 @@ var Operand = function (imgData, index) {
     },
     {
       label: 'No, there is no <b>' + info.concept.toUpperCase() + '</b> in this image</b>',
-      color: '#ffff99',
+      color: '#ff9999',
       value: -1
     },
     {
       label: 'This is not a clear depiction of <b>' + info.concept.toUpperCase() + '</b>',
-      color:  '#ff9999',
+      color:  '#ffff99',
       value: 0
     },
     {
