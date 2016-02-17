@@ -19,6 +19,16 @@ var gl519 = module.exports = (function () {
     return o.hasOwnProperty(k);
   };
 
+  _.extend = function (addTo, addFrom, incrementKey) {
+    if (_.has(addTo, incrementKey)) addTo[incrementKey] = addTo[incrementKey] + 1;
+    for (var key in addFrom) {
+      if (!_.has(addTo, key)) {
+        addTo[key] = addFrom[key];
+      }
+    }
+    return addTo;
+  };
+
   _.identity = function (e) { return e; };
 
   _.each = function (o, func) {
