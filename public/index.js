@@ -40,6 +40,7 @@ Promise.all([ loadScript('public/db.js'), loadScript('public/tasks/' + info.task
   return stub_db.getTickets();
 })
 .then(function(tickets) {
+  info.received = tickets.length;
   console.log('got ' + tickets.length);
   return stub_rx.loadComponents(tickets);
 })

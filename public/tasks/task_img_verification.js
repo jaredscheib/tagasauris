@@ -15,9 +15,15 @@ var stub_rx = {
     .then(function() {
       console.log('loaded compenents with image data', tickets)
 
-      elements.questionSpan.innerHTML = 'Do each of these <span class="img_counter"></span> photos contain "' + info.concept + '"?';
+      elements.questionSpan.innerHTML = 'Does each of the <span id="img_counter"></span> photos below depict <b>' + info.concept.toUpperCase() + '</b>?';
+      elements.imgCounter = document.getElementById('img_counter');
+      elements.imgCounter.innerHTML = info.received;
       elements.instructionsArea.appendChild(makeInstructionsList([
-        'You can click on each image to select your response.'
+        'Click on each image to select your answer.',
+        'Click ONCE if the image IS A CLEAR DEPICTION of ' + info.concept.toUpperCase() + '.',
+        'Click TWICE if the image is CLEARLY NOT A DEPICTION of ' + info.concept.toUpperCase() + '.',
+        'Click THRICE if the image is NOT A CLEAR DEPICTION of ' + info.concept.toUpperCase() + '.',
+        'Click FRICE if the image is NOT A PHOTOGRAPH.'
       ], 'li'));
 
       // instantiate Operand class per image

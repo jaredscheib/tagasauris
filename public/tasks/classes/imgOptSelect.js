@@ -1,132 +1,117 @@
-var Operand = function (imgData, i) {
+var Operand = function (imgData, index) {
   var self = this;
   this.imgData = imgData;
-  this.i = i;
+  this.index = index;
 
-  this.operandContainer = document.createElement('div');
+  this.operandContainer = this.opC = document.createElement('div');
+  this.opC.id = 'optselect' + String(this.index);
+  this.opC.className = 'optselect_container';
+
   // this.pOptSelect = document.createElement('p');
-  this.imgOptSelect = document.createElement('img');
-  this.divOptSelectRadio = document.createElement('div');
-  this.radioOptSelect1 = document.createElement('input');
-  this.labelOptSelect1 = document.createElement('label');
-  this.divOptSelectRadioLabel1 = document.createElement('div');
-  this.radioOptSelect0 = document.createElement('input');
-  this.labelOptSelect0 = document.createElement('label');
-  this.divOptSelectRadioLabel0 = document.createElement('div');
-  this['radioOptSelect-1'] = document.createElement('input');
-  this['labelOptSelect-1'] = document.createElement('label');
-  this['divOptSelectRadioLabel-1'] = document.createElement('div');
-  this['radioOptSelect-2'] = document.createElement('input');
-  this['labelOptSelect-2'] = document.createElement('label');
-  this['divOptSelectRadioLabel-2'] = document.createElement('div');
-
-  var iOptSelect = 'optselect' + String(i);
-  var iOptSelect_neg = iOptSelect + '_-1';
-  var iOptSelect_mid = iOptSelect + '_+0';
-  var iOptSelect_pos = iOptSelect + '_+1';
-  var iOptSelect_not = iOptSelect + '_-2';
-
-  this.operandContainer.id = iOptSelect;
-  this.operandContainer.className = 'optselect_container';
-
   // this.pOptSelect.className = 'optselect_p';
-  // this.pOptSelect.id = iOptSelect + '_p';
+  // this.pOptSelect.id = this.opC.id + '_p';
   // this.pOptSelect.innerHTML = this.imgData.query.slice().split('_').join(' ');
-
+  
+  this.imgOptSelect = document.createElement('img');
   this.imgOptSelect.className = 'optselect_img';
   this.imgOptSelect.src = this.imgData.url;
 
-  this.divOptSelectRadio.className = 'div_OptSelect_radio';
+  this.divOptSelectRadio = document.createElement('div');
+  this.divOptSelectRadio.className = 'div_optselect_radio';
 
-  // yes
-  this.radioOptSelect1.setAttribute('type', 'radio');
-  this.radioOptSelect1.setAttribute('name', iOptSelect);
-  this.radioOptSelect1.setAttribute('value', 1);
-  this.radioOptSelect1.id = iOptSelect_pos;
-  this.radioOptSelect1.className = 'optselect_radio';
+  var options = [
+    {
+      label: '(Click on the image to select your answer)',
+      color: '#ffffff',
+      value: null
+    },
+    {
+      label: 'Yes, this image clearly depicts <b>' + info.concept.toUpperCase() + '</b>',
+      color: '#99ff99',
+      value: 1
+    },
+    {
+      label: 'No, there is no <b>' + info.concept.toUpperCase() + '</b> in this image</b>',
+      color: '#ffff99',
+      value: -1
+    },
+    {
+      label: 'This is not a clear depiction of <b>' + info.concept.toUpperCase() + '</b>',
+      color:  '#ff9999',
+      value: 0
+    },
+    {
+      label: 'This image is not a photograph',
+      color:  '#cccccc',
+      value: -2
+    } 
+  ];
 
-  this.labelOptSelect1.setAttribute('for', iOptSelect_pos);
-  this.labelOptSelect1.className = 'optselect_radio_label';
-  this.labelOptSelect1.innerText = '(1) Yes, this is clearly "' + this.imgData.concept + '"';
-  this.labelOptSelect1.textContent = '(1) Yes, this is clearly "' + this.imgData.concept + '"';
+  // this.addRadioChangeHandler = function (radio) {
+  //   radio.addEventListener('change', function (e) {
+  //     console.log('this', this);
+  //     console.log(e.target);
+  //     self.imgData.response = Number(this.value);
+  //     self.updateColor()
+  //   });
+  // };
 
-  // maybe
-  this.radioOptSelect0.setAttribute('type', 'radio');
-  this.radioOptSelect0.setAttribute('name', iOptSelect);
-  this.radioOptSelect0.setAttribute('value', 0);
-  this.radioOptSelect0.id = iOptSelect_mid;
-  this.radioOptSelect0.className = 'optselect_radio';
+  this.divOpts = [];
+  for (var i = 0; i < options.length; i++) {
+    // var key = options[i].value;
+    var d = 'divOptSelectRadioLabel'+i;
+    var r = 'radioOptSelect'+i;
+    var l = 'labelOptSelect'+i;
+    var s = 'spanOptSelect'+i;
+    var iKey = this.opC.id+i;
 
-  this.labelOptSelect0.setAttribute('for', iOptSelect_mid);
-  this.labelOptSelect0.className = 'optselect_radio_label';
-  this.labelOptSelect0.innerText = '(2) Hm, this is not clearly "' + this.imgData.concept + '"';
-  this.labelOptSelect0.textContent = '(2) Hm, this is not clearly "' + this.imgData.concept + '"';
+    this[d] = document.createElement('div');
+    this[r] = document.createElement('input');
+    // this[l] = document.createElement('label');
+    this[s] = document.createElement('span');
+    this[d].style.backgroundColor = options[i].color;
 
-  // no
-  this['radioOptSelect-1'].setAttribute('type', 'radio');
-  this['radioOptSelect-1'].setAttribute('name', iOptSelect);
-  this['radioOptSelect-1'].setAttribute('value', -1);
-  this['radioOptSelect-1'].id = iOptSelect_neg;
-  this['radioOptSelect-1'].className = 'optselect_radio';
+    this[r].setAttribute('type', 'radio');
+    this[r].setAttribute('name', this.opC.id);
+    this[r].setAttribute('value', i);
+    this[r].id = iKey;
+    this[r].className = 'optselect_radio';
+    this[r].style.visibility = 'hidden';
 
-  this['labelOptSelect-1'].setAttribute('for', iOptSelect_neg);
-  this['labelOptSelect-1'].className = 'optselect_radio_label';
-  this['labelOptSelect-1'].innerText = '(3) No, this is clearly not "' + this.imgData.concept + '"';
-  this['labelOptSelect-1'].textContent = '(3) No, this is clearly not "' + this.imgData.concept + '"';
+    // this[l].setAttribute('for', iKey);
+    // this[l].className = 'optselect_radio_label';
+    // this[l].innerText = 'Yes, this image clearly depicts <b>' + info.concept.toUpperCase() + '</b>';
+    // this[l].textContent = 'Yes, this image clearly depicts <b>' + info.concept.toUpperCase() + '</b>';
+    this[s].innerHTML = options[i].label;
+    this[d].appendChild(this[s]);
+    this[d].appendChild(this[r]);
 
-  // not a photo
-  this['radioOptSelect-2'].setAttribute('type', 'radio');
-  this['radioOptSelect-2'].setAttribute('name', iOptSelect);
-  this['radioOptSelect-2'].setAttribute('value', -2);
-  this['radioOptSelect-2'].id = iOptSelect_not;
-  this['radioOptSelect-2'].className = 'optselect_radio';
-
-  this['labelOptSelect-2'].setAttribute('for', iOptSelect_not);
-  this['labelOptSelect-2'].className = 'optselect_radio_label';
-  this['labelOptSelect-2'].innerText = '(0) This is not a real photo';
-  this['labelOptSelect-2'].textContent = '(0) This is not a real photo';
-
-  // this.operandContainer.appendChild(this.pOptSelect);
-  this.operandContainer.appendChild(this.imgOptSelect);
-  this['divOptSelectRadioLabel-1'].appendChild(this['radioOptSelect-1']);
-  this['divOptSelectRadioLabel-1'].appendChild(this['labelOptSelect-1']);
-  this.divOptSelectRadioLabel0.appendChild(this.radioOptSelect0);
-  this.divOptSelectRadioLabel0.appendChild(this.labelOptSelect0);
-  this.divOptSelectRadioLabel1.appendChild(this.radioOptSelect1);
-  this.divOptSelectRadioLabel1.appendChild(this.labelOptSelect1);
-  this['divOptSelectRadioLabel-2'].appendChild(this['radioOptSelect-2']);
-  this['divOptSelectRadioLabel-2'].appendChild(this['labelOptSelect-2']);
-  this.divOptSelectRadio.appendChild(this.divOptSelectRadioLabel1);
-  this.divOptSelectRadio.appendChild(this.divOptSelectRadioLabel0);
-  this.divOptSelectRadio.appendChild(this['divOptSelectRadioLabel-1']);
-  this.divOptSelectRadio.appendChild(this['divOptSelectRadioLabel-2']);
-  this.operandContainer.appendChild(this.divOptSelectRadio);
-
-  this.addRadioChangeHandler = function (radio) {
-    radio.addEventListener('change', function (e) {
-      console.log('this', this);
-      console.log(e.target);
-      self.imgData.response = Number(this.value);
-      self.updateColor()
-    });
-  };
-
-  this.addRadioChangeHandler(this['radioOptSelect-1']);
-  this.addRadioChangeHandler(this.radioOptSelect0);
-  this.addRadioChangeHandler(this.radioOptSelect1);
-  this.addRadioChangeHandler(this['radioOptSelect-2']);
+    if (i === 0) {
+      this.divOptSelectRadio.appendChild(this[d]);
+    } else {
+      this.divOpts.push(this[d]); // don't want to keep the instructions in rotation
+    }
+    // this.addRadioChangeHandler(this[r]);
+  }
+  // this.opC.appendChild(this.pOptSelect);
+  this.opC.appendChild(this.imgOptSelect);
+  this.opC.appendChild(this.divOptSelectRadio);
 
   this.imgOptSelect.addEventListener('click', function(e) {
-    if (self.imgData.response === undefined) self.imgData.response = 2;
-    if (--self.imgData.response < -2) self.imgData.response = 1;
+    var isInitial = self.imgData.response === undefined;
+    if (isInitial) self.imgData.response = 4;
+    if (--self.imgData.response < 0) self.imgData.response = 3;
     self['radioOptSelect'+String(self.imgData.response)].checked = true;
-    self.updateColor();
+    self.rotateCaption(isInitial);
   });
 
-  this.updateColor = function() {
-    console.log('update to color', this.imgData.response+2, 'of', this);
-    this.operandContainer.style.backgroundColor = colorOptions[this.imgData.response+2];
+  this.rotateCaption = function(letGo) {
+    var add = this.divOpts.shift();
+    var target = this.divOptSelectRadio;
+    var current = target.firstChild;
+    if (!letGo) this.divOpts.push(current);
+    target.removeChild(current);
+    target.appendChild(add);
+    this.opC.style.backgroundColor = add.style.backgroundColor;
   }
 };
-
-var colorOptions = ['#cccccc', '#ff9999', '#ffff99', '#99ff99'];

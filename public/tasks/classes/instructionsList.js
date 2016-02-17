@@ -5,6 +5,7 @@ var makeInstructionsList = function (arrInstructions, type) {
 
   arrInstructions.forEach(function (instruction) {
     var instructionItem = document.createElement('li');
+    instructionItem.className = 'instruction_item';
     instructionItem.innerHTML = instruction;
     instructionsList.appendChild(instructionItem);
   });

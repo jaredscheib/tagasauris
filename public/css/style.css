@@ -37,6 +37,10 @@ div {
 	display: block;
 }
 
+.instruction_item {
+	font-style: italic;
+}
+
 #question_span {
 	margin: 20px 0 4px;
 	font-size: 22px;
@@ -203,7 +207,7 @@ div {
 }
 
 .div_optselect_radio {
-	margin: 6px 0;
+	margin: 4px 0;
 }
 
 .div_optselect_radio_label {
