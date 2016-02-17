@@ -32,10 +32,10 @@ var elements = {
 console.log('params', params);
 console.log(elements.submitBtn);
 
-loadScript('loader.js')
+loadScript('public/loader.js')
 .then(addLoader);
 
-Promise.all([ loadScript('db.js'), loadScript('tasks/' + info.task + '.js') ])
+Promise.all([ loadScript('public/db.js'), loadScript('public/tasks/' + info.task + '.js') ])
 .then(function() {
   return stub_db.getTickets();
 })

@@ -8,9 +8,9 @@
 var stub_rx = {
   loadComponents: function(tickets) {
     return Promise.all([
-      loadScript('./tasks/classes/instructionsList.js'),
-      loadScript('./tasks/classes/imgOptSelect.js'),
-      // loadScript('./tasks/classes/imgRow.js')
+      loadScript('public/tasks/classes/instructionsList.js'),
+      loadScript('public/tasks/classes/imgOptSelect.js'),
+      // loadScript('public/tasks/classes/imgRow.js')
     ])
     .then(function() {
       console.log('loaded compenents with image data', tickets)
