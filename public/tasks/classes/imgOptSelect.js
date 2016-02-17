@@ -26,22 +26,22 @@ var Operand = function (imgData, index) {
       value: null
     },
     {
-      label: 'Yes, this image clearly depicts <b>' + info.concept.toUpperCase() + '</b>',
+      label: 'Yes, this image is a clear depiction of <b>' + info.concept.toUpperCase() + '</b>.',
       color: '#99ff99',
       value: 1
     },
     {
-      label: 'No, there is no <b>' + info.concept.toUpperCase() + '</b> in this image</b>',
+      label: 'No, there is no <b>' + info.concept.toUpperCase() + '</b> in this image</b>.',
       color: '#ff9999',
       value: -1
     },
     {
-      label: 'This is not a clear depiction of <b>' + info.concept.toUpperCase() + '</b>',
+      label: 'This image is unclear.',
       color:  '#ffff99',
       value: 0
     },
     {
-      label: 'This image is not a photograph',
+      label: 'This image is not a photograph.',
       color:  '#cccccc',
       value: -2
     } 
