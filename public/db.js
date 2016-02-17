@@ -15,8 +15,12 @@ var stub_db = {
         fulfill(tickets);
       });
     });
+  },
+  syncToFirebase: function(imgRefs) {
+    console.log('sync to firebase', imgRefs);
+    // update orig img ref and push to general results pool
   }
-}
+};
 
 
 
