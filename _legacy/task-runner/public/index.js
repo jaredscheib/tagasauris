@@ -3,20 +3,16 @@
 
 var $j = jQuery.noConflict();
 
-// wrap in IIFE to not expose global variables
 // (function app() {
 
-var params = _.getUrlParams(); if (params.TASK_NUM) params.TASK_NUM = Number(params.TASK_NUM);
+var params = _.getUrlParams();
 
-var taskInfo = {
-  ticketsToGet: Number(params.ticketsToGet) || 30,
-  ticketsReceived: 0,
-  taskName: params.task || 'task_img_verification_trinary',
-  taskDuration: (Number(params.AssignmentDurationInSeconds) * 1000 || _.minToMs(10)), // TODO refactor?
+var info = {
+  requested: Number(params.requested) || 30,
+  received: 0,
+  task: params.task || 'task_img_verification',
+  concept: params.concept || 'minivan'
 };
-
-var server = 'http://127.0.0.1:3020';
-var apiRoute = server + '/tickets';
 
 var taskData = {};
 
@@ -35,59 +31,37 @@ var elements = {
 console.log('params', params);
 
 loadScript('loader.js')
+.then(addLoader);
+
+Promise.all([ loadScript('db.js'), loadScript('tasks/' + info.task + '.js') ])
 .then(function() {
-  addLoader();
-});
-loadScript('tasks/' + taskInfo.taskName + '.js')
+  stub_rx.loadComponents();
+})
 .then(function() {
-  getTickets(taskInfo.taskName, taskInfo.ticketsToGet)
-  .done(function (ticketsPool) {
-    console.log('got ' + Object.keys(ticketsPool).length + ' tickets via ajax');
-    // tempResultsData = ticketsPool.slice(); // TODO remove
-    removeLoader();
-    stub_updateComponentState(ticketsPool);
-    
-  })
-  .fail(function(err) {
-    console.log('failed to get tickets for task');
-    throw err;
-  });
+  return stub_db.getTickets();
+})
+.then(function(tickets) {
+  console.log('got ' + tickets.length);
+  // tempResultsData = tickets.slice(); // TODO remove
+  removeLoader();
+  stub_rx.updateComponentState(tickets);
+})
+
+.catch(function(err) {
+  console.log('failed to get tickets for task');
+  throw err;
 });
 
 // set HTML and create event listeners on window load
 window.onload = function () {
-  debugger;
-
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
-    console.log('ajax post attempt');
-    $j.ajax({
-      url: apiRoute,
-      type: 'POST',
-      data: stub_getResultsData()
-    })
-    .done(function (res) {
-      console.log('closed tickets via POST!');
-      console.log('response:', res);
-    });
+
   });
 
   mturkCheckPreview();
 };
-
-function getTickets(task, num) {
-  // TODO AJAX GET
-  console.log('ajax get attempt');
-  return $j.ajax({
-    url: apiRoute,
-    type: 'GET',
-    data: {
-      task: task,
-      num: num
-    }
-  });
-}
 
 function mturkSubmit() {
   var f = $j('<form action="' + params.turkSubmitTo + '/mturk/externalSubmit" type="GET"><input type="hidden" name="assignmentId" value="' + params.assignmentId + '"></input><input type="hidden" name="unused" value="unused"></input></form>');
@@ -106,7 +80,7 @@ function mturkCheckPreview() {
 }
 
 function loadScript(url) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function(fulfill, reject) {
     var fileType = url.split('.').reverse()[0] === 'css' ? 'css' : 'js';
     var script;
     if (fileType === 'js') {
@@ -119,9 +93,47 @@ function loadScript(url) {
       script.type = 'text/css';
       script.rel = 'stylesheet';
     }
-    script.onload = resolve;
+    script.onload = fulfill;
     script.async = 'false';
     document.body.appendChild(script);
   });
 }
 // }());
+
+var stub_rx = {
+  loadComponents: function() {
+    return Promise.all([
+      loadScript('./tasks/classes/instructionsList.js'),
+      loadScript('./tasks/classes/imgOptSelect.js'),
+      loadScript('./tasks/classes/imgRow.js')
+    ]);
+  },
+  updateComponentState: function(tickets) {
+   // TODO feed React
+    console.log('update compenents with tickets:', tickets)
+
+    elements.instructionsArea.appendChild(makeInstructionsList([
+      'Does each of the <span class="img_counter"></span> photos below contain the named concept?'
+    ], 'li'));
+
+    // instantiate imgOptSelect class per image
+    tickets.map(function(ticket, i){
+      if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
+      var newImgOptSelect = new ImgOptSelect(ticket, i);
+      elements.ticketComponents.push(newImgOptSelect);
+      elements.mediaArea.lastElementChild.appendChild(newImgOptSelect.optSelectContainer);
+    // event listeners on OptSelect
+      // add response and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
+      // enable submitBtn if all images completed
+    });   
+    // setImgCounters();
+  },
+  getResultsData() {
+   // TODO get all results data in React style
+    return {
+      here: 'is',
+      is: 'an',
+      object: 'object'
+    };
+  }
+};

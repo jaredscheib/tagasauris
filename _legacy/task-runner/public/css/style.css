@@ -174,7 +174,7 @@ div {
 	visibility: hidden;
 }
 
-.trinary_container {
+.optselect_container {
 	height: 100%;
 	margin: 10px;
 	padding: 0px;
@@ -183,47 +183,38 @@ div {
 	vertical-align: bottom;
 }
 
-.trinary_p {
+.optselect_p {
 	font-size: 19px;
 	text-transform: capitalize;
 	margin: 5px;
 	display: block;
 }
 
-.trinary_img {
+.optselect_img {
 	width: 400px;
 	/*border: 1px dotted black;*/
 	display: block;
 	vertical-align: bottom;
 }
 
-.div_trinary_radio {
+.div_optselect_radio {
 	margin: 6px 0;
 }
 
-.trinary_radio {
+.div_optselect_radio_label {
+	margin: 2px 0;
+}
+
+.optselect_radio {
 	margin: 3px;
 	display: inline-block;
 	vertical-align: bottom;
 }
 
-.trinary_radio_label {
+.optselect_radio_label {
 	margin: 0 10px 0 0;
 	font-size: 15px;
-}
-
-.div_trinary_checkbox {
-	/*margin: 3px 0;*/
-	/*border: 1px solid black;*/
-}
-
-.trinary_checkbox {
-
-}
-
-.trinary_checkbox_label {
-	margin: 0;
-	font-size: 12px;
+	display: inline-block;
 }
 
 #loader {
