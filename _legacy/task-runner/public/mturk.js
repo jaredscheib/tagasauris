@@ -1,16 +1,19 @@
-var _ = require('./server-utils.js');
-var secrets = require('./secrets.js');
+var _ = require('./util/mturk-utils.js');
+var secrets = require('../dev/secrets.js');
 
 var args = process.argv.slice(2);
-var taskNum = Number(args[0]);
-var sandbox = args[1] === 'true' ? true : false;
-var timesToRun = Number(args[2]) || 1;
-console.log(taskNum, sandbox, timesToRun);
+var sandbox = args[0] === 'true' ? true : false;
+var task = Number(args[1]) || 'task_img_verification';
+var hitsToGen = Number(args[2]) || 1;
+var requested = Number(args[3]) || 30;
+var concept = String(args.slice(4)).split(' ').join('+') || 'porsche';
+console.log(sandbox, task, hitsToGen, concept);
 
 var arg = {
   hit: {},
   ExternalQuestion: {
-    ExternalURL: secrets['URL_TASK' + String(taskNum)] + '&TODAY_DATA_DATE=' + secrets['TODAY_DATA_DATE'],
+    // task=task_img_verification&concept=porsche&requested=30
+    ExternalURL: secrets.ext_url + '&task=' + task + '&concept=' + concept + '&requested=' + requested,
     FrameHeight: '650'
   }
 };
@@ -34,7 +37,7 @@ function mturkRequest(id, secret, sandbox, params) {
 };
 
 _.run(function () {
-  for (var i = 0; i < timesToRun; i++) {
+  for (var i = 0; i < hitsToGen; i++) {
     var x = mturkRequest(secrets.ID, secrets.KEY, sandbox, {
               Operation : 'CreateHIT',
               Title : 'Simple video annotation task',
