@@ -31,5 +31,6 @@ common/secrets
 
 # Private
 work_log
+test
 temp
 results_redundancy
