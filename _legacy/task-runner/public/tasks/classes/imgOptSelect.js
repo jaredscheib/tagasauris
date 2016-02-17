@@ -47,8 +47,8 @@ var Operand = function (imgData, i) {
 
   this.labelOptSelect1.setAttribute('for', iOptSelect_pos);
   this.labelOptSelect1.className = 'optselect_radio_label';
-  this.labelOptSelect1.innerText = '(1) Yes, this is clearly a ' + this.imgData.concept;
-  this.labelOptSelect1.textContent = '(1) Yes, this is clearly a ' + this.imgData.concept;
+  this.labelOptSelect1.innerText = '(1) Yes, this is clearly "' + this.imgData.concept + '"';
+  this.labelOptSelect1.textContent = '(1) Yes, this is clearly "' + this.imgData.concept + '"';
 
   // maybe
   this.radioOptSelect0.setAttribute('type', 'radio');
@@ -59,8 +59,8 @@ var Operand = function (imgData, i) {
 
   this.labelOptSelect0.setAttribute('for', iOptSelect_mid);
   this.labelOptSelect0.className = 'optselect_radio_label';
-  this.labelOptSelect0.innerText = '(2) It is not a clear image of a ' + this.imgData.concept;
-  this.labelOptSelect0.textContent = '(2) It is not a clear image of a ' + this.imgData.concept;
+  this.labelOptSelect0.innerText = '(2) Hm, this is not clearly "' + this.imgData.concept + '"';
+  this.labelOptSelect0.textContent = '(2) Hm, this is not clearly "' + this.imgData.concept + '"';
 
   // no
   this['radioOptSelect-1'].setAttribute('type', 'radio');
@@ -71,8 +71,8 @@ var Operand = function (imgData, i) {
 
   this['labelOptSelect-1'].setAttribute('for', iOptSelect_neg);
   this['labelOptSelect-1'].className = 'optselect_radio_label';
-  this['labelOptSelect-1'].innerText = '(3) There is no ' + this.imgData.concept + ' in this image';
-  this['labelOptSelect-1'].textContent = '(3) There is no ' + this.imgData.concept + ' in this image';
+  this['labelOptSelect-1'].innerText = '(3) No, this is clearly not "' + this.imgData.concept + '"';
+  this['labelOptSelect-1'].textContent = '(3) No, this is clearly not "' + this.imgData.concept + '"';
 
   // not a photo
   this['radioOptSelect-2'].setAttribute('type', 'radio');
