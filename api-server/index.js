@@ -31,9 +31,9 @@ app.get('/images/sync', (req, res) => {
   console.log('GET on /images/sync');
   let nQ = 'ctrl_upload_sync_res';
   mq.enqueue(nQ, req.query)
-  .then(( => {
+  .then(() => {
     res.status(201).send(`Uploaded and synced images in category ${req.query.query}`);
-  }))
+  });
 });
 
 app.listen(app.get('port'), () => {
