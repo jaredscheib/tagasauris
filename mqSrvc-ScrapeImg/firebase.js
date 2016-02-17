@@ -16,16 +16,12 @@ function pushAndAddUID(sourceObj) {
     targetRef.push(item)
     .then(tempRef => {
       tempRef.update({ uid: tempRef.key() });
-      // console.log('tempRef', tempRef);
+      console.log('pushAndAddUID success', typeof tempRef);
       resolve(tempRef); // return updated obj ref
     })
-    // .then(() => {
-    //   // console.log(`item at ${targetRef.path.u[0]}/${item.uid} updated`);
-    // })
-    .catch((err) => {
-      sendErr(err);
-      reject(err);
-    });
+    .catch(err => {
+      resolve(null);
+    })
   });
 }
 
