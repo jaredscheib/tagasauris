@@ -73,7 +73,7 @@ function loadFiles (dirPath, concept) {
         let search = `-C${concept.split(' ').join('_')}-`;
         if (file.indexOf(search) !== -1) matchedFiles.push(dirPath + file);
       } else {
-        matchedFiles.push(dirPath + file);
+        if (file.indexOf('.') > 0) matchedFiles.push(dirPath + file); // exclude hidden files
       }
     });
     return Promise.map(matchedFiles, loadFile);

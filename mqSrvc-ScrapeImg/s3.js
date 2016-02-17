@@ -95,7 +95,7 @@ function pipeTransformAndUploadImgObjToS3 (imgObj) {
     .on('response', response => {
       console.log(response.statusCode);
       console.log('content-type', response.headers['content-type']);
-      if (response.headers['content-type'].split('/')[0] === 'image' ) {
+      if (response.headers['content-type'] && response.headers['content-type'].split('/')[0] === 'image' ) {
         console.log('URL resolved to image');
         req.pipe(pipeline).on('error', handler);
       } else {
