@@ -19,6 +19,7 @@ var taskData = {};
 // page elements
 var elements = {
   instructionsArea: document.getElementById('instructions_area'),
+  questionSpan: document.getElementById('question_span'),
   prevBtns: document.getElementsByClassName('prev_btn'),
   nextBtns: document.getElementsByClassName('next_btn'),
   controlsArea: document.getElementsByClassName('controls_area'),
@@ -57,7 +58,7 @@ window.onload = function () {
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
 
-
+    // if (isTaskComplete())
   });
 
   mturkCheckPreview();
@@ -99,41 +100,3 @@ function loadScript(url) {
   });
 }
 // }());
-
-var stub_rx = {
-  loadComponents: function() {
-    return Promise.all([
-      loadScript('./tasks/classes/instructionsList.js'),
-      loadScript('./tasks/classes/imgOptSelect.js'),
-      loadScript('./tasks/classes/imgRow.js')
-    ]);
-  },
-  updateComponentState: function(tickets) {
-   // TODO feed React
-    console.log('update compenents with tickets:', tickets)
-
-    elements.instructionsArea.appendChild(makeInstructionsList([
-      'Does each of the <span class="img_counter"></span> photos below contain the named concept?'
-    ], 'li'));
-
-    // instantiate imgOptSelect class per image
-    tickets.map(function(ticket, i){
-      if (i % 3 === 0) elements.mediaArea.appendChild(makeImgRow());
-      var newImgOptSelect = new ImgOptSelect(ticket, i);
-      elements.ticketComponents.push(newImgOptSelect);
-      elements.mediaArea.lastElementChild.appendChild(newImgOptSelect.optSelectContainer);
-    // event listeners on OptSelect
-      // add response and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
-      // enable submitBtn if all images completed
-    });   
-    // setImgCounters();
-  },
-  getResultsData() {
-   // TODO get all results data in React style
-    return {
-      here: 'is',
-      is: 'an',
-      object: 'object'
-    };
-  }
-};

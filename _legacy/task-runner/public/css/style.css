@@ -37,6 +37,12 @@ div {
 	display: block;
 }
 
+#question_span {
+	margin: 20px 0 4px;
+	font-size: 22px;
+	display: block;
+}
+
 #instructions_list {
 	font-size: 16px;
 	text-align: left;
