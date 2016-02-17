@@ -63,39 +63,29 @@ function saveLocalCopy (webImgObjSet) {
     });
   });
 }
-var loadFiles = (dirPath, concept) => {
+
+function loadFiles (dirPath, concept) {
   return fs.readdirAsync(dirPath)
-  .then(files => {
-    let matchedFiles = files.filter(file => { return file.indexOf(`-C${concept}'`) !== -1; })
-    return Promise.map(matchedFiles, file => {
-      return fs.readFileAsync(file, 'utf8');
-    })
-  })
-  // .then(filenames => {
+  .then(allFiles => {
+    let matchedFiles = [];
+    allFiles.forEach(file => {
+      if (concept) {
+        let search = `-C${concept.split(' ').join('_')}-`;
+        if (file.indexOf(search) !== -1) matchedFiles.push(dirPath + file);
+      } else {
+        matchedFiles.push(dirPath + file);
+      }
+    });
+    return Promise.map(matchedFiles, loadFile);
+  });
 }
 
-var loadFile = (filePath) => {
-  return fs.readFileAsync(`${readPath}${filePath}`, 'utf8');
+function loadFile (filePath) {
+  return fs.readFileAsync(`${filePath}`, 'utf8')
+  .then(JSON.parse);
 }
-
-const readPath = './results_redundancy/json/';
-// const writePath = './www/allImgData.js';
-fs.readdirAsync(readPath)
-.then(arr => { console.log(arr); });
-// loadFile(readPath)
-// .then(s3UploadFirebaseSyncImgSet)
-// .then(finalFbRefs => {
-//   // enqueue payload
-//   return finalFbRefs;
-// })
-// .catch(console.log);
-
-  // return Promise.all(allImgSets.map((set, i) => {
-  //   return Promise.all(JSON.parse(set).map(s3UploadFirebaseSyncImgSet))
-  // }));
 
 function s3UploadFirebaseSyncImgSet (webImgObjSet) {
-  let temp = [];
   console.log(`upload and sync img set of size ${webImgObjSet.length}..`);
   return Promise.map(webImgObjSet, imgObjSet => {
     return s3UploadImgObj(imgObjSet)
@@ -155,3 +145,8 @@ function normalizeDataSet (arr) {
 function fs_prep (str) {
   return str.slice().split(' ').join('_').toLowerCase()
 }
+
+module.exports = {
+  s3UploadFirebaseSyncImgSet: s3UploadFirebaseSyncImgSet,
+  loadFiles: loadFiles
+};
