@@ -30,7 +30,6 @@ var elements = {
 };
 
 console.log('params', params);
-console.log(elements.submitBtn);
 
 loadScript('public/loader.js')
 .then(addLoader);
@@ -64,6 +63,7 @@ window.onload = function () {
     console.log('Submit clicked..');
     if (stub_rx.isTaskComplete()) {
       console.log('Submitting results!');
+      elements.submitBtn.setAttribute('disabled', true);
       var mod = {
         amt_worker_id: params.workerId,
         amt_assignment_id: params.assignmentId,
@@ -71,9 +71,11 @@ window.onload = function () {
         amt_turk_submit_to: params.turkSubmitTo,
         time_submitted: Date.now(),
       };
-      console.log(mod);
-      console.log(stub_rx.getComponentsData(mod));
+      var incrementKey = info.task;
+      mod[incrementKey] = 1;
+      stub_db.syncToFirebase(stub_rx.getComponentsData(mod, incrementKey));
       // TODO add response and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
+      // TODO on submit failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
     } else {
       alert('Please complete every item.');
     }

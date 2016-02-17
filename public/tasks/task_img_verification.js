@@ -40,10 +40,9 @@ var stub_rx = {
     // TODO feed React
     // setImgCounters();
   },
-  getComponentsData: function(mod) {
+  getComponentsData: function(mod, incrementKey) {
     return elements.ticketComponents.map(function(ticketComponent) {
-      for (var key in mod) ticketComponent[key] = mod[key];
-      return ticketComponent.imgData;
+      return _.extend(ticketComponent.imgData, mod, incrementKey);
     });
   },
   isTaskComplete: function () {
