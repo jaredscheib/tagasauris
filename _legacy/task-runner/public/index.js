@@ -30,24 +30,27 @@ var elements = {
 };
 
 console.log('params', params);
+console.log(elements.submitBtn);
 
 loadScript('loader.js')
 .then(addLoader);
 
 Promise.all([ loadScript('db.js'), loadScript('tasks/' + info.task + '.js') ])
 .then(function() {
-  stub_rx.loadComponents();
-})
-.then(function() {
   return stub_db.getTickets();
 })
 .then(function(tickets) {
   console.log('got ' + tickets.length);
-  // tempResultsData = tickets.slice(); // TODO remove
-  removeLoader();
-  stub_rx.updateComponentState(tickets);
+  return stub_rx.loadComponents(tickets);
 })
-
+.then(function(loaded) {
+  if (loaded) {
+    removeLoader();
+  } else {
+    console.log('failed to load data');
+    alert('Failed to load data. Please return HIT.');
+  }
+})
 .catch(function(err) {
   console.log('failed to get tickets for task');
   throw err;
@@ -57,8 +60,22 @@ Promise.all([ loadScript('db.js'), loadScript('tasks/' + info.task + '.js') ])
 window.onload = function () {
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
-
-    // if (isTaskComplete())
+    console.log('Submit clicked..');
+    if (stub_rx.isTaskComplete()) {
+      console.log('Submitting results!');
+      var mod = {
+        amt_worker_id: params.workerId,
+        amt_assignment_id: params.assignmentId,
+        amt_hit_id: params.hitId,
+        amt_turk_submit_to: params.turkSubmitTo,
+        time_submitted: Date.now(),
+      };
+      console.log(mod);
+      console.log(stub_rx.getComponentsData(mod));
+      // TODO add response and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
+    } else {
+      alert('Please complete every item.');
+    }
   });
 
   mturkCheckPreview();
