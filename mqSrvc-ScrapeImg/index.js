@@ -21,7 +21,7 @@ let lQ_upload_sync = 'srvc_upload_sync_req';
 
 mq.listen(lQ_scrape, (ack, reject, payload) => {
   getWebImgObjSet(payload.query, payload.num, { query: payload.query, concept: payload.concept })
-  .then(normalizeSet)
+  .then(normalizePromiseSet)
   .then(saveLocalCopy)
   .then(webImgObjSet => {
     ack();
@@ -32,26 +32,16 @@ mq.listen(lQ_scrape, (ack, reject, payload) => {
 });
 
 mq.listen(lQ_upload_sync, (ack, reject, payload) => {
-  Firebase.goOnline();
   s3UploadFirebaseSyncImgSet(payload)
-  .then(allImgRefs => {
-    // allImgRefs.forEach((imgRef, i) => { console.log(`imgRef ${i} of ${allImgRefs.length}`); });
-    Firebase.goOffline();
+  .then(finalFbRefSet => { // TODO why are these all undefined?
     let nQ = 'ctrl_upload_sync_res';
-    let cleanPayload = allImgRefs.filter(imgRef => { return imgRef !== null; });
-    console.log(`uploaded and synced ${cleanPayload.length} valid images out of ${allImgRefs.length} search results`);
-    mq.enqueue(nQ, cleanPayload)
+    mq.enqueue(nQ, finalFbRefSet)
     .then(console.log(`service: ${lQ_upload_sync} --> ${nQ}`));
   })
 });
 
 function getWebImgObjSet (query, num, mod) {
   return gClient.search(query, num, mod);
-}
-
-function normalizeSet (arr) {
-  console.log('normalizing..');
-  return arr.reduce((a, b) => { return typeof b === 'function' ? a : a.concat(b); }, []);
 }
 
 function saveLocalCopy (webImgObjSet) {
@@ -73,25 +63,67 @@ function saveLocalCopy (webImgObjSet) {
     });
   });
 }
+var loadFiles = (dirPath, concept) => {
+  return fs.readdirAsync(dirPath)
+  .then(files => {
+    let matchedFiles = files.filter(file => { return file.indexOf(`-C${concept}'`) !== -1; })
+    return Promise.map(matchedFiles, file => {
+      return fs.readFileAsync(file, 'utf8');
+    })
+  })
+  // .then(filenames => {
+}
+
+var loadFile = (filePath) => {
+  return fs.readFileAsync(`${readPath}${filePath}`, 'utf8');
+}
+
+const readPath = './results_redundancy/json/';
+// const writePath = './www/allImgData.js';
+fs.readdirAsync(readPath)
+.then(arr => { console.log(arr); });
+// loadFile(readPath)
+// .then(s3UploadFirebaseSyncImgSet)
+// .then(finalFbRefs => {
+//   // enqueue payload
+//   return finalFbRefs;
+// })
+// .catch(console.log);
+
+  // return Promise.all(allImgSets.map((set, i) => {
+  //   return Promise.all(JSON.parse(set).map(s3UploadFirebaseSyncImgSet))
+  // }));
 
 function s3UploadFirebaseSyncImgSet (webImgObjSet) {
-  return Promise.all(
-    webImgObjSet.map(
-      s3UploadImgObj
-      .then(s3ImgObj => {
-        if (s3ImgObj === null) {
-          console.log('null on s3ImgObj');
-          return null;
-        } else {
-          console.log('successful upload of imgObj to s3');
-          return firebaseSync(s3ImgObj);
-        }
-      })
-      .then(fbImgRef => {
-        if (fbImgRef === null) console.log('null not synced to firebase');
-        else console.log('synced s3ImgObj to firebase');
-        return fbImgRef;
-      })));
+  let temp = [];
+  console.log(`upload and sync img set of size ${webImgObjSet.length}..`);
+  return Promise.map(webImgObjSet, imgObjSet => {
+    return s3UploadImgObj(imgObjSet)
+    .then(s3ImgObj => {
+      if (s3ImgObj === null) {
+        console.log('did not upload unresolved img to s3');
+        return null;
+      } else {
+        console.log('successful upload of imgObj to s3');
+        return firebaseSync(s3ImgObj);
+      }
+    })
+    .then(fbImgRef => {
+      if (fbImgRef === null) console.log('null not synced to firebase');
+      else console.log('synced s3ImgObj to firebase');
+      console.log('fbImgRef', fbImgRef === null, typeof fbImgRef);
+      return fbImgRef;
+    })
+    .catch(err => {
+      console.log(err);
+      return Promise.resolve;
+    });
+  })
+  .then(allFbImgRefs => {
+    let finalFbRefs = normalizeDataSet(allFbImgRefs);
+    console.log(`uploaded and synced ${finalFbRefs.length} valid images out of ${webImgObjSet.length} search results`);
+    return finalFbRefs;
+  });
 }
 
 function s3UploadImgObj (imgObj) {
@@ -100,6 +132,24 @@ function s3UploadImgObj (imgObj) {
 
 function firebaseSync (imgObj) {
   return fb.pushAndAddUID(imgObj);
+}
+
+function normalizePromiseSet (arr) {
+  console.log('normalizing promise set..');
+  return arr.reduce((a, b, i, o) => {
+    // console.log(`normalizing at obj ${i} of ${o.length}`);
+    return (typeof b === 'function' || b === null || b === undefined) ? a : a.concat(b);
+  }, []);
+}
+
+function normalizeDataSet (arr) {
+  console.log('normalizing data set..');
+  return arr.filter(obj => {
+    // console.log(`normalizing at obj ${i} of ${o.length}`);
+    let isValid = !(obj === null || obj === undefined);
+    console.log('filter obj?', typeof obj, isValid);
+    return isValid;
+  });
 }
 
 function fs_prep (str) {
