@@ -28,6 +28,7 @@ node_modules
 
 # Secrets
 common/secrets
+secrets.json
 
 # Private
 work_log
