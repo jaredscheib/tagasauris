@@ -64,24 +64,39 @@ window.onload = function () {
     if (stub_rx.isTaskComplete()) {
       console.log('Submitting results!');
       elements.submitBtn.setAttribute('disabled', true);
-      // promise each all result tickets
-        // push copy of mod result to fb task results pool
-        // then update orig img ref with task key
-          // stub_db.fbUpdateOrigRef
-      // then submit HIT
 
-      var mod = {
-        amt_worker_id: params.workerId,
-        amt_assignment_id: params.assignmentId,
-        amt_hit_id: params.hitId,
-        amt_turk_submit_to: params.turkSubmitTo,
-        time_submitted: Date.now(),
-      };
-      var incrementKey = info.task;
-      mod[incrementKey] = 1;
-      stub_db.syncToFirebase(stub_rx.getComponentsData(mod, incrementKey));
-      // TODO add result and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
-      // TODO on submit failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
+      // promise each all result tickets
+      Promise.map(elements.ticketComponents, function(ticketComponent, i) {
+        // hash map ticket data result to Bahjat's desired values
+        var imgObj = _.mapKey(ticketComponent.imgData, 'result', {
+          3: 1,
+          2: -1,
+          1: 0,
+          0: -2
+        });
+
+        var mod = {
+          amt_worker_id: params.workerId,
+          amt_assignment_id: params.assignmentId,
+          amt_hit_id: params.hitId,
+          amt_turk_submit_to: params.turkSubmitTo,
+          time_submitted: Date.now(),
+        };
+        // push copy of mod result to fb task results pool
+        return stub_db.pushResultsRef(_.extend(imgObj, mod, info.task), info.task+'_results')
+        // then update orig img ref with task key
+        .then(function(imgObj) {
+          return stub_db.updateImgRef(_.extend(imgObj, {}, info.task))
+        });
+      })
+      .then(function() {
+        mTurkSubmit();
+        // TODO Promisify mTurkSubmit and catch possible failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
+      })
+      .catch(function(err) {
+        console.log('failed to sync data to firebase', err);
+      });
+
     } else {
       alert('Please complete every item.');
     }
