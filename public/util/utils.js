@@ -19,24 +19,6 @@ var gl519 = module.exports = (function () {
     return o.hasOwnProperty(k);
   };
 
-  _.mapkey = function(obj, key, mod) {
-    if (_.has(obj, key)) obj[key] = mod[obj[key]];
-    return obj;
-  };
-
-  _.extend = function (addTo, addFrom, incrementKey) {
-    var obj = {};
-    if (_.has(addTo, incrementKey)) obj[incrementKey] = addTo[incrementKey] + 1;
-    for (var key in addFrom) {
-      if (_.has(addTo, key)) {
-        obj[key] = addTo[key];
-      } else {
-        obj[key] = addFrom[key];
-      }
-    }
-    return obj;
-  };
-
   _.identity = function (e) { return e; };
 
   _.each = function (o, func) {
@@ -70,7 +52,7 @@ var gl519 = module.exports = (function () {
     }
   };
 
-  _.deepClone = _.cloneDeep = function (o) { // TODO fix for objects
+  _.deepClone = _.cloneDeep = function (o) {
     if (o == null) return o;
     return _.map(o, function (v) {
       if (typeof(v) == 'object') {
@@ -78,6 +60,20 @@ var gl519 = module.exports = (function () {
       }
       return v;
     });
+  };
+
+  _.mapKey = function(targetObj, key, mod) {
+    var newObj = _.deepClone(targetObj);
+    if (_.has(newObj, key)) newObj[key] = mod[newObj[key]];
+    return newObj;
+  };
+
+  _.extend = function (addTo, addFrom, incrementKey) {
+    var obj = _.deepClone(addTo);
+    if (!_.has(obj, incrementKey)) obj[incrementKey] = 1;
+    else obj[incrementKey]++;
+    for (var key in addFrom) if (!_.has(addTo, key)) obj[key] = _.deepClone(addFrom[key]);
+    return obj;
   };
 
   _.unescapeUrl = function (s) {
