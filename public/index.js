@@ -57,13 +57,20 @@ Promise.all([ loadScript('public/db.js'), loadScript('public/tasks/' + info.task
   throw err;
 });
 
+// function solveRandom () {
+//   elements.ticketComponents.forEach(function(c) {
+//     c.imgData.result = Math.floor(Math.random()*4);
+//     console.log(c.imgData.result);
+//   });
+//   elements.submitBtn.click();
+// }
 // set HTML and create event listeners on window load
 window.onload = function () {
   elements.submitBtn.addEventListener('click', function (event) {
     event.preventDefault();
     console.log('Submit clicked..');
     if (stub_rx.isTaskComplete()) {
-      console.log('Submitting results!');
+      console.log('Submitting results..');
       elements.submitBtn.setAttribute('disabled', true);
 
       // promise each all result tickets
@@ -76,32 +83,33 @@ window.onload = function () {
           0: -2
         });
 
+        var now = Date.now();
         var mod = {
           amt_worker_id: params.workerId,
           amt_assignment_id: params.assignmentId,
           amt_hit_id: params.hitId,
           amt_turk_submit_to: params.turkSubmitTo,
-          time_submitted: Date.now(),
+          time_submitted: now,
         };
         // push copy of mod result to fb task results pool
-        return stub_db.pushResultsRef(_.extend(imgObj, mod, info.task), info.resultsPool)
+        return stub_db.pushResultRef(_.extend(imgObj, mod, info.task), info.resultsPool)
         // then update orig img ref with task key
-        .then(function(imgObj) {
-          console.log('pushed result', i, 'of', info.received, 'to', info.resultsPool);
-          return stub_db.updateImgRefTaskCount(_.extend(imgObj, {}, info.task));
+        .then(function() {
+          // console.log('pushed result', i+1, 'of', info.received, 'to', info.resultsPool);
+          return stub_db.updateImgRefTaskCount(_.extend(imgObj, {}, info.task), info.task);
         })
-        .then(function(ref) {
-          console.log('updated ref', i, 'of', info.received);
-          return ref;
+        .then(function(transactionSnapshotVal) {
+          // console.log('updated ref', i+1, 'of', info.received, ':', transactionSnapshotVal);
+          return transactionSnapshotVal;
         });
       })
       .then(function() {
         console.log('submitting HIT..');
-        mTurkSubmit();
+        mturkSubmit();
         // TODO Promisify mTurkSubmit and catch possible failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
       })
       .catch(function(err) {
-        console.log('failed to sync data to firebase', err);
+        console.log('failed to sync data to firebase', err.stack);
       });
 
     } else {
