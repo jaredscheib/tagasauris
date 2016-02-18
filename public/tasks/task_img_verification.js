@@ -1,10 +1,6 @@
 /* global _, Promise, elements, getNow, minToMs, loadScript */
 /* global setImgCounters, makeInstructionsList, makeImgRow, Operand */
 
-  // event listener on submitBtn for click
-    // iterate over results obj
-      // push to img_sanitizer_task_worker_res
-
 var stub_rx = {
   loadComponents: function(tickets) {
     return Promise.all([
@@ -52,7 +48,7 @@ var stub_rx = {
         return false;
       }
     }
-    console.log('task complete');
+    console.log('worker has completed the task');
     return true;
   }
 };
