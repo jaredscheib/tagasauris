@@ -5,15 +5,19 @@ const Firebase = require('firebase');
 const dbRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 const _ = require('../public/util/utils.js');
 
-function createDuplicateSet (path1, path2) {
-  path1 = path1 || 'img_ref';
-  path2 = path2 || 'img_ref2';
+function deleteSet (path) {
+  return dbRef.child(path).remove();
+}
+
+function createDuplicateSet (backup, path2) {
+  backup = backup || 'img_ref_backup20160217';
+  path2 = path2 || 'img_ref';
   return new Promise((fulfill, reject) => {
-    dbRef.child(path1).once('value', function(snapshot) {
+    dbRef.child(backup).once('value', function(snapshot) {
       var obj = snapshot.val();
       dbRef.child(path2).set(obj)
       .then(val => {
-        if (val === null) console.log(`Created duplicate of ${path1} at ${path2}`);
+        if (val === null) console.log(`Created duplicate of ${backup} at ${path2}`);
         fulfill();
       })
       .catch(err => {
@@ -25,7 +29,7 @@ function createDuplicateSet (path1, path2) {
 }
 
 function createTaskKeysForSets (path, task) {
-  path = path || 'img_ref2';
+  path = path || 'img_ref';
   task = task || 'task_img_verification';
 
   return new Promise((fulfill, reject) => {
@@ -56,8 +60,13 @@ function createTaskKeysForSets (path, task) {
   });
 }
 
-// createDuplicateSet()
-// .then(x => {
-// createTaskKeysForSets()
-// // })
-// .catch(console.log.bind(console));
+function resetImgRefSet (path) {
+  // return deleteSet(path).then(x => {
+    // return deleteSet('task_img_verification_results').then(x => {
+  return createDuplicateSet('img_ref_backup20160217', path).then(x => {
+  return createTaskKeysForSets(path, 'task_img_verification')}).then(x => {
+  return createTaskKeysForSets(path, 'task_img_bounding_box')}).catch(console.log.bind(console));
+}
+
+// resetImgRefSet('img_ref')
+// resetImgRefSet('img_ref2');
