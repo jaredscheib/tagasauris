@@ -70,9 +70,13 @@ var gl519 = module.exports = (function () {
 
   _.extend = function (addTo, addFrom, incrementKey) {
     var obj = _.deepClone(addTo);
+    if (!addFrom && !incrementKey) return obj;
     if (!_.has(obj, incrementKey)) obj[incrementKey] = 1;
     else obj[incrementKey]++;
-    for (var key in addFrom) if (!_.has(addTo, key)) obj[key] = _.deepClone(addFrom[key]);
+    if (addFrom) {
+      for (var key in addFrom)
+        if (!_.has(obj, key)) obj[key] = typeof addFrom[key] === 'object' ? _.deepClone(addFrom[key]) : addFrom[key];
+    }
     return obj;
   };
 
