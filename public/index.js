@@ -11,7 +11,8 @@ var info = {
   requested: Number(params.requested) || 30,
   received: 0,
   task: params.task || 'task_img_verification',
-  concept: params.concept || 'minivan'
+  concept: params.concept || 'minivan',
+  resultsPool: params.task + '_results'
 };
 
 var taskData = {};
@@ -36,7 +37,7 @@ loadScript('public/loader.js')
 
 Promise.all([ loadScript('public/db.js'), loadScript('public/tasks/' + info.task + '.js') ])
 .then(function() {
-  return stub_db.getTickets();
+  return stub_db.getTickets(info.concept);
 })
 .then(function(tickets) {
   info.received = tickets.length;
@@ -83,13 +84,19 @@ window.onload = function () {
           time_submitted: Date.now(),
         };
         // push copy of mod result to fb task results pool
-        return stub_db.pushResultsRef(_.extend(imgObj, mod, info.task), info.task+'_results')
+        return stub_db.pushResultsRef(_.extend(imgObj, mod, info.task), info.resultsPool)
         // then update orig img ref with task key
         .then(function(imgObj) {
-          return stub_db.updateImgRef(_.extend(imgObj, {}, info.task))
+          console.log('pushed result', i, 'of', info.received, 'to', info.resultsPool);
+          return stub_db.updateImgRefTaskCount(_.extend(imgObj, {}, info.task));
+        })
+        .then(function(ref) {
+          console.log('updated ref', i, 'of', info.received);
+          return ref;
         });
       })
       .then(function() {
+        console.log('submitting HIT..');
         mTurkSubmit();
         // TODO Promisify mTurkSubmit and catch possible failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
       })

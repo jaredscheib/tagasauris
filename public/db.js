@@ -1,33 +1,56 @@
-/* global taskInfo, _ */
+/* global _ */
 
 var dbRef = new Firebase('https://dazzling-heat-3394.firebaseio.com/');
 
 var stub_db = {
-  getTickets: function() {
+  getTickets: function(concept) {
     return new Promise(function(fulfill, reject) {
-      dbRef.child('img_ref').child(info.concept).once('value', function(snapshot) {
+      dbRef.child('img_ref').child(concept).once('value', function(snapshot) {
         var imgData = snapshot.val();
         var tickets = [];
         for (var key in imgData) {
           tickets.push(imgData[key]);
-          if (tickets.length === 30) break;
+          if (tickets.length === 1) break;
         }
         fulfill(tickets);
       });
     });
   },
-  // updateOrigImgRef: function(updateObj) {
-  //   //
-  // },
-  // pushResultObjAndAddUID: function(sourceObj) {
-  //   console.log('push obj to firebase and add UID', sourceObj);
+  updateImgRefTaskCount: function(updateObj, taskCountKey) {
+    return new Promise(function(fulfill, reject) {
+      dbRef.child('img_ref').child(updateObj.concept).child(updateObj.uid).child(taskCountKey)
+      .transaction(function(val) {
+        if (val === null) {
+          var newObj = {};
+          newObj[taskCountKey] = 1;
+          return newObj;
+        } else {
+          return val++;
+        }
+      }, function(error, committed, snapshot) {
+        if (error) {
+          console.log('Transaction to create/increment', taskCountKey, 'failed at', updateObj.uid);
+          reject(error);
+        } else if (!committed) {
+          console.log('Aborted transaction at', updateObj.uid, taskCountKey);
+          reject();
+        } else {
+          console.log('Transaction successful at', updateObj.uid, taskCountKey);
+        }
+        console.log('Data:', snapshot.val());
+        resolve(snapshot.val);
+      });
+    });
+  },
+  // pushResultRef: function(sourceObj, targetRef) {
+  //   console.log('push result obj to task results and add UID', sourceObj);
   //   // update orig img ref and push to general results pool
   // },
-  // pushAndAddUID(sourceObj) {
+  // pushAndAddUID(sourceObj, targetRef) {
   //   console.log(`attempt to pushAndAddUID`)
-  //   let targetBucket = sourceObj.s3_key.split('/').slice(0,2).join('/');
-  //   // console.log('targetBucket', targetBucket);
-  //   let targetRef = dbRef.child(targetBucket) || dbRef.child('img_ref3');
+  //   targetRef = targetRef || sourceObj.s3_key.split('/').slice(0,2).join('/');
+  //   // console.log('targetRef', targetRef);
+  //   let targetRef = dbRef.child(targetRef) || dbRef.child('img_ref3');
   //   const item = sourceObj;
   //   return new Promise((resolve, reject) => {
   //     targetRef.push(item)
@@ -40,6 +63,8 @@ var stub_db = {
   //       resolve(null);
   //     })
   //   });
+  // },
+  // addUID(targetRef) {
   // }
 };
 
