@@ -51,7 +51,7 @@ var Operand = function (imgData, index) {
   //   radio.addEventListener('change', function (e) {
   //     console.log('this', this);
   //     console.log(e.target);
-  //     self.imgData.response = Number(this.value);
+  //     self.imgData.result = Number(this.value);
   //     self.updateColor()
   //   });
   // };
@@ -98,10 +98,10 @@ var Operand = function (imgData, index) {
   this.opC.appendChild(this.divOptSelectRadio);
 
   this.imgOptSelect.addEventListener('click', function(e) {
-    var isInitial = self.imgData.response === undefined;
-    if (isInitial) self.imgData.response = 4;
-    if (--self.imgData.response < 0) self.imgData.response = 3;
-    self['radioOptSelect'+String(self.imgData.response)].checked = true;
+    var isInitial = self.imgData.result === undefined;
+    if (isInitial) self.imgData.result = 4;
+    if (--self.imgData.result < 0) self.imgData.result = 3;
+    self['radioOptSelect'+String(self.imgData.result)].checked = true;
     self.rotateCaption(isInitial);
   });
 

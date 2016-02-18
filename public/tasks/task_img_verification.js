@@ -2,7 +2,7 @@
 /* global setImgCounters, makeInstructionsList, makeImgRow, Operand */
 
   // event listener on submitBtn for click
-    // iterate over responses obj
+    // iterate over results obj
       // push to img_sanitizer_task_worker_res
 
 var stub_rx = {
@@ -47,7 +47,7 @@ var stub_rx = {
   },
   isTaskComplete: function () {
     for (var i = 0; i < elements.ticketComponents.length; i++) {
-      if (!elements.ticketComponents[i].imgData.hasOwnProperty('response')) {
+      if (!elements.ticketComponents[i].imgData.hasOwnProperty('result')) {
         console.log('task not complete');
         return false;
       }

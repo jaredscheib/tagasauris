@@ -64,6 +64,12 @@ window.onload = function () {
     if (stub_rx.isTaskComplete()) {
       console.log('Submitting results!');
       elements.submitBtn.setAttribute('disabled', true);
+      // promise each all result tickets
+        // push copy of mod result to fb task results pool
+        // then update orig img ref with task key
+          // stub_db.fbUpdateOrigRef
+      // then submit HIT
+
       var mod = {
         amt_worker_id: params.workerId,
         amt_assignment_id: params.assignmentId,
@@ -74,7 +80,7 @@ window.onload = function () {
       var incrementKey = info.task;
       mod[incrementKey] = 1;
       stub_db.syncToFirebase(stub_rx.getComponentsData(mod, incrementKey));
-      // TODO add response and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
+      // TODO add result and other metadata (worker id, img_ref) to flat output obj based on OptSelect state change
       // TODO on submit failure, re-enable submit button? elements.submitBtn.removeAttribute('disabled');
     } else {
       alert('Please complete every item.');
